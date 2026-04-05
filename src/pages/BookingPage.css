@@ -539,7 +539,7 @@ html, body {
   .booking-title { font-size: 1.6rem; text-align: center; margin-bottom: 1rem; }
   .booking-result-side { padding: 1.2rem; min-height: auto; }
   .res-camera-info img { max-height: 100px; max-width: 120px; }
-  .rec-product-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .rec-product-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
 }
 
 /* USER GUIDE */
