@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { Link } from 'react-router-dom';
-import { products } from '../data/products';
+import adminService from '../services/adminService';
+import { products as metadataList } from '../data/products';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -11,6 +12,54 @@ import 'swiper/css/pagination';
 import './NeedsRecommendation.css';
 
 const NeedsRecommendation = () => {
+  const [mergedProducts, setMergedProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAndMerge = async () => {
+      try {
+        const dbProducts = await adminService.getAllProducts();
+        
+        // Merge DB data with local metadata (theme, desc, designImage)
+        const merged = metadataList.map(meta => {
+          const dbMatch = dbProducts.find(p => p.id === meta.id);
+          if (dbMatch) {
+            return {
+              ...meta,
+              price1Day: dbMatch.price1Day,
+              price2Days: dbMatch.price2Days,
+              price3Days: dbMatch.price3Days,
+              price4DaysPlus: dbMatch.price4DaysPlus,
+              price6h: dbMatch.price6h,
+              name: dbMatch.name, // Ensure names match DB too
+            };
+          }
+          return meta; // Fallback to mock if not in DB
+        });
+
+        setMergedProducts(merged);
+      } catch (err) {
+        console.error('Error syncing NeedsRecommendation:', err);
+        setMergedProducts(metadataList); // Ultimate fallback
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAndMerge();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <section className="featured-products">
+        <div className="container" style={{ textAlign: 'center', padding: '5rem' }}>
+          <div className="spinner" style={{ margin: '0 auto' }}></div>
+          <p style={{ marginTop: '1rem' }}>ĐANG ĐỒNG BỘ DỮ LIỆU VIP...</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="featured-products">
       <div className="container">
@@ -39,7 +88,7 @@ const NeedsRecommendation = () => {
             }}
             className="featured-swiper"
           >
-            {products.map(product => (
+            {mergedProducts.map(product => (
               <SwiperSlide key={product.id}>
                 <div className="pricing-card">
                   
@@ -52,18 +101,18 @@ const NeedsRecommendation = () => {
                     <p className="pricing-desc">{product.desc}</p>
                     
                     <div className="pricing-daily" style={{ color: product.theme }}>
-                      Giá thuê: {product.price1Day}VNĐ/1 ngày
+                      Giá thuê: {new Intl.NumberFormat('vi-VN').format(String(product.price1Day).replace(/\./g, ''))}đ/1 ngày
                     </div>
 
                     <div className="pricing-table">
                       <div className="p-cell p-label">2 Ngày</div>
-                      <div className="p-cell p-val">{product.price2Days}VNĐ</div>
+                      <div className="p-cell p-val">{new Intl.NumberFormat('vi-VN').format(String(product.price2Days).replace(/\./g, ''))}đ</div>
                       <div className="p-cell p-label border-bottom-none">3 Ngày</div>
-                      <div className="p-cell p-val border-bottom-none">{product.price3Days}VNĐ</div>
+                      <div className="p-cell p-val border-bottom-none">{new Intl.NumberFormat('vi-VN').format(String(product.price3Days).replace(/\./g, ''))}đ</div>
                     </div>
 
                     <div className="pricing-subtext" style={{ color: product.theme }}>
-                      Từ ngày 4 trở đi {product.price4DaysPlus}VNĐ/1 Ngày
+                      Từ ngày 4 trở đi {new Intl.NumberFormat('vi-VN').format(String(product.price4DaysPlus).replace(/\./g, ''))}đ/1 Ngày
                     </div>
 
                     <Link to={`/dat-lich?id=${product.id}`} className="btn-rent-now" style={{ backgroundColor: product.theme }}>
