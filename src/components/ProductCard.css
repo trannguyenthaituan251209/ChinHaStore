@@ -1,13 +1,13 @@
 .product-card-vip-centered {
   background-color: #E2E2E2;
-  padding: 2rem 1.5rem;
+  padding: 1rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   border: none;
-  /* NO HOVER EFFECT as per user request */
   transition: opacity 0.3s ease;
+  height: 100%; /* Ensure all cards in a row have same height */
 }
 
 .product-card-image-wrapper {
@@ -17,84 +17,94 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
 }
 
 .product-card-image-wrapper img {
-  width: 95%;
-  height: auto;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Better for varying camera shapes in a fixed box */
   mix-blend-mode: multiply;
-  transition: none; /* Zero motion lift */
+  transition: none;
 }
 
 .product-card-content {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-}
-
-.product-card-name {
-  font-family: inherit;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #000000;
-  margin-bottom: 0.5rem;
-  line-height: 1.3;
-}
-
-.product-card-rating {
-  margin-bottom: 0.2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  flex: 1; /* Occupy remaining space to push buttons down */
   gap: 0.5rem;
 }
 
+.product-card-name {
+  font-family: "ShopeeDisplayR";
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #000000;
+  height: 2.8rem; /* FIXED POSITION: Always takes 2 lines of space */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  margin-bottom: 0.2rem;
+}
+
+.product-card-rating {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3rem;
+  height: 1rem; /* FIXED POSITION */
+  margin-bottom: 0.2rem;
+}
+
 .product-card-rating .stars {
-  font-size: 0.75rem;
-  letter-spacing: 2px;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
   color: #000000;
 }
 
 .product-card-rating .rating-num {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #555555;
   font-weight: 400;
 }
 
 .product-card-price {
-  font-size: 1.1rem;
+  font-family: "ShopeeDisplayB";
+  font-size: 1rem;
   font-weight: 600;
   color: #000000;
-  margin-bottom: 1.5rem;
+  height: 1.2rem; /* FIXED POSITION */
+  margin-bottom: 1rem;
 }
 
 .product-card-price small {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 400;
   color: #555555;
 }
 
-/* STACKED BUTTON RESONANCE */
+/* STACKED BUTTON RESONANCE - ANCHORED TO BOTTOM */
 .product-card-actions-stacked {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.5rem;
   width: 100%;
+  margin-top: auto; /* FIXED POSITION: Always at the bottom */
 }
 
 .product-card-actions-stacked .btn-buy-vip,
 .product-card-actions-stacked .btn-info-vip {
+  font-family: "ShopeeDisplayR";
   display: block;
   width: 100%;
-  padding: 1rem 0.5rem;
-  font-size: 0.85rem;
+  padding: 0.6rem 0.5rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
   text-decoration: none;
   border-radius: 0;
   border: none;
