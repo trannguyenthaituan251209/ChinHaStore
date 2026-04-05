@@ -22,29 +22,35 @@ const NeedsRecommendation = () => {
         
         // Merge DB data with local metadata (theme, desc, designImage)
         const merged = metadataList.map(meta => {
-          // Normalize names for a more robust match (lowercase, remove spaces)
-          const normalize = (n) => n.toLowerCase().replace(/[^a-z0-9]/g, '');
-          const metaNameClean = normalize(meta.name);
+          // Normalize names: lowercase and split into words for keyword matching
+          const getKeywords = (n) => n.toLowerCase().split(/\s+/).filter(word => word.length > 1);
+          const metaKeywords = getKeywords(meta.name);
 
           const dbMatch = dbProducts.find(p => {
-            const dbNameClean = normalize(p.name);
-            // Match if one contains the other or they are exact (e.g. "DJI Pocket 3" matches "DJI Osmo Pocket 3")
-            return dbNameClean.includes(metaNameClean) || metaNameClean.includes(dbNameClean);
+            const dbKeywords = getKeywords(p.name);
+            // Match if important keywords overlap significantly (e.g. "Pocket" and "3" exist in both)
+            const commonKeywords = metaKeywords.filter(k => dbKeywords.includes(k));
+            
+            // Specialized Rule: Match if at least 2 significant keywords match, or one name is contained in the other
+            const metaNameClean = meta.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const dbNameClean = p.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            
+            return commonKeywords.length >= 2 || dbNameClean.includes(metaNameClean) || metaNameClean.includes(dbNameClean);
           });
 
           if (dbMatch) {
             return {
               ...meta,
-              dbId: dbMatch.id, // Store actual DB ID for Link
+              dbId: dbMatch.id,
               price1Day: dbMatch.price1Day,
               price2Days: dbMatch.price2Days,
               price3Days: dbMatch.price3Days,
               price4DaysPlus: dbMatch.price4DaysPlus,
               price6h: dbMatch.price6h,
-              name: dbMatch.name, // Ensure names match DB too
+              name: dbMatch.name, 
             };
           }
-          return meta; // Fallback to mock if not in DB
+          return meta; 
         });
 
         setMergedProducts(merged);
