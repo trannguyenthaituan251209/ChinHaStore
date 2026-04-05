@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import adminService from '../services/adminService';
+import ProductCard from '../components/ProductCard';
 import './BookingPage.css';
 
 const BookingPage = () => {
@@ -551,27 +552,7 @@ const BookingPage = () => {
             <h2 className="rec-row-title">NGAY KHUNG GIỜ BẠN CHỌN, CHÚNG TÔI CÒN CÓ</h2>
             <div className="rec-product-grid">
               {result.recommendations.map(rec => (
-                <div key={rec.id} className="rec-product-card" onClick={() => setSelectedCamera(rec.id)}>
-                  <div className="rec-image-box">
-                    <img src={rec.image} alt={rec.name} />
-                  </div>
-                  <div className="rec-info-box">
-                    <h3 className="rec-name">{rec.name}</h3>
-                    <div className="rec-meta">
-                      <div className="rec-rating">
-                        <span className="stars">★★★★★</span>
-                        <span className="rating-text">5.0</span>
-                      </div>
-                      <div className="rec-price">
-                        {parseInt(String(rec.price1Day || 0).replace(/\./g, '')).toLocaleString('vi-VN')}đ <small>/ngày</small>
-                      </div>
-                    </div>
-                    <div className="rec-actions">
-                      <button className="rec-btn-primary">Chọn thuê</button>
-                      <button className="rec-btn-secondary">Tìm hiểu thêm</button>
-                    </div>
-                  </div>
-                </div>
+                <ProductCard key={rec.id} product={rec} onClick={(p) => setSelectedCamera(p.id)} />
               ))}
             </div>
           </div>

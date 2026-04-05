@@ -32,7 +32,7 @@ export const adminService = {
       .gte('start_time', todayISO)
       .lt('start_time', tomorrowISO)
       .not('status', 'eq', 'Cancelled');
-    
+
     const todayRevenue = (revenueData || []).reduce((acc, curr) => acc + (Number(curr.total_price) || 0), 0);
 
     // 3. New Bookings Today: Bookings created today
@@ -47,7 +47,7 @@ export const adminService = {
       .from('bookings')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'Returned');
-      // Note: Ideally we'd filter by completion date if available
+    // Note: Ideally we'd filter by completion date if available
 
     // 5. Confirmed Today
     const { count: bookingConfirmed } = await supabase
@@ -98,12 +98,12 @@ export const adminService = {
     return data.map(b => {
       const start = b.start_time ? new Date(b.start_time) : null;
       const end = b.end_time ? new Date(b.end_time) : null;
-      const format = (d) => d ? d.toLocaleString('vi-VN', { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric', 
+      const format = (d) => d ? d.toLocaleString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
         hour12: false,
         timeZone: 'Asia/Ho_Chi_Minh'
       }) : 'N/A';
@@ -148,7 +148,7 @@ export const adminService = {
     if (filters.status) {
       query = query.eq('status', filters.status);
     }
-    
+
     // Add other filters if needed (product_id, etc.)
     if (filters.product_id && filters.product_id !== 'all') {
       query = query.eq('product_id', filters.product_id);
@@ -161,12 +161,12 @@ export const adminService = {
     const mappedData = data.map(b => {
       const start = b.start_time ? new Date(b.start_time) : null;
       const end = b.end_time ? new Date(b.end_time) : null;
-      const format = (d) => d ? d.toLocaleString('vi-VN', { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric', 
+      const format = (d) => d ? d.toLocaleString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
         hour12: false,
         timeZone: 'Asia/Ho_Chi_Minh'
       }) : 'N/A';
@@ -195,7 +195,7 @@ export const adminService = {
    */
   calculatePrice(product, startTime, endTime) {
     if (!product || !startTime || !endTime) return 0;
-    
+
     const start = new Date(startTime);
     const end = new Date(endTime);
     const diffMs = end - start;
@@ -206,7 +206,7 @@ export const adminService = {
     if (diffDays === 1) return Number(product.price_1day?.toString().replace(/\./g, '')) || 0;
     if (diffDays === 2) return Number(product.price_2days?.toString().replace(/\./g, '')) || 0;
     if (diffDays === 3) return Number(product.price_3days?.toString().replace(/\./g, '')) || 0;
-    
+
     // 4+ days: price3Days + (extra days * price4DaysPlus)
     const base3 = Number(product.price_3days?.toString().replace(/\./g, '')) || 0;
     const extra = Number(product.price_4days_plus?.toString().replace(/\./g, '')) || 0;
@@ -221,7 +221,7 @@ export const adminService = {
     const { phone, full_name, email, city, social } = customerData;
     const cleanPhone = phone?.trim() || '0';
     const cleanName = full_name?.trim() || 'Khách lẻ';
-    
+
     // 1. ALWAYS check for high-precision match (Phone + Name) first
     // This prevents violating the UNIQUE(phone, full_name) constraint
     const { data: exactMatch } = await supabase
@@ -250,8 +250,8 @@ export const adminService = {
     // 3. Create new if neither high-precision nor phone-only match exists
     const { data: created, error } = await supabase
       .from('customers')
-      .insert({ 
-        phone: cleanPhone, 
+      .insert({
+        phone: cleanPhone,
         full_name: cleanName,
         email,
         city,
@@ -269,19 +269,19 @@ export const adminService = {
    */
   async findAvailableUnit(productId, startTime, endTime, excludeBookingId = null) {
     if (!productId) return null;
-    
+
     // 1. Get all units for this product type
     const { data: units, error: uErr } = await supabase
       .from('inventory_units')
       .select('id, serial_number')
       .eq('product_id', productId)
       .eq('status', 'Available');
-    
+
     if (uErr) {
       console.error('Find units error:', uErr);
       return null;
     }
-    
+
     if (!units || units.length === 0) {
       console.warn('No physical units found for product:', productId);
       return null;
@@ -295,7 +295,7 @@ export const adminService = {
       .in('status', ['Confirmed', 'Returned'])
       .lt('start_time', endTime)
       .gt('end_time', startTime);
-      
+
     if (excludeBookingId) {
       query = query.neq('id', excludeBookingId);
     }
@@ -308,7 +308,7 @@ export const adminService = {
     }
 
     const conflictedUnitIds = new Set(conflicts?.map(c => c.unit_id) || []);
-    
+
     // 3. Pick the first unoccupied unit
     const availableUnit = units.find(u => !conflictedUnitIds.has(u.id));
     return availableUnit ? availableUnit.id : null;
@@ -400,8 +400,8 @@ export const adminService = {
 
     // Auto-assign an available unit
     const unitId = await this.findAvailableUnit(
-      bookingData.product_id, 
-      bookingData.start_time, 
+      bookingData.product_id,
+      bookingData.start_time,
       bookingData.end_time
     );
 
@@ -434,7 +434,7 @@ export const adminService = {
    */
   async updateBooking(id, updates) {
     const { start_time, end_time, status, product_id } = updates;
-    
+
     // If updating time, status, or product, perform availability check
     if (start_time || end_time || status || product_id) {
       // Fetch current booking data to handle partial updates
@@ -443,7 +443,7 @@ export const adminService = {
         .select('product_id, start_time, end_time, status, unit_id')
         .eq('id', id)
         .single();
-      
+
       if (fErr) throw fErr;
 
       const finalProductId = product_id || current.product_id;
@@ -454,11 +454,11 @@ export const adminService = {
       // Only check availability if status is active (Confirmed or Returned)
       if (['Confirmed', 'Returned'].includes(finalStatus)) {
         const availableUnitId = await this.findAvailableUnit(finalProductId, finalStart, finalEnd, id);
-        
+
         if (!availableUnitId) {
           throw new Error('Sản phẩm hiện đã hết máy sẵn sàng vào thời gian này. Vui lòng chọn thời gian hoặc sản phẩm khác.');
         }
-        
+
         // If the unit needs to change (or was assigned for the first time), update it
         updates.unit_id = availableUnitId;
       }
@@ -495,7 +495,7 @@ export const adminService = {
       .select('*')
       .order('name');
     if (error) throw error;
-    
+
     // Map snake_case database columns to camelCase for the UI
     return data.map(p => ({
       ...p,
@@ -552,31 +552,31 @@ export const adminService = {
     const { data: bookings, error: bErr } = await supabase
       .from('bookings')
       .select('total_price, status, product_id, products(name), start_time');
-    
+
     if (bErr) throw bErr;
 
     const stats = {
-        totalRevenue: 0,
-        completedCount: 0,
-        cancelledCount: 0,
-        productPerformance: {} // id -> { name, count, revenue }
+      totalRevenue: 0,
+      completedCount: 0,
+      cancelledCount: 0,
+      productPerformance: {} // id -> { name, count, revenue }
     };
 
     bookings.forEach(b => {
-        const price = Number(b.total_price) || 0;
-        if (b.status !== 'Cancelled') {
-            stats.totalRevenue += price;
-            if (b.status === 'Returned') stats.completedCount++;
-            
-            const pId = b.product_id;
-            if (!stats.productPerformance[pId]) {
-                stats.productPerformance[pId] = { name: b.products?.name || 'Unknown', count: 0, revenue: 0 };
-            }
-            stats.productPerformance[pId].count++;
-            stats.productPerformance[pId].revenue += price;
-        } else {
-            stats.cancelledCount++;
+      const price = Number(b.total_price) || 0;
+      if (b.status !== 'Cancelled') {
+        stats.totalRevenue += price;
+        if (b.status === 'Returned') stats.completedCount++;
+
+        const pId = b.product_id;
+        if (!stats.productPerformance[pId]) {
+          stats.productPerformance[pId] = { name: b.products?.name || 'Unknown', count: 0, revenue: 0 };
         }
+        stats.productPerformance[pId].count++;
+        stats.productPerformance[pId].revenue += price;
+      } else {
+        stats.cancelledCount++;
+      }
     });
 
     return stats;
@@ -616,7 +616,7 @@ export const adminService = {
    */
   async bulkImportBookings(bookingsList) {
     const results = { success: 0, total: bookingsList.length, errors: [] };
-    
+
     for (const item of bookingsList) {
       try {
         const customerId = await this.getOrCreateCustomer({
@@ -635,7 +635,7 @@ export const adminService = {
           source: item.source || 'Imported',
           status: item.status || 'Returned'
         });
-        
+
         if (error) throw error;
         results.success++;
       } catch (err) {

@@ -506,76 +506,9 @@ html, body {
 
 .rec-product-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); 
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.5rem;
 }
-
-.rec-product-card {
-  background-color: #FFF; 
-  padding: 1rem;
-  border: 1px solid #EEE;
-  transition: transform 0.3s ease;
-}
-
-.rec-product-card:hover { transform: translateY(-5px); }
-
-.rec-image-box {
-  background-color: #FFFFFF; 
-  height: 180px; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.rec-image-box img {
-  max-width: 90%;
-  max-height: 90%;
-  object-fit: contain;
-}
-
-.rec-info-box {
-  padding-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-.rec-name {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  height: 2.4rem; 
-  overflow: hidden;
-}
-
-.rec-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.rec-price { font-size: 1rem; font-weight: 700; }
-.rec-price small { font-size: 0.75rem; color: #555; }
-
-.rec-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-}
-
-.rec-btn-primary, .rec-btn-secondary {
-  padding: 0.6rem 0;
-  font-weight: 700;
-  font-size: 0.8rem;
-  cursor: pointer;
-  border-radius: 0;
-}
-.rec-btn-secondary{
-  border: 1px solid #000;
-}
-.rec-btn-primary { background-color: rgb(235, 143, 61); color: #FFF; }
-.rec-btn-secondary { background-color: #FFF; color: #111; }
 
 .success-container { 
   text-align: center; 
@@ -606,9 +539,7 @@ html, body {
   .booking-title { font-size: 1.6rem; text-align: center; margin-bottom: 1rem; }
   .booking-result-side { padding: 1.2rem; min-height: auto; }
   .res-camera-info img { max-height: 100px; max-width: 120px; }
-  .rec-image-box { height: 140px; }
-  .rec-meta { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-  .rec-actions { grid-template-columns: 1fr; gap: 0.8rem; }
+  .rec-product-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
 }
 
 /* USER GUIDE */

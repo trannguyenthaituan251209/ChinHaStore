@@ -1,0 +1,126 @@
+.product-card-vip-centered {
+  background-color: #E2E2E2;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: none;
+  /* NO HOVER EFFECT as per user request */
+  transition: opacity 0.3s ease;
+}
+
+.product-card-image-wrapper {
+  background-color: #FFFFFF;
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.product-card-image-wrapper img {
+  width: 95%;
+  height: auto;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  transition: none; /* Zero motion lift */
+}
+
+.product-card-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.product-card-name {
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #000000;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.product-card-rating {
+  margin-bottom: 0.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.product-card-rating .stars {
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  color: #000000;
+}
+
+.product-card-rating .rating-num {
+  font-size: 0.75rem;
+  color: #555555;
+  font-weight: 400;
+}
+
+.product-card-price {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 1.5rem;
+}
+
+.product-card-price small {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #555555;
+}
+
+/* STACKED BUTTON RESONANCE */
+.product-card-actions-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.product-card-actions-stacked .btn-buy-vip,
+.product-card-actions-stacked .btn-info-vip {
+  display: block;
+  width: 100%;
+  padding: 1rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-decoration: none;
+  border-radius: 0;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  text-align: center;
+}
+
+.product-card-actions-stacked .btn-buy-vip {
+  background-color: #EB8F3D;
+  color: #000000;
+}
+
+.product-card-actions-stacked .btn-info-vip {
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+.product-card-actions-stacked .btn-buy-vip:hover,
+.product-card-actions-stacked .btn-info-vip:hover {
+  opacity: 0.85;
+}
+
+/* Ensure no hover lift on mobile too */
+@media (hover: none) {
+  .product-card-vip-centered:hover {
+    transform: none;
+  }
+}

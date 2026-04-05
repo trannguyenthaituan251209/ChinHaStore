@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import BookingPage from './pages/BookingPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
+import AllCameraPage from './pages/AllCameraPage';
 import { adminService } from './services/adminService';
 
 import './index.css';
@@ -81,6 +82,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/dat-lich" element={<BookingPage />} />
+        <Route path="/all-camera" element={<AllCameraPage />} />
         
         {/* Protected /admin route even on public domain */}
         <Route 

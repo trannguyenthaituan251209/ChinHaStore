@@ -15,10 +15,10 @@ const HeroSection = () => {
         </p>
       </div>
       <div className="hero-image-wrapper">
-        <img 
-          src="/assets/image/hero_section.png" 
-          alt="Các dòng máy ảnh tại ChinHaStore" 
-          className="hero-image" 
+        <img
+          src="/assets/image/hero_section.png"
+          alt="Các dòng máy ảnh tại ChinHaStore"
+          className="hero-image"
         />
       </div>
     </section>

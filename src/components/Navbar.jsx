@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -20,15 +21,15 @@ const Navbar = () => {
 
         {/* Logo */}
         <div className="navbar-logo">
-          <a href="/">ChinHaStore</a>
+          <Link to="/">ChinHaStore</Link>
         </div>
 
         {/* Navigation Links */}
         <ul className={`navbar-links ${isMobileMenuOpen ? 'open' : ''}`}>
-          <li><a href="/">TRANG CHỦ</a></li>
-          <li><a href="/rent">ĐẶT THUÊ</a></li>
-          <li><a href="/news">TIN TỨC</a></li>
-          <li><a href="/policy">CHÍNH SÁCH</a></li>
+          <li><Link to="/" onClick={() => setIsMobileMenuOpen(false)}>TRANG CHỦ</Link></li>
+          <li><Link to="/all-camera" onClick={() => setIsMobileMenuOpen(false)}>KHO MÁY</Link></li>
+          <li><Link to="/dat-lich" onClick={() => setIsMobileMenuOpen(false)}>ĐẶT THUÊ</Link></li>
+          <li><Link to="/policy" onClick={() => setIsMobileMenuOpen(false)}>CHÍNH SÁCH</Link></li>
         </ul>
         
       </div>
