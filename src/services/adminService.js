@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabase';
+import emailjs from '@emailjs/browser';
 
 /**
  * Service for administrative data fetching and calculations.
@@ -395,7 +396,10 @@ export const adminService = {
   async createBooking(bookingData) {
     const customerId = await this.getOrCreateCustomer({
       phone: bookingData.phone,
-      full_name: bookingData.customerName
+      full_name: bookingData.customerName,
+      email: bookingData.email,
+      city: bookingData.city,
+      social: bookingData.social
     });
 
     // Auto-assign an available unit
@@ -409,14 +413,23 @@ export const adminService = {
       throw new Error('Sản phẩm hiện đã hết máy sẵn sàng vào thời gian này. Vui lòng chọn thời gian khác hoặc sản phẩm khác.');
     }
 
+    const formatTimestamp = (ts) => {
+      if (!ts) return null;
+      if (ts.includes('+') || ts.includes('Z')) return ts;
+      // If it already ends in :ss, don't add :00
+      const timePart = ts.split('T')[1] || '';
+      const hasSeconds = timePart.split(':').length === 3;
+      return `${ts}${hasSeconds ? '' : ':00'}+07:00`;
+    };
+
     const { data, error } = await supabase
       .from('bookings')
       .insert({
         customer_id: customerId,
         product_id: bookingData.product_id,
         unit_id: unitId,
-        start_time: `${bookingData.start_time}:00+07:00`,
-        end_time: `${bookingData.end_time}:00+07:00`,
+        start_time: formatTimestamp(bookingData.start_time),
+        end_time: formatTimestamp(bookingData.end_time),
         rental_type: bookingData.rentalType,
         total_price: bookingData.total_price,
         source: bookingData.source || 'Admin',
@@ -426,8 +439,15 @@ export const adminService = {
       .single();
 
     if (error) throw error;
+
+    // --- TRIGGER EMAIL NOTIFICATIONS ---
+    // Fetch product name and image for placeholders
+    const { data: product } = await supabase.from('products').select('name, image_url').eq('id', bookingData.product_id).single();
+    this.sendBookingEmails(bookingData, product, bookingData.email, bookingData.breakdown);
+
     return data;
   },
+
 
   /**
    * Update a booking.
@@ -464,9 +484,17 @@ export const adminService = {
       }
     }
 
+    const formatTimestamp = (ts) => {
+      if (!ts || typeof ts !== 'string') return ts;
+      if (ts.includes('+') || ts.includes('Z')) return ts;
+      const timePart = ts.split('T')[1] || '';
+      const hasSeconds = timePart.split(':').length === 3;
+      return `${ts}${hasSeconds ? '' : ':00'}+07:00`;
+    };
+
     const finalUpdates = { ...updates };
-    if (finalUpdates.start_time) finalUpdates.start_time = `${finalUpdates.start_time}:00+07:00`;
-    if (finalUpdates.end_time) finalUpdates.end_time = `${finalUpdates.end_time}:00+07:00`;
+    if (finalUpdates.start_time) finalUpdates.start_time = formatTimestamp(finalUpdates.start_time);
+    if (finalUpdates.end_time) finalUpdates.end_time = formatTimestamp(finalUpdates.end_time);
 
     const { error } = await supabase
       .from('bookings')
@@ -674,6 +702,219 @@ export const adminService = {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) return null;
     return user;
+  },
+
+  // --- EMAIL NOTIFICATION & SETTINGS ---
+
+  /**
+   * Fetch email templates from the settings table.
+   * If doesn't exist, returns defaults.
+   */
+  async getEmailSettings() {
+    try {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'email_config')
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "not found"
+
+      const defaultSettings = {
+        admin_notice: {
+          enabled: true,
+          recipient: 'manhichin.chinhastore@gmail.com',
+          subject: '[NEW BOOKING] {{customer_name}} - {{product_name}}',
+          body: `CHINHASTORE - THÔNG BÁO ĐƠN HÀNG MỚI\n\nChào Mẫn Hi Chin,\n\nBạn có một đơn đặt thuê thiết bị mới từ Website:\n\nTHÔNG TIN KHÁCH HÀNG:\n- Tên: {{customer_name}}\n- SĐT: {{phone}}\n- Địa chỉ: {{location}}\n- Mạng xã hội: {{social}}\n\nTHÔNG TIN THIẾT BỊ:\n- Máy: {{product_name}}\n- Gói thuê: {{rental_package}}\n- Thời gian: {{start_date}} - {{end_date}}\n\nDỰ KIẾN DOANH THU:\n- Tổng thanh toán: {{total_price}} VNĐ\n\nVui lòng truy cập Admin Dashboard để xác nhận lịch cho khách.\n\nTrân trọng,\nChinHaStore Hệ Thống`
+        },
+        customer_invoice: {
+          enabled: true,
+          subject: 'Xác nhận đặt thuê máy #{{customer_name}} - ChinHaStore',
+          body: `<!DOCTYPE html>
+<html lang="vi">
+<body style="margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f7f6; color: #333;">
+    <div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e1e9e5;">
+        <div style="padding: 30px 20px; text-align: center; border-bottom: 2px solid #f0f4f2;">
+            <img src="https://i.ibb.co/LXWYmSqM/logo.png" alt="Logo" style="height: 60px; margin-bottom: 15px;">
+            <h1 style="margin: 0; color: #2d3e50; font-size: 22px;">XÁC NHẬN ĐẶT HÀNG</h1>
+        </div>
+        <div style="padding: 30px 25px;">
+            <p style="font-size: 16px;">Xin chào <strong>{{customer_name}}</strong>,</p>
+            <p style="font-size: 15px; color: #5a6a7a;">Chúng tôi gửi email này để xác nhận yêu cầu đặt thuê máy <strong>{{product_name}}</strong> của bạn.</p>
+            <div style="background-color: #fafbfc; border-radius: 10px; padding: 20px; margin: 25px 0; border: 1px solid #edf2f0;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="color: #8899a6; font-size: 12px;">NHẬN MÁY</td>
+                        <td style="color: #8899a6; font-size: 12px; text-align: right;">TRẢ MÁY</td>
+                    </tr>
+                    <tr>
+                        <td style="font-size: 15px; font-weight: 700;">{{start_date}}</td>
+                        <td style="font-size: 15px; font-weight: 700; text-align: right;">{{end_date}}</td>
+                    </tr>
+                </table>
+            </div>
+            <div style="border-bottom: 2px solid #f0f4f2; padding-bottom: 25px; margin-bottom: 25px;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="width: 80px;"><img src="{{product_image}}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"></td>
+                        <td style="padding-left: 20px;">
+                            <div style="font-size: 17px; font-weight: 700;">{{product_name}}</div>
+                            <div style="margin-top: 5px; color: #2b6cb0; font-weight: 600;">{{total_price}} VNĐ</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 14px; color: #8899a6; text-transform: uppercase;">Chi tiết bảng giá</h3>
+                <table style="width: 100%; font-size: 14px; line-height: 2;">
+                    {{price_breakdown_rows}}
+                    <tr style="border-top: 2px solid #1a202c;">
+                        <td style="padding-top: 15px; font-size: 16px; font-weight: 700;">Tổng cộng:</td>
+                        <td style="padding-top: 15px; font-size: 20px; font-weight: 800; text-align: right;">{{total_price}} VNĐ</td>
+                    </tr>
+                </table>
+            </div>
+            <div style="background-color: #fff9f0; border-left: 4px solid #f6ad55; padding: 15px; border-radius: 4px; font-size: 13px; color: #7b341e;">
+                <strong>Lưu ý:</strong> Chúng mình sẽ gọi xác nhận qua số <strong>{{phone}}</strong> sớm nhé!
+            </div>
+        </div>
+    </div>
+</body>
+</html>`
+        }
+      };
+
+      if (!data) {
+        // Automatically seed defaults if missing (Optional, might fail if table missing)
+        return defaultSettings;
+      }
+
+      return { ...defaultSettings, ...data.value };
+    } catch (err) {
+      console.warn('Settings table not found or error:', err.message);
+      // Return defaults even if table missing so UI doesn't crash
+      return {
+        admin_notice: { enabled: true, recipient: 'manhichin.chinhastore@gmail.com', subject: '[NEW BOOKING] {{customer_name}}', body: 'New booking received.' },
+        customer_invoice: { enabled: true, subject: 'Invoice', body: 'Thank you for your booking.' }
+      };
+    }
+  },
+
+  /**
+   * Save email templates to the settings table.
+   */
+  async updateEmailSettings(config) {
+    const { error } = await supabase
+      .from('settings')
+      .upsert({ key: 'email_config', value: config }, { onConflict: 'key' });
+    
+    if (error) throw error;
+  },
+
+  /**
+   * Sends automated emails to admin and customer based on templates.
+   */
+  async sendBookingEmails(bookingData, product, cusEmail, breakdown = []) {
+    try {
+      const config = await this.getEmailSettings();
+      
+      const format = (d) => {
+        const date = new Date(d);
+        return date.toLocaleString('vi-VN', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric',
+            timeZone: 'Asia/Ho_Chi_Minh'
+        });
+      };
+
+      // Generate HTML rows for price breakdown
+      const breakdownHtml = breakdown.map(item => `
+        <tr>
+          <td style="color: #4a5568; padding: 5px 0;">${item.label}:</td>
+          <td style="text-align: right; color: #1a202c; font-weight: 500;">${item.value} VNĐ</td>
+        </tr>
+      `).join('');
+
+      // Data for both internal replacement and EmailJS
+      const templateData = {
+        customer_name: bookingData.customerName || 'Quý khách',
+        phone: bookingData.phone || 'Chưa cung cấp',
+        product_name: product?.name || 'Sản phẩm',
+        product_image: product?.image_url || 'https://via.placeholder.com/100',
+        start_date: format(bookingData.start_time),
+        end_date: format(bookingData.end_time),
+        total_price: new Intl.NumberFormat('vi-VN').format(bookingData.total_price),
+        location: bookingData.city || 'Chưa rõ',
+        social: bookingData.social || 'Chưa rõ',
+        rental_package: bookingData.rentalType || 'Thanh toán linh hoạt',
+        price_breakdown_rows: breakdownHtml
+      };
+
+      // Initialize EmailJS
+      emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
+
+      const replaceAll = (text) => {
+        let result = text;
+        Object.entries(templateData).forEach(([key, val]) => {
+          result = result.split(`{{${key}}}`).join(val);
+        });
+        return result;
+      };
+
+      // 1. Send Admin Notification
+      if (config.admin_notice.enabled) {
+        const adminSubject = replaceAll(config.admin_notice.subject);
+        const adminTo = (config.admin_notice.recipient && config.admin_notice.recipient.trim()) || 'manhichin.chinhastore@gmail.com';
+        
+        console.log('--- EMAILJS SENDING (ADMIN THREAD) ---');
+        console.log('Recipient:', adminTo);
+
+        await emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+          {
+            ...templateData,
+            header_title: 'THÔNG BÁO ĐƠN HÀNG MỚI',
+            greeting: 'Chào Mẫn Hi Chin,',
+            intro_text: 'Bạn vừa nhận được một yêu cầu đặt máy mới từ Website ChinHaStore. Vui lòng kiểm tra chi tiết bên dưới:',
+            footer_note: 'Yêu cầu này cần được xử lý sớm trên Admin Dashboard. Hãy liên hệ khách hàng ngay để xác nhận lịch trình.',
+            subject: adminSubject,
+            to_email: adminTo
+          }
+        );
+        console.log('✅ Admin Notification Sent');
+      }
+
+      // 2. Send Customer Invoice
+      const customerTo = cusEmail ? cusEmail.trim() : '';
+      if (config.customer_invoice.enabled && customerTo) {
+        const customerSubject = replaceAll(config.customer_invoice.subject);
+
+        console.log('--- EMAILJS SENDING (CUSTOMER THREAD) ---');
+        console.log('Recipient:', customerTo);
+
+        await emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+          {
+            ...templateData,
+            header_title: 'XÁC NHẬN ĐẶT HÀNG',
+            greeting: `Xin chào ${templateData.customer_name},`,
+            intro_text: `Cảm ơn bạn đã lựa chọn ChinHaStore! Chúng mình đã nhận được yêu cầu đặt thuê máy ${templateData.product_name} của bạn. Chi tiết lịch trình và báo giá được liệt kê bên dưới:`,
+            footer_note: `Lưu ý: Nhân viên ChinHaStore sẽ liên hệ với bạn sớm nhất có thể qua số điện thoại ${templateData.phone} để chốt lịch và nhận cọc. Đơn hàng chỉ được xác nhận chính thức sau khi đặt cọc thành công.`,
+            subject: customerSubject,
+            to_email: customerTo
+          }
+        );
+        console.log('✅ Customer Invoice Sent');
+      }
+
+    } catch (err) {
+      console.error('Error in sendBookingEmails:', err);
+    }
   }
 };
 

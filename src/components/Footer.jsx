@@ -25,17 +25,17 @@ const Footer = () => {
           <div className="footer-social">
             <h4 className="footer-heading">KẾT NỐI</h4>
             <div className="social-links-list">
-              <a href="https://facebook.com/chinhastore" target="_blank" rel="noreferrer">Facebook</a>
-              <a href="https://instagram.com/chinhastore" target="_blank" rel="noreferrer">Instagram</a>
-              <a href="https://zalo.me" target="_blank" rel="noreferrer">Zalo messenger</a>
+              <a href="https://www.facebook.com/people/Thu%C3%AA-m%C3%A1y-%E1%BA%A3nh-BMT/61574591176497/" target="_blank" rel="noreferrer">Facebook</a>
+              <a href="https://www.instagram.com/thuemayanh.bmt/" target="_blank" rel="noreferrer">Instagram</a>
+              <a href="https://zalo.me/0842204207" target="_blank" rel="noreferrer">Zalo messenger</a>
             </div>
           </div>
 
           <div className="footer-contact">
             <h4 className="footer-heading">LIÊN HỆ</h4>
-            <p>123 Đường Sáng Tạo, Quận 1, TP. HCM</p>
-            <p>090 123 4567</p>
-            <p>hi@chinhastore.vn</p>
+            <p>124 Lê Thánh Tông, Phường Buôn Ma Thuột, Tỉnh Đăk Lăk</p>
+            <p>0842204207</p>
+            <p>thaituantrannguyen@gmail.com</p>
           </div>
         </div>
 

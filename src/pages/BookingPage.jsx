@@ -286,12 +286,16 @@ const BookingPage = () => {
       await adminService.createBooking({
         customerName: cusName,
         phone: cusPhone,
+        email: cusEmail,
+        city: cusCity,
+        social: cusSocial,
         product_id: selectedCamera,
         start_time: startDate + 'T' + (rentalType==='SHIFT'?(shiftType==='A'?'07:00:00':'14:00:00'):(rentalType==='DAY'?'07:30:00':'19:00:00')), 
         end_time: (rentalType==='SHIFT'?startDate:endDate) + 'T' + (rentalType==='SHIFT'?(shiftType==='A'?'13:00:00':'21:00:00'):(rentalType==='DAY'?'07:30:00':'19:00:00')),
         total_price: parseInt(result.price.replace(/\./g, '')),
         rentalType: rentalType,
-        source: 'Website'
+        source: 'Website',
+        breakdown: result.breakdown
       });
       setStep(3);
     } catch (error) {
@@ -425,7 +429,7 @@ const BookingPage = () => {
                     <label>KHU VỰC THUÊ</label>
                     <div className="city-selector">
                       <button className={`city-box ${cusCity === 'Hồ Chí Minh' ? 'active' : ''}`} onClick={() => setCusCity('Hồ Chí Minh')}>Hồ Chí Minh</button>
-                      <button className={`city-box ${cusCity === 'Cần Thơ' ? 'active' : ''}`} onClick={() => setCusCity('Cần Thơ')}>Cần Thơ</button>
+                      <button className={`city-box ${cusCity === 'Buôn Ma Thuột' ? 'active' : ''}`} onClick={() => setCusCity('Buôn Ma Thuột')}>Buôn Ma Thuột</button>
                     </div>
                   </div>
                   <div className="form-group">

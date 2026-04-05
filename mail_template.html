@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{header_title}}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ffffff; color: #1a202c;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #d1d5db;">
+        
+        <!-- Header with Logo - NO BORDER RADIUS -->
+        <div style="padding: 40px 20px; text-align: center; border-bottom: 3px solid #1a202c;">
+            <img src="https://i.ibb.co/LXWYmSqM/logo.png" alt="ChinHaStore Logo" style="height: 70px; margin-bottom: 20px;">
+            <h1 style="margin: 0; color: #1a202c; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">{{header_title}}</h1>
+        </div>
+
+        <div style="padding: 40px 30px;">
+            <p style="font-size: 18px; line-height: 1.6; margin-top: 0; font-weight: 700;">{{greeting}}</p>
+            <p style="font-size: 16px; line-height: 1.7; color: #4a5568; margin-bottom: 30px;">
+                {{intro_text}}
+            </p>
+
+            <!-- Timing Block - NO BORDER RADIUS -->
+            <div style="background-color: #f8fafc; padding: 25px; margin-bottom: 35px; border: 1px solid #e2e8f0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="width: 50%; color: #718096; font-size: 12px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; padding-bottom: 8px;">NHẬN THIẾT BỊ</td>
+                        <td style="width: 50%; color: #718096; font-size: 12px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; padding-bottom: 8px; text-align: right;">TRẢ THIẾT BỊ</td>
+                    </tr>
+                    <tr>
+                        <td style="font-size: 16px; font-weight: 800; color: #1a202c;">{{start_date}}</td>
+                        <td style="font-size: 16px; font-weight: 800; color: #1a202c; text-align: right;">{{end_date}}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Customer Details Block - Sharp Edges -->
+            <div style="border-left: 5px solid #1a202c; padding-left: 20px; margin-bottom: 35px;">
+                <h3 style="font-size: 14px; color: #718096; text-transform: uppercase; margin: 0 0 10px 0;">Thông tin liên hệ</h3>
+                <p style="margin: 5px 0; font-size: 15px;"><strong>Khách hàng:</strong> {{customer_name}}</p>
+                <p style="margin: 5px 0; font-size: 15px;"><strong>Điện thoại:</strong> {{phone}}</p>
+                <p style="margin: 5px 0; font-size: 15px;"><strong>Khu vực:</strong> {{location}}</p>
+                <p style="margin: 5px 0; font-size: 15px;"><strong>Mạng xã hội:</strong> {{social}}</p>
+            </div>
+
+            <!-- Product Display Section -->
+            <div style="padding: 20px 0; border-top: 1px solid #edf2f7;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="vertical-align: top;">
+                        <td style="width: 120px; padding-right: 25px;">
+                            <img src="{{product_image}}" alt="Product" style="width: 120px; height: 120px; object-fit: cover; border: 1px solid #edf2f7;">
+                        </td>
+                        <td>
+                            <div style="font-size: 19px; font-weight: 800; color: #1a202c; margin-bottom: 8px;">{{product_name}}</div>
+                            <div style="font-size: 14px; color: #718096; margin-bottom: 12px;">Gói thuê: <strong>{{rental_package}}</strong></div>
+                            <div style="font-size: 18px; font-weight: 800; color: #1a202c;">{{total_price}} VNĐ</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Price Breakdown Section -->
+            <div style="margin-top: 35px; padding-top: 25px; border-top: 1px solid #edf2f7;">
+                <h3 style="font-size: 14px; color: #718096; text-transform: uppercase; margin-bottom: 15px;">Bảng tính phí chi tiết</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 15px; line-height: 2.2;">
+                    {{price_breakdown_rows}}
+                    <tr style="border-top: 2px solid #1a202c;">
+                        <td style="padding-top: 20px; font-size: 18px; font-weight: 800; color: #1a202c;">TỔNG CỘNG DỰ KIẾN:</td>
+                        <td style="padding-top: 20px; font-size: 22px; font-weight: 900; color: #1a202c; text-align: right;">{{total_price}} VNĐ</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Footer Note Block -->
+            <div style="margin-top: 40px; padding: 20px; background-color: #fffaf0; border: 1px solid #feebc8; font-size: 14px; line-height: 1.6; color: #7b341e;">
+                {{footer_note}}
+            </div>
+        </div>
+
+        <!-- System Footer -->
+        <div style="background-color: #1a202c; padding: 30px; text-align: center; font-size: 12px; color: #ffffff;">
+            <p style="margin: 0 0 10px 0; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">ChinHaStore - Hệ Thống Cho Thuê Thiết Bị Toàn Quốc</p>
+            <p style="margin: 0; opacity: 0.7;">Email gửi tự động. Vui lòng không trả lời trực tiếp email này.</p>
+        </div>
+    </div>
+</body>
+</html>

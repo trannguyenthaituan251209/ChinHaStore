@@ -96,7 +96,7 @@ const AllCameraPage = () => {
             <ChevronRight size={14} />
             <span>Kho máy ảnh</span>
           </div>
-          <h1 className="catalog-title">TẤT CẢ THIẾT BỊ <span>({filteredProducts.length})</span></h1>
+          <h1 className="catalog-title">TẤT CẢ THIẾT BỊ</h1>
         </div>
       </div>
 
