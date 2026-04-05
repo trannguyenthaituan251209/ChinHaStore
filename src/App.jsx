@@ -16,10 +16,19 @@ import './index.css';
  * We use VITE_DEPLOY_TARGET to toggle between PUBLIC and ADMIN modes.
  */
 const DEPLOY_TARGET = import.meta.env.VITE_DEPLOY_TARGET || 'PUBLIC';
+const SECRET_ADMIN_PATH = '/quanly-chinha-trungtam';
 
 function App() {
   const location = useLocation();
-  const isAdminPath = location.pathname.startsWith('/admin');
+  
+  // High-Precision Host & Path Detection
+  const isAdminHost = window.location.hostname.startsWith('admin.');
+  const isSecretPath = location.pathname.startsWith(SECRET_ADMIN_PATH);
+  const isLegacyAdminPath = location.pathname.startsWith('/admin');
+  
+  // Authoritative Admin Mode Flag
+  const isAdminMode = isAdminHost || isSecretPath;
+
   const [adminUser, setAdminUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -58,8 +67,34 @@ function App() {
     );
   }
 
-  // MODE A: ADMIN-ONLY DEPLOYMENT (DEDICATED DOMAIN)
-  if (DEPLOY_TARGET === 'ADMIN') {
+  // Specialized Restricted Access Deterrence
+  if (isLegacyAdminPath && !isAdminHost) {
+    return (
+      <div style={{ 
+        height: '100vh', display: 'flex', flexDirection: 'column', 
+        alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', color: '#fff',
+        fontFamily: 'monospace', textAlign: 'center', padding: '2rem'
+      }}>
+        <h1 style={{ color: '#ff0000', fontSize: '3rem', marginBottom: '1rem' }}>ACCESS RESTRICTED</h1>
+        <p style={{ fontSize: '1.2rem', maxWidth: '600px' }}>
+          This area is monitored and reserved for authorized ChinHaStore personnel only. 
+          Unauthorized access attempts are logged and reported.
+        </p>
+        <button 
+          onClick={() => window.location.href = '/'}
+          style={{ 
+            marginTop: '2rem', padding: '0.8rem 2rem', backgroundColor: '#fff', color: '#000',
+            border: 'none', cursor: 'pointer', fontWeight: 'bold'
+          }}
+        >
+          RETURN TO SAFETY
+        </button>
+      </div>
+    );
+  }
+
+  // MODE A: ADMIN-ONLY DEPLOYMENT (DEDICATED SUBDOMAIN OR DOMAIN)
+  if (DEPLOY_TARGET === 'ADMIN' || isAdminHost) {
     if (!adminUser) {
       return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
     }
@@ -68,7 +103,7 @@ function App() {
       <div className="app admin-mode">
         <Routes>
           <Route path="/" element={<AdminDashboard onLogout={handleLogout} />} />
-          <Route path="/admin/*" element={<AdminDashboard onLogout={handleLogout} />} />
+          <Route path={`${SECRET_ADMIN_PATH}/*`} element={<AdminDashboard onLogout={handleLogout} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
@@ -78,15 +113,15 @@ function App() {
   // MODE B: PUBLIC STOREFRONT (MAIN DOMAIN)
   return (
     <div className="app storefront-mode">
-      {!isAdminPath && <Navbar />}
+      {!isAdminMode && <Navbar />}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/dat-lich" element={<BookingPage />} />
         <Route path="/all-camera" element={<AllCameraPage />} />
         
-        {/* Protected /admin route even on public domain */}
+        {/* Protected Secret Route on public domain */}
         <Route 
-          path="/admin/*" 
+          path={`${SECRET_ADMIN_PATH}/*`} 
           element={
             adminUser ? (
               <AdminDashboard onLogout={handleLogout} />
@@ -95,8 +130,11 @@ function App() {
             )
           } 
         />
+        
+        {/* Default fallback for main storefront */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      {!isAdminPath && <Footer />}
+      {!isAdminMode && <Footer />}
     </div>
   );
 }
