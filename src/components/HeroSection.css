@@ -1,0 +1,83 @@
+.hero {
+  background-color: var(--color-bg-white);
+  padding: 4rem 0 0 0;
+  text-align: center;
+}
+
+.hero-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Base sizing (Mobile <= 767px) */
+.hero-title {
+  font-family: 'VIPNesans', serif;
+  font-size: 50px;
+  font-weight: 400;
+  color: var(--color-text-main);
+  margin-bottom: 1rem;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.hero-subtitle {
+  font-size: 17px; 
+  color: var(--color-text-light);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.btn-hero-cta {
+  display: inline-block;
+  background-color: #EB8F3D;
+  color: #FFF;
+  padding: 1.2rem 3.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 1px;
+  border-radius: 4px;
+  transition: opacity 0.3s ease;
+  margin-bottom: 3rem;
+}
+
+.btn-hero-cta:hover {
+  opacity: 0.8;
+}
+
+.hero-image-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.hero-image {
+  width: 100%;
+  height: 55vh; /* Take up roughly half the screen height */
+  min-height: 250px; /* Prevent it from getting too tiny on phones */
+  max-height: 800px; /* Prevent it from exploding on 4k monitors */
+  object-fit: cover; /* Crop gracefully without distorting cameras */
+  object-position: bottom; /* Always keep the dark shelf and cameras in frame */
+}
+
+/* Tablet (768px -> 1023px) */
+@media (min-width: 768px) {
+  .hero-title {
+    font-size: 70px;
+  }
+  .hero-subtitle {
+    font-size: 20px;
+  }
+}
+
+/* Desktop (>= 1024px) */
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: 85px;
+  }
+  .hero-subtitle {
+    font-size: 25px;
+  }
+}

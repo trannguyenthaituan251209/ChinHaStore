@@ -1,0 +1,94 @@
+.final-cta {
+  padding: 10rem 0;
+  background-image: url('/assets/image/final_cta_bg.png');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+/* Creating a subtle organic depth effect using pseudo-elements instead of a heavy image */
+.final-cta::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 40%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(235, 143, 61, 0.03) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.final-cta::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 40%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(196, 72, 72, 0.03) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.cta-content {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.cta-title {
+  font-family: inherit;
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.cta-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 3.5rem;
+  font-weight: 500;
+}
+
+.btn-final-rent {
+  background-color: #f7a35a; /* Your signature accent orange */
+  color: #ffffff;
+  border: none;
+  padding: 1.2rem 4rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-final-rent:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(235, 143, 61, 0.4);
+  background-color: #f39c4d;
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+  .final-cta {
+    padding: 6rem 1rem;
+  }
+  .cta-title {
+    font-size: 2.2rem;
+  }
+  .cta-subtitle {
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .btn-final-rent {
+    width: 100%;
+    padding: 1.2rem;
+  }
+}

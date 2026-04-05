@@ -1,0 +1,167 @@
+.featured-products {
+  background-color: var(--color-bg-white);
+  padding: 5rem 0;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  font-family: inherit; 
+  font-size: 3rem;
+  color: var(--color-text-main);
+  letter-spacing: 1px;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+/* Slider Wrapper */
+.featured-slider-wrapper {
+  padding: 0 4rem; 
+}
+
+.featured-swiper {
+  padding-bottom: 4rem !important;
+}
+
+/* Force Swiper slides to mirror the height of the tallest slide in the row */
+.featured-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
+.featured-swiper .swiper-slide {
+  height: auto;
+}
+
+/* Card Styling */
+.pricing-card {
+  background-color: #e9e9e9; 
+  display: flex;
+  flex-direction: column;
+  height: 100%; 
+}
+
+/* Image Box - Force square aspect ratio so all cards align */
+.pricing-img-box {
+  width: 100%;
+  aspect-ratio: 1 / 1; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.pricing-img-box img {
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover; 
+}
+
+.pricing-content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1; 
+}
+
+.pricing-title {
+  font-family: inherit; 
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: #111;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+  min-height: 2.6em; 
+}
+
+.pricing-desc {
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  min-height: 8em; 
+}
+
+.pricing-daily {
+  font-family: inherit;
+  font-size: 1.6rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+}
+
+/* Exact CSS Table Structure */
+.pricing-table {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 2px solid #111; 
+  background-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.p-cell {
+  padding: 1rem 0;
+  text-align: center;
+  font-weight: 400;
+  color: #111;
+  font-size: 1rem;
+}
+
+.p-label {
+  border-right: 2px solid #111;
+  background-color: #e6e6e6; 
+}
+
+.p-label, .p-val {
+  border-bottom: 2px solid #111;
+}
+
+.border-bottom-none {
+  border-bottom: none !important;
+}
+
+.pricing-subtext {
+  font-size: 0.95rem;
+  font-weight: 400;
+  margin-bottom: 2.5rem; 
+}
+
+/* Action Button */
+.btn-rent-now {
+  margin-top: auto; 
+  width: 100%;
+  padding: 1rem 0;
+  color: #ffffff !important;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+.btn-rent-now:hover {
+  opacity: 0.8;
+}
+
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+  .featured-slider-wrapper { padding: 0 2rem; }
+  .section-title { font-size: 2.5rem; }
+}
+
+@media (max-width: 768px) {
+  .featured-slider-wrapper { padding: 0; }
+  .section-title { font-size: 2.2rem; }
+  .pricing-title { font-size: 2rem; }
+  .pricing-desc { min-height: 0; } 
+  .pricing-content { padding: 1.5rem; }
+}

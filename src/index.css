@@ -1,0 +1,98 @@
+@font-face {
+  font-family: 'FontDaughter';
+  src: url("/assets/Font Daughter VH/Font Daughter VH/Font-Daughter.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'VIPNesans';
+  src: url("/assets/VIP Nesans VH/VIP Nesans VH/1FTV-VIP-Nesans.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ShopeeDisplayR';
+  src: url("/assets/Shopee Font Full VH/ShopeeDisplay-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ShopeeDisplayB';
+  src: url("/assets/Shopee Font Full VH/ShopeeDisplay-Bold.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ShopeeDisplayL';
+  src: url("/assets/Shopee Font Full VH/ShopeeDisplay-Light.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ShopeeDisplayM';
+  src: url("/assets/Shopee Font Full VH/ShopeeDisplay-Medium.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ShopeeDisplayEB';
+  src: url("/assets/Shopee Font Full VH/ShopeeDisplay-ExtraBold.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --color-bg-body: #D6D4D4;
+  --color-bg-white: #ffffff;
+  --color-bg-dark: #333333;
+  
+  --color-text-main: #333333;
+  --color-text-light: #666666;
+  --color-text-white: #ffffff;
+  
+  --color-accent-blue: #007bff;
+  --color-accent-red: #dc3545;
+
+  --font-logo: 'FontDaughter', cursive, sans-serif;
+  --font-main: 'VIPNesans', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--color-bg-body);
+  color: var(--color-text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Global utility for centering content */
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
