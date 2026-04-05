@@ -22,10 +22,20 @@ const NeedsRecommendation = () => {
         
         // Merge DB data with local metadata (theme, desc, designImage)
         const merged = metadataList.map(meta => {
-          const dbMatch = dbProducts.find(p => p.id === meta.id);
+          // Normalize names for a more robust match (lowercase, remove spaces)
+          const normalize = (n) => n.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const metaNameClean = normalize(meta.name);
+
+          const dbMatch = dbProducts.find(p => {
+            const dbNameClean = normalize(p.name);
+            // Match if one contains the other or they are exact (e.g. "DJI Pocket 3" matches "DJI Osmo Pocket 3")
+            return dbNameClean.includes(metaNameClean) || metaNameClean.includes(dbNameClean);
+          });
+
           if (dbMatch) {
             return {
               ...meta,
+              dbId: dbMatch.id, // Store actual DB ID for Link
               price1Day: dbMatch.price1Day,
               price2Days: dbMatch.price2Days,
               price3Days: dbMatch.price3Days,
@@ -115,7 +125,7 @@ const NeedsRecommendation = () => {
                       Từ ngày 4 trở đi {new Intl.NumberFormat('vi-VN').format(String(product.price4DaysPlus).replace(/\./g, ''))}đ/1 Ngày
                     </div>
 
-                    <Link to={`/dat-lich?id=${product.id}`} className="btn-rent-now" style={{ backgroundColor: product.theme }}>
+                    <Link to={`/dat-lich?id=${product.dbId || product.id}`} className="btn-rent-now" style={{ backgroundColor: product.theme }}>
                       Thuê ngay
                     </Link>
                   </div>
