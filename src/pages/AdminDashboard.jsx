@@ -18,7 +18,7 @@ import { adminService } from '../services/adminService';
 import { supabase } from '../utils/supabase';
 import './AdminDashboard.css';
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'manager', 'modify', 'report'
   const [showRevenue, setShowRevenue] = useState(false);
   const [stats, setStats] = useState(null);
@@ -208,7 +208,7 @@ const AdminDashboard = () => {
         </nav>
 
         <div className="sidebar-footer">
-          <button className="nav-item logout">
+          <button className="nav-item logout" onClick={onLogout}>
             <LogOut size={20} />
             <span>Đăng xuất</span>
           </button>

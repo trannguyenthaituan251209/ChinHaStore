@@ -643,7 +643,38 @@ export const adminService = {
       }
     }
     return results;
+  },
+
+  // --- AUTHENTICATION HARDENING ---
+
+  /**
+   * Authoritative Sign In for Admin command center
+   */
+  async signIn(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+    return data;
+  },
+
+  /**
+   * Specialized Sign Out to clear session persistence
+   */
+  async signOut() {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  },
+
+  /**
+   * Identity Handshake: Retrieve current authoritative session
+   */
+  async getUser() {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) return null;
+    return user;
   }
-}
+};
 
 export default adminService;
