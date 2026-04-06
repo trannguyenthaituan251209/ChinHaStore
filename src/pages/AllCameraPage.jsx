@@ -45,7 +45,7 @@ const AllCameraPage = () => {
 
   // Filtering & Sorting Logic
   const filteredProducts = useMemo(() => {
-    let result = [...products];
+    let result = products.filter(p => p.status === 'active');
 
     // Search
     if (searchTerm) {

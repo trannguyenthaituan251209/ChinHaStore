@@ -11,7 +11,7 @@ import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { adminService } from '../../services/adminService';
 
-const ReportCenter = () => {
+const ReportCenter = ({ showStatus }) => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
@@ -52,8 +52,9 @@ const ReportCenter = () => {
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Rental History");
       XLSX.writeFile(wb, `ChinHaStore_Report_${new Date().toLocaleDateString('vi-VN')}.xlsx`);
+      showStatus('Đã xuất file Excel thành công', 'success');
     } catch (err) {
-      alert('Lỗi khi xuất file: ' + err.message);
+      showStatus('Lỗi khi xuất file: ' + err.message, 'error');
     }
   };
 

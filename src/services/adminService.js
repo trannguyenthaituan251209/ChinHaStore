@@ -125,7 +125,8 @@ export const adminService = {
         end_time: b.end_time,
         customer_id: b.customer_id,
         product_id: b.product_id,
-        unit_id: b.unit_id
+        unit_id: b.unit_id,
+        is_seen: b.is_seen
       };
     });
   },
@@ -184,7 +185,8 @@ export const adminService = {
         status: b.status,
         start_time: b.start_time,
         end_time: b.end_time,
-        product_id: b.product_id
+        product_id: b.product_id,
+        is_seen: b.is_seen
       };
     });
 
@@ -433,7 +435,8 @@ export const adminService = {
         rental_type: bookingData.rentalType,
         total_price: bookingData.total_price,
         source: bookingData.source || 'Admin',
-        status: bookingData.status || 'Pending'
+        status: bookingData.status || 'Pending',
+        is_seen: (bookingData.source && bookingData.source !== 'Website') ? true : false
       })
       .select()
       .single();
@@ -504,6 +507,28 @@ export const adminService = {
   },
 
   /**
+   * Quick status update for a booking.
+   */
+  async updateBookingStatus(id, status) {
+    const { error } = await supabase
+      .from('bookings')
+      .update({ status })
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  /**
+   * Mark a booking as acknowledged/seen.
+   */
+  async markBookingAsSeen(id) {
+    const { error } = await supabase
+      .from('bookings')
+      .update({ is_seen: true })
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  /**
    * Delete a booking.
    */
   async deleteBooking(id) {
@@ -534,26 +559,90 @@ export const adminService = {
       price4DaysPlus: p.price_4days_plus,
       image: p.image_url,
       designImage: p.design_image_url,
-      status: p.status || 'active'
+      status: p.status || 'active',
+      quantity: p.quantity || 1
     }));
   },
 
   async createProduct(product) {
+    const { quantity, ...productData } = product;
     const { data, error } = await supabase
       .from('products')
-      .insert(product)
+      .insert({ 
+        ...productData, 
+        id: self.crypto.randomUUID(), // Manually generate ID to avoid null constraint
+        quantity: parseInt(quantity) || 1 
+      })
       .select()
       .single();
     if (error) throw error;
+
+    // Create corresponding inventory units
+    const units = [];
+    for (let i = 1; i <= (parseInt(quantity) || 1); i++) {
+      units.push({
+        product_id: data.id,
+        serial_number: `${data.name} #${i}`,
+        status: 'Available'
+      });
+    }
+
+    if (units.length > 0) {
+      const { error: unitError } = await supabase.from('inventory_units').insert(units);
+      if (unitError) console.error('Error creating units:', unitError);
+    }
+
     return data;
   },
 
   async updateProduct(id, updates) {
+    const { quantity, ...productData } = updates;
+    
+    // 1. Get current product to check quantity change
+    const { data: current, error: fetchErr } = await supabase
+      .from('products')
+      .select('name, quantity')
+      .eq('id', id)
+      .single();
+    
+    if (fetchErr) throw fetchErr;
+
+    // 2. Update product info
     const { error } = await supabase
       .from('products')
-      .update(updates)
+      .update({ ...productData, quantity: parseInt(quantity) })
       .eq('id', id);
     if (error) throw error;
+
+    // 3. Sync Inventory Units if quantity changed
+    const newQty = parseInt(quantity);
+    const oldQty = current.quantity || 0;
+
+    if (newQty > oldQty) {
+      // Add more units
+      const unitsToAdd = [];
+      for (let i = oldQty + 1; i <= newQty; i++) {
+        unitsToAdd.push({
+          product_id: id,
+          serial_number: `${current.name} #${i}`,
+          status: 'Available'
+        });
+      }
+      await supabase.from('inventory_units').insert(unitsToAdd);
+    } else if (newQty < oldQty) {
+      // Remove units (prioritize those without bookings if possible, but for now just simple removal)
+      // Get all units for this product
+      const { data: units } = await supabase
+        .from('inventory_units')
+        .select('id')
+        .eq('product_id', id)
+        .order('created_at', { ascending: false });
+
+      if (units && units.length > (oldQty - newQty)) {
+        const idsToRemove = units.slice(0, oldQty - newQty).map(u => u.id);
+        await supabase.from('inventory_units').delete().in('id', idsToRemove);
+      }
+    }
   },
 
   async deleteProduct(id) {
@@ -819,7 +908,9 @@ export const adminService = {
       const config = await this.getEmailSettings();
       
       const format = (d) => {
+        if (!d) return 'Chưa rõ';
         const date = new Date(d);
+        if (isNaN(date.getTime())) return 'Chưa rõ';
         return date.toLocaleString('vi-VN', { 
             hour: '2-digit', 
             minute: '2-digit', 
@@ -830,13 +921,19 @@ export const adminService = {
         });
       };
 
-      // Generate HTML rows for price breakdown
-      const breakdownHtml = breakdown.map(item => `
-        <tr>
-          <td style="color: #4a5568; padding: 5px 0;">${item.label}:</td>
-          <td style="text-align: right; color: #1a202c; font-weight: 500;">${item.value} VNĐ</td>
-        </tr>
-      `).join('');
+      // Initialize EmailJS once at the start
+      emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
+
+      // Generate both a raw array (for loops) and a pre-formatted string (for backup)
+      const breakdownData = (breakdown || []).map(item => ({
+        label: item.label,
+        value: item.value
+      }));
+
+      // Generate HTML rows - FLAT STRING (no newlines) to prevent EmailJS corruption
+      const priceTableHtml = (breakdown || []).length > 0 
+        ? breakdown.map(item => `<tr><td style="color: #4a5568; padding: 5px 0;">${item.label}:</td><td style="text-align: right; color: #1a202c; font-weight: 500;">${item.value} VNĐ</td></tr>`).join('')
+        : '<tr><td colspan="2" style="color: #718096; padding: 5px 0;">Đang tính toán...</td></tr>';
 
       // Data for both internal replacement and EmailJS
       const templateData = {
@@ -850,16 +947,19 @@ export const adminService = {
         location: bookingData.city || 'Chưa rõ',
         social: bookingData.social || 'Chưa rõ',
         rental_package: bookingData.rentalType || 'Thanh toán linh hoạt',
-        price_breakdown_rows: breakdownHtml
+        price_table: priceTableHtml,
+        price_breakdown_rows: priceTableHtml 
       };
 
-      // Initialize EmailJS
-      emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
-
       const replaceAll = (text) => {
+        if (!text) return 'ChinHaStore Notification';
         let result = text;
         Object.entries(templateData).forEach(([key, val]) => {
-          result = result.split(`{{${key}}}`).join(val);
+          if (typeof val === 'string' || typeof val === 'number') {
+            // Remove any potential hidden characters that break EmailJS
+            const safeVal = String(val).replace(/\n/g, ' ').trim();
+            result = result.split(`{{${key}}}`).join(safeVal);
+          }
         });
         return result;
       };

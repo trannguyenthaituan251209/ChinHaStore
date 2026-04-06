@@ -410,7 +410,7 @@ html, body {
     
     /* Strict Toolbar Stacking & Centering (Admin Only) */
     .admin-layout .manager-toolbar, .admin-layout .section-header {
-        flex-direction: column-reverse;
+        flex-direction: column;
         align-items: center;
         gap: 1.5rem;
         width: 100%;
@@ -434,6 +434,16 @@ html, body {
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+.new-bookings-title,
+.bookings-title{
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #989898;
+    font-family: "ShopeeDisplayR", sans-serif;
+    margin-top: 1rem;
+    
 }
 
 /* == TABLES & LISTS == */
@@ -479,6 +489,8 @@ html, body {
     font-size: 0.9rem;
     min-width: 800px;
     font-family: "ShopeeDisplayR", sans-serif;
+    background-color: #fff;
+    border: 1px solid #EEE;
 }
 
 .manager-table th {
@@ -963,6 +975,50 @@ html, body {
     color: #888;
 }
 
+.item-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.2rem;
+}
+
+.qty-badge {
+    background-color: #F0F4F8;
+    color: #5A6A85;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid #E2E8F0;
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-left: 0.6rem;
+    vertical-align: middle;
+}
+
+.status-indicator.disabled {
+    background-color: #FFF5F5;
+    color: #D32F2F;
+    border: 1px solid #FFCDD2;
+}
+
+.checkbox-label-vip:hover {
+    background-color: #F8F8F8;
+}
+
+.checkbox-label-vip input:checked {
+    accent-color: #1cc2ba;
+}
+
 .manager-subtabs {
     display: flex;
     background-color: #EEE;
@@ -987,6 +1043,70 @@ html, body {
     background-color: #000;
     color: #FFF;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tab-badge {
+    background-color: #dc3545;
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 6px;
+    font-weight: 800;
+}
+
+.verification-section {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background-color: #F0F7FF;
+    border: 1px solid #CDE2FF;
+    border-radius: 0;
+}
+
+.verification-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+    color: #0056B3;
+}
+
+.verification-header h4 {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.verification-table {
+    margin-bottom: 0 !important;
+    background-color: transparent !important;
+}
+
+.verification-table tr {
+    background-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.verification-table th {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.btn-quick-verify {
+    background-color: #0056B3;
+    color: #FFF;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 0.5rem;
+}
+
+.btn-quick-verify:hover {
+    background-color: #004494;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 86, 179, 0.2);
 }
 
 .manager-search-box {
@@ -1738,4 +1858,102 @@ html, body {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* == GLOBAL STATUS MODAL == */
+.status-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    padding: 1rem;
+}
+
+.status-modal-box {
+    background: #FFF;
+    width: 100%;
+    max-width: 360px;
+    padding: 2.5rem 2rem;
+    position: relative;
+    text-align: center;
+    border: var(--color-admin-border);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+}
+.status-modal-box.error {
+    border-top: 4px solid #dc3545;
+}
+
+.status-modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: -0.5rem;
+}
+
+.status-modal-box.success .status-modal-icon {
+    color: #1cc2ba;
+}
+
+.status-modal-box.error .status-modal-icon {
+    color: #dc3545;
+}
+
+.status-modal-content h4 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.status-modal-content p {
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.status-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    color: #999;
+    cursor: pointer;
+}
+
+.status-modal-close:hover {
+    color: #000;
+}
+
+.status-modal-btn {
+    background: #000;
+    color: #FFF;
+    border: none;
+    padding: 0.8rem 2.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    transition: all 0.2s;
+}
+
+.status-modal-box.error .status-modal-btn {
+    background: #dc3545;
+}
+
+.status-modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }

@@ -9,7 +9,10 @@ import {
   Search,
   User,
   Eye,
-  EyeOff
+  EyeOff,
+  CheckCircle,
+  AlertCircle,
+  X
 } from 'lucide-react';
 import BookingManager from '../components/admin/BookingManager';
 import DatabaseModifier from '../components/admin/DatabaseModifier';
@@ -29,6 +32,12 @@ const AdminDashboard = ({ onLogout }) => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Global Status Modal Handle
+  const [statusModal, setStatusModal] = useState({ isOpen: false, type: 'success', message: '' });
+  const showStatus = (message, type = 'success') => {
+    setStatusModal({ isOpen: true, type, message });
+  };
 
   const fetchStats = async () => {
     try {
@@ -290,11 +299,32 @@ const AdminDashboard = ({ onLogout }) => {
 
         <main className="admin-content">
           {activeTab === 'dashboard' && renderDashboard()}
-          {activeTab === 'manager' && <BookingManager />}
-          {activeTab === 'modify' && <DatabaseModifier />}
-          {activeTab === 'report' && <ReportCenter />}
+          {activeTab === 'manager' && <BookingManager showStatus={showStatus} />}
+          {activeTab === 'modify' && <DatabaseModifier showStatus={showStatus} />}
+          {activeTab === 'report' && <ReportCenter showStatus={showStatus} />}
         </main>
       </div>
+
+      {/* Global Status Modal */}
+      {statusModal.isOpen && (
+        <div className="status-modal-overlay">
+          <div className={`status-modal-box animate-in ${statusModal.type}`}>
+            <div className="status-modal-icon">
+              {statusModal.type === 'success' ? <CheckCircle size={32} /> : <AlertCircle size={32} />}
+            </div>
+            <div className="status-modal-content">
+              <h4>{statusModal.type === 'success' ? 'Thành công' : 'Thông báo lỗi'}</h4>
+              <p>{statusModal.message}</p>
+            </div>
+            <button className="status-modal-close" onClick={() => setStatusModal({ ...statusModal, isOpen: false })}>
+              <X size={20} />
+            </button>
+            <button className="status-modal-btn" onClick={() => setStatusModal({ ...statusModal, isOpen: false })}>
+              Đóng
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Nav Mobile */}
       <nav className="mobile-nav">

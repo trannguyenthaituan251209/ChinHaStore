@@ -11,7 +11,7 @@ import {
 import { adminService } from '../../services/adminService';
 import '../../pages/AdminDashboard.css';
 
-const BookingManager = () => {
+const BookingManager = ({ showStatus }) => {
   const [activeSubtab, setActiveSubtab] = useState('renting'); // 'renting', 'future', 'past', 'bills'
   const [searchQuery, setSearchQuery] = useState('');
   const [data, setData] = useState([]);
@@ -114,6 +114,31 @@ const BookingManager = () => {
     return matchesSearch && matchesTab && matchesDevice && matchesSource && matchesStatus;
   });
 
+  const pendingWebsiteBookings = data.filter(b => b.source === 'Website' && !b.is_seen);
+  
+  // The main table should only show acknowledged bookings or non-website bookings
+  const mainListData = filteredData.filter(b => b.is_seen || b.source !== 'Website');
+
+  const handleMarkAsSeen = async (id) => {
+    try {
+      await adminService.markBookingAsSeen(id);
+      showStatus('Đã đánh dấu xem đơn hàng', 'success');
+      reloadBookings();
+    } catch (err) {
+      showStatus('Lỗi khi đánh dấu đã xem: ' + err.message, 'error');
+    }
+  };
+
+  const handleQuickVerify = async (id) => {
+    try {
+      await adminService.updateBookingStatus(id, 'Confirmed');
+      showStatus('Đã xác nhận đơn hàng thành công', 'success');
+      reloadBookings();
+    } catch (err) {
+      showStatus('Lỗi khi xác nhận đơn: ' + err.message, 'error');
+    }
+  };
+
   const resetFilters = () => {
     setFilterDevice('all');
     setFilterSource('all');
@@ -151,9 +176,10 @@ const BookingManager = () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa đơn đặt lịch này?')) {
       try {
         await adminService.deleteBooking(id);
+        showStatus('Đã xóa đơn đặt lịch', 'success');
         reloadBookings();
       } catch (err) {
-        alert('Lỗi khi xóa: ' + err.message);
+        showStatus('Lỗi khi xóa: ' + err.message, 'error');
       }
     }
   };
@@ -227,7 +253,7 @@ const BookingManager = () => {
 
     // Validation
     if (end < start) {
-      alert('⚠️ LỖI: Ngày kết thúc không thể trước ngày bắt đầu.');
+      showStatus('LỖI: Ngày kết thúc không thể trước ngày bắt đầu.', 'error');
       return;
     }
 
@@ -257,10 +283,11 @@ const BookingManager = () => {
         });
       }
       setIsModalOpen(false);
+      showStatus('Đã lưu thông tin đặt lịch', 'success');
       reloadBookings();
       if (activeSubtab === 'past') fetchHistoryPage(historyPage);
     } catch (err) {
-      alert('Lỗi khi lưu: ' + err.message);
+      showStatus('Lỗi khi lưu: ' + err.message, 'error');
     }
   };
 
@@ -271,7 +298,10 @@ const BookingManager = () => {
         <div className="manager-toolbar-top">
           <div className="manager-subtabs">
             <button className={activeSubtab === 'renting' ? 'active' : ''} onClick={() => { setActiveSubtab('renting'); resetFilters(); }}>Đang thuê</button>
-            <button className={activeSubtab === 'future' ? 'active' : ''} onClick={() => { setActiveSubtab('future'); resetFilters(); }}>Sắp tới</button>
+            <button className={activeSubtab === 'future' ? 'active' : ''} onClick={() => { setActiveSubtab('future'); resetFilters(); }}>
+              Sắp tới
+              {pendingWebsiteBookings.length > 0 && <span className="tab-badge">{pendingWebsiteBookings.length}</span>}
+            </button>
             <button className={activeSubtab === 'past' ? 'active' : ''} onClick={() => { setActiveSubtab('past'); resetFilters(); }}>Lịch sử</button>
             <button className={activeSubtab === 'bills' ? 'active' : ''} onClick={() => { setActiveSubtab('bills'); resetFilters(); }}>Hóa đơn</button>
           </div>
@@ -341,6 +371,58 @@ const BookingManager = () => {
         </div>
       </div>
 
+      {activeSubtab === 'future' && pendingWebsiteBookings.length > 0 && (
+        <div className="new-bookings-section animate-in">
+            <h3 className="new-bookings-title">Booking mới trong hôm nay</h3>
+            <div className="manager-table-wrapper" style={{border: 'none', background: 'transparent'}}>
+              <table className="manager-table">
+                <thead>
+                  <tr>
+                    <th>Khách hàng</th>
+                    <th>Thiết bị</th>
+                    <th>Thời gian</th>
+                    <th>Nguồn</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingWebsiteBookings.map(b => (
+                    <tr key={b.id} className="new-booking-row">
+                      <td>
+                        <strong>{b.customerName}</strong>
+                        <div style={{fontSize: '0.7rem', color: '#888'}}>{b.phone}</div>
+                      </td>
+                      <td>{b.productName}</td>
+                      <td>
+                        <div className="time-block">
+                          <span className="time-label">Nhận:</span> {b.startDate}
+                        </div>
+                        <div className="time-block">
+                          <span className="time-label">Trả:</span> {b.endDate}
+                        </div>
+                      </td>
+                      <td><span className={`source-tag ${b.source.toLowerCase()}`}>{b.source}</span></td>
+                      <td>
+                        <span className={`status-badge ${b.status.toLowerCase()}`}>
+                          Chờ xác nhận
+                        </span>
+                      </td>
+                      <td>
+                        <button className="action-btn tick" onClick={() => handleMarkAsSeen(b.id)} title="Đánh dấu đã xem">
+                          <PlusCircle size={18} style={{transform: 'rotate(45deg)', color: '#28a745'}} />
+                        </button>
+                        <button className="action-btn edit" onClick={() => handleEdit(b)} title="Sửa"><Edit3 size={16} /></button>
+                        <button className="action-btn delete" onClick={() => handleDelete(b.id)} title="Xóa"><Trash2 size={16} /></button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+      )}
+      <h3 className="bookings-title">Danh sách đặt lịch sắp tới</h3>
       <div className="manager-table-wrapper">
         {loading && <div style={{padding: '2rem', textAlign: 'center'}}>Đang tải danh sách...</div>}
         {error && <div style={{padding: '2rem', textAlign: 'center', color: 'red'}}>{error}</div>}
@@ -358,7 +440,7 @@ const BookingManager = () => {
               </tr>
             </thead>
             <tbody>
-              {(activeSubtab === 'past' ? historyData : filteredData).map(b => (
+              {(activeSubtab === 'past' ? historyData : mainListData).map(b => (
                 <tr key={b.id}>
                   <td>
                     <strong>{b.customerName}</strong>

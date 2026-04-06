@@ -57,9 +57,15 @@ const BookingPage = () => {
     const fetchProducts = async () => {
       try {
         const data = await adminService.getAllProducts();
-        setProductList(data);
-        if (!selectedCamera && data.length > 0) {
-          setSelectedCamera(initialId || data[0].id);
+        const activeProducts = data.filter(p => p.status === 'active');
+        setProductList(activeProducts);
+        
+        // Ensure starting product is active
+        if (!selectedCamera && activeProducts.length > 0) {
+          setSelectedCamera(initialId || activeProducts[0].id);
+        } else if (selectedCamera && !activeProducts.some(p => p.id === selectedCamera)) {
+          // If a direct link target is disabled, reset to first active
+          setSelectedCamera(activeProducts[0]?.id || '');
         }
       } catch (err) {
         console.error('Error fetching products:', err);

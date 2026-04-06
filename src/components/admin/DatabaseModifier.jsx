@@ -18,7 +18,7 @@ import Papa from 'papaparse';
 import { adminService } from '../../services/adminService';
 import '../../pages/AdminDashboard.css';
 
-const DatabaseModifier = () => {
+const DatabaseModifier = ({ showStatus }) => {
   const [activeTab, setActiveTab] = useState('camera'); // 'camera', 'customer', 'booking'
   const [data, setData] = useState({ cameras: [], customers: [], bookings: [] });
   const [loading, setLoading] = useState(true);
@@ -39,7 +39,9 @@ const DatabaseModifier = () => {
     price_1day: '',
     price_2days: '',
     price_3days: '',
-    price_4days_plus: ''
+    price_4days_plus: '',
+    quantity: 1,
+    status: 'active'
   });
 
   // Import States
@@ -76,11 +78,12 @@ const DatabaseModifier = () => {
       if (type === 'customer') await adminService.deleteCustomer(id);
       if (type === 'booking') await adminService.deleteBooking(id);
       fetchData();
+      showStatus('Đã xóa dữ liệu thành công', 'success');
     } catch (err) {
       if (err.message.includes('violates foreign key constraint')) {
-        alert('⚠️ Không thể xóa vĩnh viễn: Mục này đang có dữ liệu trong lịch sử thuê. Bạn nên dùng chức năng "Lưu trữ" thay vì Xóa.');
+        showStatus('⚠️ Không thể xóa vĩnh viễn: Mục này đang có dữ liệu trong lịch sử thuê. Bạn nên dùng chức năng "Lưu trữ" thay vì Xóa.', 'error');
       } else {
-        alert('Lỗi khi xóa: ' + err.message);
+        showStatus('Lỗi khi xóa: ' + err.message, 'error');
       }
     }
   };
@@ -90,8 +93,9 @@ const DatabaseModifier = () => {
     try {
       await adminService.updateProductStatus(id, newStatus);
       fetchData();
+      showStatus('Đã thay đổi trạng thái thành công', 'success');
     } catch (err) {
-      alert('Lỗi khi thay đổi trạng thái: ' + err.message);
+      showStatus('Lỗi khi thay đổi trạng thái: ' + err.message, 'error');
     }
   };
 
@@ -106,7 +110,9 @@ const DatabaseModifier = () => {
         price_1day: item.price_1day || '0',
         price_2days: item.price_2days || '0',
         price_3days: item.price_3days || '0',
-        price_4days_plus: item.price_4days_plus || '0'
+        price_4days_plus: item.price_4days_plus || '0',
+        quantity: item.quantity || 1,
+        status: item.status || 'active'
       });
     }
     setModalType(type);
@@ -123,7 +129,9 @@ const DatabaseModifier = () => {
         price_1day: '0',
         price_2days: '0',
         price_3days: '0',
-        price_4days_plus: '0'
+        price_4days_plus: '0',
+        quantity: 1,
+        status: 'active'
       });
     }
     setModalType(type);
@@ -140,8 +148,9 @@ const DatabaseModifier = () => {
       }
       setModalType(null);
       fetchData();
+      showStatus('Đã lưu dữ liệu sản phẩm', 'success');
     } catch (err) {
-      alert('Lỗi khi lưu sản phẩm: ' + err.message);
+      showStatus('Lỗi khi lưu sản phẩm: ' + err.message, 'error');
     } finally {
       setIsSaving(false);
     }
@@ -154,8 +163,15 @@ const DatabaseModifier = () => {
         {p.image_url && <img src={p.image_url} alt="" />}
       </div>
       <div className="item-details" style={{flex: 1}}>
-        <strong>{p.name} {p.status === 'archived' && <small>(Đã ẩn)</small>}</strong>
-        <span>{new Intl.NumberFormat('vi-VN').format(p.price_1day)} VNĐ/Ngày</span>
+        <strong>
+          {p.name} 
+          {p.status === 'archived' && <small>(Đã ẩn)</small>}
+          {p.status === 'disabled' && <span className="status-indicator disabled">Vô hiệu hóa</span>}
+        </strong>
+        <div className="item-meta">
+          <span>{new Intl.NumberFormat('vi-VN').format(p.price_1day)} VNĐ/Ngày</span>
+          <span className="qty-badge">Sẵn có: {p.quantity}</span>
+        </div>
       </div>
       <div className="item-actions">
         <button className="action-btn archive" onClick={() => handleToggleArchive(p.id, p.status)} title={p.status === 'archived' ? 'Khôi phục' : 'Lưu trữ'}>
@@ -451,6 +467,29 @@ const DatabaseModifier = () => {
                     value={productForm.image_url}
                     onChange={e => setProductForm({...productForm, image_url: e.target.value})}
                   />
+                </div>
+
+                <div className="form-group">
+                  <label>Số lượng máy</label>
+                  <input 
+                    type="number" 
+                    min="1"
+                    required
+                    value={productForm.quantity}
+                    onChange={e => setProductForm({...productForm, quantity: e.target.value})}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="checkbox-label-vip" style={{display: 'flex', gap: '0.8rem', alignItems: 'center', cursor: 'pointer', marginTop: '0.5rem', fontWeight: '700', fontSize: '0.85rem'}}>
+                    <input 
+                      type="checkbox" 
+                      style={{width: '20px', height: '20px'}}
+                      checked={productForm.status === 'active'}
+                      onChange={e => setProductForm({...productForm, status: e.target.checked ? 'active' : 'disabled'})}
+                    />
+                    Cho phép thuê trên Website
+                  </label>
                 </div>
                 
                 <h4 className="span-all" style={{marginTop: '0.5rem', opacity: 0.8, fontSize: '0.9rem'}}>BẢNG GIÁ (VNĐ)</h4>
