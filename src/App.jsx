@@ -73,7 +73,7 @@ const RestrictedAccessWarning = () => {
       alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffffff', color: '#0f0',
       fontFamily: 'monospace', textAlign: 'center', padding: '2rem'
     }}>
-      <img src="public/assets/image/restricted.png" alt="restricted" style={{ height: '120px', margin: '0 0 15px 0' }}></img>
+      <img src="https://i.ibb.co/6RQ6McRD/restricted.png" alt="restricted" style={{ height: '120px', margin: '0 0 15px 0' }}></img>
       <h1 style={{ color: '#000000ff', fontSize: '3rem', margin: '0 0 1rem 0',fontFamily:"ShopeeDisplayB" }}>TRUY CẬP BỊ TỪ CHỐI</h1>
       <p style={{ fontSize: '1.2rem', maxWidth: '600px', lineHeight: 1.6, color: '#000000ff',fontFamily:"ShopeeDisplayR" }}>
         Khu vực chỉ dành cho quản trị viên của ChinHaStore và đội ngũ kỹ thuật. Xin vui lòng đừng cố gắng xâm nhập trái phép. Chúng tôi đã ghi lại lưu lượng truy cập này và theo dõi
