@@ -10,12 +10,12 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
+import { supabase } from '../../utils/supabase';
 import html2canvas from 'html2canvas';
 import '../../pages/AdminDashboard.css';
 
-const BookingManager = ({ showStatus }) => {
+const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [activeSubtab, setActiveSubtab] = useState('renting'); // 'renting', 'future', 'past', 'bills'
-  const [searchQuery, setSearchQuery] = useState('');
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,6 +28,7 @@ const BookingManager = ({ showStatus }) => {
   const [conflictError, setConflictError] = useState(null);
   const [conflicts, setConflicts] = useState([]);
   const [isChecking, setIsChecking] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Filter Categories
   const [filterDevice, setFilterDevice] = useState('all');
@@ -65,7 +66,20 @@ const BookingManager = ({ showStatus }) => {
 
   React.useEffect(() => {
     reloadBookings();
-  }, []);
+    
+    // Real-time synchronization
+    const channel = supabase
+      .channel('booking_manager_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+        reloadBookings();
+        if (activeSubtab === 'past') fetchHistoryPage(historyPage);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeSubtab, historyPage]);
 
   // Specialized History Fetcher (Server-side)
   const fetchHistoryPage = async (page) => {
@@ -297,6 +311,7 @@ const BookingManager = ({ showStatus }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
 
     const start = new Date(formData.start_time);
     const end = new Date(formData.end_time);
@@ -307,6 +322,7 @@ const BookingManager = ({ showStatus }) => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       // 1. Ensure customer identity is resolved/updated
       const customerId = await adminService.getOrCreateCustomer({
@@ -338,6 +354,8 @@ const BookingManager = ({ showStatus }) => {
       if (activeSubtab === 'past') fetchHistoryPage(historyPage);
     } catch (err) {
       showStatus('Lỗi khi lưu: ' + err.message, 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -385,6 +403,10 @@ const BookingManager = ({ showStatus }) => {
               const startStr = `${d1.getFullYear()}-${pad(d1.getMonth()+1)}-${pad(d1.getDate())}T07:00`;
               const endStr = `${d2.getFullYear()}-${pad(d2.getMonth()+1)}-${pad(d2.getDate())}T07:00`;
               
+              // If start_time is in the past, default to "Returned" (Đã trả máy)
+              const isPast = d1 < new Date();
+              const defaultStatus = isPast ? 'Returned' : 'Pending';
+
               setFormData({ 
                 customerName: '', 
                 phone: '', 
@@ -392,7 +414,7 @@ const BookingManager = ({ showStatus }) => {
                 start_time: startStr, 
                 end_time: endStr, 
                 total_price: '0', 
-                status: 'Pending' 
+                status: defaultStatus 
               }); 
               setIsModalOpen(true); 
             }}>
@@ -738,13 +760,24 @@ const BookingManager = ({ showStatus }) => {
                     onChange={e => {
                       const newStart = e.target.value;
                       let newEnd = formData.end_time;
+                      let newStatus = formData.status;
+                      
                       if (newStart) {
                         const d = new Date(newStart);
+                        const now = new Date();
+                        
+                        // Auto-Status Logic
+                        if (d < now) {
+                          newStatus = 'Returned';
+                        }
+                        
                         d.setDate(d.getDate() + 1);
                         const pad = (n) => n.toString().padStart(2, '0');
                         newEnd = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                        setFormData({...formData, start_time: newStart, end_time: newEnd, status: newStatus});
+                      } else {
+                        setFormData({...formData, start_time: newStart});
                       }
-                      setFormData({...formData, start_time: newStart, end_time: newEnd});
                     }}
                     required 
                   />
@@ -807,8 +840,8 @@ const BookingManager = ({ showStatus }) => {
                     Chốt lịch
                   </button>
                 )}
-                <button type="submit" className="btn-save" disabled={!!conflictError || isChecking}>
-                  {isChecking ? 'Đang kiểm tra...' : 'Xác nhận'}
+                <button type="submit" className="btn-save" disabled={!!conflictError || isChecking || isSubmitting}>
+                  {isSubmitting ? 'Đang lưu...' : isChecking ? 'Đang kiểm tra...' : 'Xác nhận'}
                 </button>
               </div>
             </form>

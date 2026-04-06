@@ -24,6 +24,7 @@ import './AdminDashboard.css';
 const AdminDashboard = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'manager', 'modify', 'report'
   const [showRevenue, setShowRevenue] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -242,7 +243,12 @@ const AdminDashboard = ({ onLogout }) => {
         <header className="admin-header">
           <div className="header-search">
             <Search size={18} />
-            <input type="text" placeholder="Tìm kiếm nhanh..." />
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm nhanh..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
           <div className="header-actions">
             {/* Diagnostic Ping for testing Real-time */}
@@ -312,7 +318,7 @@ const AdminDashboard = ({ onLogout }) => {
 
         <main className="admin-content">
           {activeTab === 'dashboard' && renderDashboard()}
-          {activeTab === 'manager' && <BookingManager showStatus={showStatus} />}
+          {activeTab === 'manager' && <BookingManager showStatus={showStatus} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />}
           {activeTab === 'modify' && <DatabaseModifier showStatus={showStatus} />}
           {activeTab === 'report' && <ReportCenter showStatus={showStatus} />}
         </main>
