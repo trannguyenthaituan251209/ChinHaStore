@@ -88,7 +88,7 @@ export const adminService = {
       .select(`
         *,
         customers (full_name, phone),
-        products (name),
+        products (name, image_url),
         inventory_units (serial_number)
       `)
       .order('start_time', { ascending: false });
@@ -114,6 +114,7 @@ export const adminService = {
         customerName: b.customers?.full_name || 'Khách lẻ',
         phone: b.customers?.phone || '',
         productName: b.products?.name || 'Sản phẩm',
+        productImage: b.products?.image_url || null,
         unitName: b.inventory_units?.serial_number || 'N/A',
         startDate: format(start),
         endDate: format(end),

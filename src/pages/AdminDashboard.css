@@ -1957,3 +1957,157 @@ html, body {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
+
+/* BILL INVOICE V2 STYLES */
+.bill-invoice-v2 {
+    background: #ffffff;
+    color: #000;
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+    border: 1px solid #ddd;
+    margin-bottom: 1.5rem;
+}
+
+.bill-v2-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.bill-v2-header h2 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0 0 0.5rem 0;
+    text-transform: uppercase;
+}
+
+.bill-v2-header p {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.bill-v2-divider {
+    border: none;
+    border-top: 1px solid #000;
+    margin: 1rem 0;
+}
+
+.bill-v2-product-section {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: flex-start;
+}
+
+.bill-v2-product-image {
+    width: 120px;
+    height: 140px;
+    border: 2px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.image-placeholder {
+    font-size: 0.75rem;
+    color: #666;
+    text-align: center;
+}
+
+.bill-v2-product-info {
+    flex: 1;
+}
+
+.camera-name {
+    font-size: 1rem;
+    font-weight: normal;
+    margin: 0 0 1rem 0;
+}
+
+.bill-v2-dates {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.date-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.5rem;
+    flex: 1;
+}
+
+.date-box.border-purple {
+    border: 2px solid #8e44ad;
+}
+
+.date-box span {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.date-box strong {
+    font-size: 0.9rem;
+}
+
+.bill-v2-customer-section p {
+    font-size: 0.95rem;
+    margin: 0.4rem 0;
+    text-transform: uppercase;
+}
+
+.bill-v2-details-section {
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.details-title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.bill-v2-details-section p {
+    margin: 0.2rem 0;
+}
+
+.bill-v2-total-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3rem;
+    font-size: 0.95rem;
+}
+
+.total-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.main-total {
+    font-weight: bold;
+    font-size: 1.05rem;
+    margin-top: 0.3rem;
+}
+
+.bill-v2-qr-section {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.qr-img {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+}
+
+.bill-v2-qr-section p {
+    margin: 0.2rem 0;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+

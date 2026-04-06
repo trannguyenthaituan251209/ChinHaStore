@@ -10,6 +10,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
+import html2canvas from 'html2canvas';
 import '../../pages/AdminDashboard.css';
 
 const BookingManager = ({ showStatus }) => {
@@ -20,6 +21,8 @@ const BookingManager = ({ showStatus }) => {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBillOpen, setIsBillOpen] = useState(false);
+  const [depositProperty, setDepositProperty] = useState('CĂN CƯỚC CÔNG DÂN');
+  const [discountAmount, setDiscountAmount] = useState('0');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [productList, setProductList] = useState([]);
   const [conflictError, setConflictError] = useState(null);
@@ -151,7 +154,30 @@ const BookingManager = ({ showStatus }) => {
 
   const handleBillView = (booking) => {
     setSelectedBooking(booking);
+    setDiscountAmount('0');
     setIsBillOpen(true);
+  };
+
+  const handleDownloadBill = async () => {
+    const invoiceElement = document.querySelector('.bill-invoice-v2');
+    if (!invoiceElement) return;
+
+    try {
+      showStatus('Đang tạo ảnh hóa đơn...', 'success');
+      const canvas = await html2canvas(invoiceElement, {
+        scale: 2, 
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        allowTaint: true
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `Hoa_Don_${selectedBooking?.id?.slice(0, 8)}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      showStatus('Lỗi khi xuất hóa đơn: ' + err.message, 'error');
+    }
   };
 
   const handleEdit = (booking) => {
@@ -520,29 +546,111 @@ const BookingManager = ({ showStatus }) => {
 
       {/* Bill Modal */}
       {isBillOpen && selectedBooking && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal animate-in" style={{maxWidth: '400px'}}>
-            <header className="modal-header">
+        (() => {
+          let subTotalNum = 0;
+          let finalTotalNum = 0;
+          if (selectedBooking && selectedBooking.totalPrice) {
+            subTotalNum = Number(selectedBooking.totalPrice.replace(/\D/g, ''));
+            const discountNum = Number(discountAmount.replace(/\D/g, '')) || 0;
+            finalTotalNum = subTotalNum - discountNum;
+          }
+          const finalTotalStr = new Intl.NumberFormat('vi-VN').format(finalTotalNum);
+
+          return (
+            <div className="admin-modal-overlay">
+              <div className="admin-modal animate-in" style={{maxWidth: '500px', width: '95%'}}>
+                <header className="modal-header">
               <h3>Xuất hóa đơn</h3>
               <button className="close-btn" onClick={() => setIsBillOpen(false)}>×</button>
             </header>
-            <div className="bill-invoice">
-              <div className="bill-header">
-                <h3>CHIN HA STORE</h3>
-                <p>Mã hóa đơn: {selectedBooking.id}</p>
+
+            <div style={{ overflowY: 'auto', padding: '1.5rem', flex: 1, backgroundColor: '#f5f5f5' }}>
+                <div style={{display: 'flex', gap: '1rem'}}>
+                  <div style={{flex: 1}}>
+                    <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TÀI SẢN CỌC:</label>
+                    <input type="text" value={depositProperty} onChange={e => setDepositProperty(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px'}} />
+                  </div>
+                  <div style={{flex: 1}}>
+                    <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>GIẢM GIÁ (VNĐ):</label>
+                    <input type="text" value={discountAmount} onChange={e => setDiscountAmount(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px'}} />
+                  </div>
+                </div>
+
+              <div className="bill-invoice-v2">
+              <div className="bill-v2-header">
+                <h2>CHIN HA STORE</h2>
+                <p>MÃ HỢP ĐỒNG: {selectedBooking.id.toUpperCase()}</p>
               </div>
-              <div className="bill-body">
-                <div className="bill-row"><span>Khách hàng:</span> <strong>{selectedBooking.customerName}</strong></div>
-                <div className="bill-row"><span>SĐT:</span> <strong>{selectedBooking.phone}</strong></div>
-                <div className="bill-row"><span>Thiết bị:</span> <strong>{selectedBooking.productName}</strong></div>
-                <div className="bill-row"><span>Bắt đầu:</span> <strong>{selectedBooking.startDate}</strong></div>
-                <div className="bill-row"><span>Kết thúc:</span> <strong>{selectedBooking.endDate}</strong></div>
-                <div className="bill-total"><span>Thành tiền:</span> <strong>{selectedBooking.totalPrice} VNĐ</strong></div>
+              
+              <hr className="bill-v2-divider" />
+              
+              <div className="bill-v2-product-section">
+                <div className="bill-v2-product-image">
+                  {selectedBooking.productImage ? (
+                    <img src={selectedBooking.productImage} alt="Product" style={{width: '100%', height: '100%', objectFit: 'cover'}} crossOrigin="anonymous" />
+                  ) : (
+                    <div className="image-placeholder">ẢNH SẢN PHẨM</div>
+                  )}
+                </div>
+                <div className="bill-v2-product-info">
+                  <h4 className="camera-name">TÊN MÁY ẢNH: {selectedBooking.productName.toUpperCase()}</h4>
+                  <div className="bill-v2-dates">
+                    <div className="date-box border-purple">
+                      <span>NGÀY NHẬN</span>
+                      <strong>{selectedBooking.startDate}</strong>
+                    </div>
+                    <div className="date-box">
+                      <span>NGÀY TRẢ</span>
+                      <strong>{selectedBooking.endDate}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bill-v2-customer-section">
+                <p>TÊN KHÁCH HÀNG: {selectedBooking.customerName.toUpperCase()}</p>
+                <p>SĐT: {selectedBooking.phone}</p>
+                <p>TÀI SẢN CỌC: {depositProperty.toUpperCase()}</p>
+              </div>
+              
+              <hr className="bill-v2-divider" />
+              
+              <div className="bill-v2-details-section">
+                <p className="details-title">CHI TIẾT</p>
+                <p>THỜI GIAN ĐẶT: {selectedBooking.startDate} đến {selectedBooking.endDate}</p>
+                <p>PHÂN LOẠI THUÊ: {selectedBooking.rentalType === 'Manual' ? 'Đặt trực tiếp' : 'Qua Website'}</p>
+              </div>
+
+              <hr className="bill-v2-divider" />
+              
+              <div className="bill-v2-total-section">
+                <div className="total-row"><span>TẠM TÍNH:</span> <span>{selectedBooking.totalPrice} VNĐ</span></div>
+                <div className="total-row"><span>GIẢM GIÁ:</span> <span>{new Intl.NumberFormat('vi-VN').format(Number(discountAmount.replace(/\D/g, '')) || 0)} VNĐ</span></div>
+                <div className="total-row main-total"><span>TỔNG CỘNG:</span> <span>{finalTotalStr} VNĐ</span></div>
+              </div>
+              
+              <div className="bill-v2-qr-section" style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                <img 
+                  src={`https://img.vietqr.io/image/seabank-0364344419-compact2.jpg?amount=${finalTotalNum}&addInfo=${selectedBooking.id.slice(0, 8)}`} 
+                  alt="QR Code" 
+                  className="qr-img" 
+                  crossOrigin="anonymous" 
+                />
+                <p>SEABANK</p>
+                <p>MAN HI CHIN</p>
+              </div>
               </div>
             </div>
-            <button className="btn-download-bill" onClick={handleDownloadBill}>Tải xuống dạng ảnh</button>
+
+            <div style={{ padding: '1rem', background: '#fff', borderTop: '1px solid #ddd' }}>
+              <button className="btn-download-bill" style={{ width: '100%', margin: 0, padding: '1rem' }} onClick={handleDownloadBill}>
+                TẢI XUỐNG ẢNH HÓA ĐƠN
+              </button>
+            </div>
           </div>
         </div>
+        );
+        })()
       )}
 
       {/* Add/Edit Modal */}
