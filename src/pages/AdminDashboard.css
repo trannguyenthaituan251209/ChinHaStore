@@ -454,33 +454,26 @@ html, body {
     border: var(--color-admin-border);
 }
 
-/* Booking Status Badges */
-.status-badge {
-    padding: 0.3rem 0.8rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    display: inline-block;
-    font-family: "ShopeeDisplayR", sans-serif;
+/* Booking Status Text - Color Only */
+.status-text {
+    font-size: 0.85rem;
+    font-weight: 700;
 }
 
-.status-badge.pending {
-    background-color: #c97514;
-    color: #ffffff;
+.status-text.pending {
+    color: #e67e22; /* Orange for clarity */
 }
 
-.status-badge.confirmed {
-    background-color: #1cc2ba;
-    color: #ffffff;
+.status-text.confirmed {
+    color: #2980b9; /* Professional Blue */
 }
 
-.status-badge.returned {
-    background-color: #25cb33;
-    color: #ffffff;
+.status-text.returned {
+    color: #27ae60; /* Success Green */
 }
 
-.status-badge.cancelled {
-    background-color: #ffffff;
-    color: #bd1830;
+.status-text.cancelled {
+    color: #c0392b; /* Alert Red */
 }
 
 .manager-table {

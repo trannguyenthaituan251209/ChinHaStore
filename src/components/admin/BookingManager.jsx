@@ -496,7 +496,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       <td><span style={{fontSize: '0.85rem', color: '#666', fontWeight: 600}}>{getTimeAgo(b.created_at)}</span></td>
                       <td><span className={`source-tag ${b.source.toLowerCase()}`}>{b.source}</span></td>
                       <td>
-                        <span className={`status-badge ${b.status.toLowerCase()}`}>
+                        <span className="status-text pending">
                           Chờ xác nhận
                         </span>
                       </td>
@@ -554,7 +554,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                   <td><span style={{fontSize: '0.85rem', color: '#666', fontWeight: 600}}>{getTimeAgo(b.created_at)}</span></td>
                   <td><span className={`source-tag ${b.source.toLowerCase()}`}>{b.source}</span></td>
                   <td>
-                    <span className={`status-badge ${b.status.toLowerCase()}`}>
+                    <span className={`status-text ${b.status.toLowerCase()}`}>
                       {b.status === 'Pending' ? 'Chờ xác nhận' :
                        b.status === 'Confirmed' ? 'Đã chốt lịch' :
                        b.status === 'Returned' ? 'Đã trả máy' :
