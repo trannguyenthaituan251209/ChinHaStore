@@ -6,7 +6,8 @@ import {
   Trash2, 
   FileText,
   Clock,
-  RefreshCcw
+  RefreshCcw,
+  CheckCircle
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import '../../pages/AdminDashboard.css';
@@ -114,10 +115,10 @@ const BookingManager = ({ showStatus }) => {
     return matchesSearch && matchesTab && matchesDevice && matchesSource && matchesStatus;
   });
 
-  const pendingWebsiteBookings = data.filter(b => b.source === 'Website' && !b.is_seen);
+  const pendingWebsiteBookings = data.filter(b => b.source === 'Website' && !b.is_seen && b.status === 'Pending');
   
-  // The main table should only show acknowledged bookings or non-website bookings
-  const mainListData = filteredData.filter(b => b.is_seen || b.source !== 'Website');
+  // The main table should only show acknowledged bookings, non-website bookings, or already processed bookings
+  const mainListData = filteredData.filter(b => b.is_seen || b.source !== 'Website' || b.status !== 'Pending');
 
   const handleMarkAsSeen = async (id) => {
     try {
@@ -129,21 +130,23 @@ const BookingManager = ({ showStatus }) => {
     }
   };
 
-  const handleQuickVerify = async (id) => {
-    try {
-      await adminService.updateBookingStatus(id, 'Confirmed');
-      showStatus('Đã xác nhận đơn hàng thành công', 'success');
-      reloadBookings();
-    } catch (err) {
-      showStatus('Lỗi khi xác nhận đơn: ' + err.message, 'error');
-    }
-  };
-
   const resetFilters = () => {
     setFilterDevice('all');
     setFilterSource('all');
     setFilterStatus('all');
     setSearchQuery('');
+  };
+
+  const getTimeAgo = (dateStr) => {
+    if (!dateStr) return '';
+    const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+    if (diff < 60) return 'Vừa xong';
+    const mins = Math.floor(diff / 60);
+    if (mins < 60) return `${mins} phút trước`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `Khoảng ${hours} giờ trước`;
+    const days = Math.floor(hours / 24);
+    return `Khoảng ${days} ngày trước`;
   };
 
   const handleBillView = (booking) => {
@@ -381,6 +384,7 @@ const BookingManager = ({ showStatus }) => {
                     <th>Khách hàng</th>
                     <th>Thiết bị</th>
                     <th>Thời gian</th>
+                    <th>Tạo lúc</th>
                     <th>Nguồn</th>
                     <th>Trạng thái</th>
                     <th>Thao tác</th>
@@ -402,6 +406,7 @@ const BookingManager = ({ showStatus }) => {
                           <span className="time-label">Trả:</span> {b.endDate}
                         </div>
                       </td>
+                      <td><span style={{fontSize: '0.85rem', color: '#666', fontWeight: 600}}>{getTimeAgo(b.created_at)}</span></td>
                       <td><span className={`source-tag ${b.source.toLowerCase()}`}>{b.source}</span></td>
                       <td>
                         <span className={`status-badge ${b.status.toLowerCase()}`}>
@@ -410,7 +415,7 @@ const BookingManager = ({ showStatus }) => {
                       </td>
                       <td>
                         <button className="action-btn tick" onClick={() => handleMarkAsSeen(b.id)} title="Đánh dấu đã xem">
-                          <PlusCircle size={18} style={{transform: 'rotate(45deg)', color: '#28a745'}} />
+                          <CheckCircle size={18} style={{color: '#28a745'}} />
                         </button>
                         <button className="action-btn edit" onClick={() => handleEdit(b)} title="Sửa"><Edit3 size={16} /></button>
                         <button className="action-btn delete" onClick={() => handleDelete(b.id)} title="Xóa"><Trash2 size={16} /></button>
@@ -434,6 +439,7 @@ const BookingManager = ({ showStatus }) => {
                 <th>Khách hàng</th>
                 <th>Thiết bị</th>
                 <th>Thời gian</th>
+                <th>Tạo lúc</th>
                 <th>Nguồn</th>
                 <th>Trạng thái</th>
                 <th>Thao tác</th>
@@ -456,6 +462,7 @@ const BookingManager = ({ showStatus }) => {
                     </div>
                     <div style={{fontSize: '0.7rem', color: '#999', marginTop: '4px'}}>Mã: {b.id}</div>
                   </td>
+                  <td><span style={{fontSize: '0.85rem', color: '#666', fontWeight: 600}}>{getTimeAgo(b.created_at)}</span></td>
                   <td><span className={`source-tag ${b.source.toLowerCase()}`}>{b.source}</span></td>
                   <td>
                     <span className={`status-badge ${b.status.toLowerCase()}`}>

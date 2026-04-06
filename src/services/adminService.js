@@ -126,7 +126,8 @@ export const adminService = {
         customer_id: b.customer_id,
         product_id: b.product_id,
         unit_id: b.unit_id,
-        is_seen: b.is_seen
+        is_seen: b.is_seen,
+        created_at: b.created_at
       };
     });
   },
@@ -495,7 +496,7 @@ export const adminService = {
       return `${ts}${hasSeconds ? '' : ':00'}+07:00`;
     };
 
-    const finalUpdates = { ...updates };
+    const finalUpdates = { ...updates, is_seen: true };
     if (finalUpdates.start_time) finalUpdates.start_time = formatTimestamp(finalUpdates.start_time);
     if (finalUpdates.end_time) finalUpdates.end_time = formatTimestamp(finalUpdates.end_time);
 
@@ -512,7 +513,7 @@ export const adminService = {
   async updateBookingStatus(id, status) {
     const { error } = await supabase
       .from('bookings')
-      .update({ status })
+      .update({ status, is_seen: true })
       .eq('id', id);
     if (error) throw error;
   },
