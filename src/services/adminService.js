@@ -666,6 +666,63 @@ export const adminService = {
   /**
    * Reporting Metrics fetcher.
    */
+  async getRevenueByDateRange(startDateStr, endDateStr) {
+    const start = new Date(startDateStr);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(endDateStr || startDateStr);
+    end.setHours(23, 59, 59, 999);
+
+    const { data: bookings, error } = await supabase
+      .from("bookings")
+      .select(`
+        total_price, 
+        status,
+        start_time,
+        products (name),
+        customers (full_name)
+      `)
+      .gte("start_time", start.toISOString())
+      .lte("start_time", end.toISOString())
+      .not("status", "eq", "Cancelled");
+
+    if (error) throw error;
+
+    const stats = {
+      totalRevenue: 0,
+      performance: {}, // name -> { count, revenue }
+      bookings: []     // [{ customer, product, price }]
+    };
+
+    (bookings || []).forEach(b => {
+      const price = Number(b.total_price) || 0;
+      const pName = b.products?.name || "Máy khác";
+      const cName = b.customers?.full_name || "Khách lẻ";
+
+      stats.totalRevenue += price;
+
+      // Aggregated Performance
+      if (!stats.performance[pName]) {
+        stats.performance[pName] = { name: pName, count: 0, revenue: 0 };
+      }
+      stats.performance[pName].count++;
+      stats.performance[pName].revenue += price;
+
+      // Individual Bookings
+      stats.bookings.push({
+        customerName: cName,
+        productName: pName,
+        totalPrice: price,
+        date: b.start_time ? new Date(b.start_time).toLocaleDateString("vi-VN") : "N/A"
+      });
+    });
+
+    return {
+      totalRevenue: stats.totalRevenue,
+      performance: Object.values(stats.performance).sort((a, b) => b.revenue - a.revenue),
+      bookings: stats.bookings
+    };
+  },
+
   async getReportData() {
     // 1. All Bookings for aggregation
     const { data: bookings, error: bErr } = await supabase
