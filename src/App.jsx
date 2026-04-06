@@ -18,6 +18,93 @@ import './index.css';
 const DEPLOY_TARGET = import.meta.env.VITE_DEPLOY_TARGET || 'PUBLIC';
 const SECRET_ADMIN_PATH = '/quanly-chinha-trungtam';
 
+const RestrictedAccessWarning = () => {
+  const [ip, setIp] = useState('Đang lấy IP...');
+  const [locationStr, setLocationStr] = useState('Đang xác định...');
+  const [deviceInfo, setDeviceInfo] = useState('');
+
+  useEffect(() => {
+    // Fetch IP and Location with Fallback
+    fetch('https://ipinfo.io/json')
+      .then(r => r.json())
+      .then(data => {
+        setIp(data.ip || 'Unknown');
+        if (data.city && data.country) {
+          setLocationStr(`${data.city}, ${data.region || ''}, ${data.country}`);
+        } else {
+          setLocationStr('Không xác định');
+        }
+      })
+      .catch(() => {
+        // Fallback to just IP if location provider is blocked (e.g. by AdBlocker)
+        fetch('https://api.ipify.org?format=json')
+          .then(r => r.json())
+          .then(data => {
+            setIp(data.ip);
+            setLocationStr('Không thể lấy vị trí');
+          })
+          .catch(() => {
+            setIp('Không tin cậy (Ẩn danh)');
+            setLocationStr('Đã bị ẩn/Proxy');
+          });
+      });
+
+    // Get Device/Browser Info
+    const ua = navigator.userAgent;
+    let browser = 'Không xác định';
+    if (ua.includes('Firefox/')) browser = 'Firefox';
+    else if (ua.includes('Edg/')) browser = 'Edge';
+    else if (ua.includes('Chrome/')) browser = 'Chrome';
+    else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari';
+
+    let os = 'Không xác định';
+    if (ua.includes('Win')) os = 'Windows';
+    else if (ua.includes('Mac')) os = 'MacOS';
+    else if (ua.includes('Linux')) os = 'Linux';
+    else if (ua.includes('Android')) os = 'Android';
+    else if (ua.includes('like Mac')) os = 'iOS';
+
+    setDeviceInfo(`${os} - ${browser}`);
+  }, []);
+
+  return (
+    <div style={{ 
+      height: '100vh', display: 'flex', flexDirection: 'column', 
+      alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffffff', color: '#0f0',
+      fontFamily: 'monospace', textAlign: 'center', padding: '2rem'
+    }}>
+      <img src="public/assets/image/restricted.png" alt="restricted" style={{ height: '120px', margin: '0 0 15px 0' }}></img>
+      <h1 style={{ color: '#000000ff', fontSize: '3rem', margin: '0 0 1rem 0',fontFamily:"ShopeeDisplayB" }}>TRUY CẬP BỊ TỪ CHỐI</h1>
+      <p style={{ fontSize: '1.2rem', maxWidth: '600px', lineHeight: 1.6, color: '#000000ff',fontFamily:"ShopeeDisplayR" }}>
+        Khu vực chỉ dành cho quản trị viên của ChinHaStore và đội ngũ kỹ thuật. Xin vui lòng đừng cố gắng xâm nhập trái phép. Chúng tôi đã ghi lại lưu lượng truy cập này và theo dõi
+      </p>
+      
+      <div style={{
+          marginTop: '2rem', padding: '1.5rem', backgroundColor: '#000000ff', 
+          border: '1px solid #333', textAlign: 'left', minWidth: '350px',
+          color: '#e82323ff',fontFamily:"ShopeeDisplayR"
+      }}>
+
+        <p style={{ margin: '0.6rem 0' }}><strong>IP Address:</strong> <span style={{color: '#fff'}}>{ip}</span></p>
+        <p style={{ margin: '0.6rem 0' }}><strong>Vị trí:</strong> <span style={{color: '#fff'}}>{locationStr}</span></p>
+        <p style={{ margin: '0.6rem 0' }}><strong>Thiết bị:</strong> <span style={{color: '#fff'}}>{deviceInfo}</span></p>
+        <p style={{ margin: '0.6rem 0' }}><strong>Thời gian:</strong> <span style={{color: '#fff'}}>{new Date().toLocaleTimeString('vi-VN')}</span></p>
+      </div>
+
+      <button 
+        onClick={() => window.location.href = '/'}
+        style={{ 
+          marginTop: '3rem', padding: '1rem 2.5rem', backgroundColor: '#d49d24ff', color: '#fff',
+          border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem',
+          letterSpacing: '2px', textTransform: 'uppercase', transition: 'all 0.3s'
+        }}
+      >
+        Trở Về Trang Chủ
+      </button>
+    </div>
+  );
+};
+
 function App() {
   const location = useLocation();
   
@@ -62,35 +149,14 @@ function App() {
     return (
       <div className="admin-loading-page">
         <div className="spinner"></div>
-        <span>Đang xác minh danh tính...</span>
+        <span>Đang xác minh thiết bị...</span>
       </div>
     );
   }
 
   // Specialized Restricted Access Deterrence
   if (isLegacyAdminPath && !isAdminHost) {
-    return (
-      <div style={{ 
-        height: '100vh', display: 'flex', flexDirection: 'column', 
-        alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', color: '#fff',
-        fontFamily: 'monospace', textAlign: 'center', padding: '2rem'
-      }}>
-        <h1 style={{ color: '#ff0000', fontSize: '3rem', marginBottom: '1rem' }}>ACCESS RESTRICTED</h1>
-        <p style={{ fontSize: '1.2rem', maxWidth: '600px' }}>
-          This area is monitored and reserved for authorized ChinHaStore personnel only. 
-          Unauthorized access attempts are logged and reported.
-        </p>
-        <button 
-          onClick={() => window.location.href = '/'}
-          style={{ 
-            marginTop: '2rem', padding: '0.8rem 2rem', backgroundColor: '#fff', color: '#000',
-            border: 'none', cursor: 'pointer', fontWeight: 'bold'
-          }}
-        >
-          RETURN TO SAFETY
-        </button>
-      </div>
-    );
+    return <RestrictedAccessWarning />;
   }
 
   // MODE A: ADMIN-ONLY DEPLOYMENT (DEDICATED SUBDOMAIN OR DOMAIN)
