@@ -179,10 +179,18 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     try {
       showStatus('Đang tạo ảnh hóa đơn...', 'success');
       const canvas = await html2canvas(invoiceElement, {
-        scale: 2, 
+        scale: 3, 
         backgroundColor: '#ffffff',
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        logging: false,
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.querySelector('.bill-invoice-v2');
+          if (el) {
+            el.style.width = '450px';
+            el.style.maxWidth = 'none';
+          }
+        }
       });
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
@@ -613,10 +621,44 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
         (() => {
           let subTotalNum = 0;
           let finalTotalNum = 0;
-          if (selectedBooking && selectedBooking.totalPrice) {
-            subTotalNum = Number(selectedBooking.totalPrice.replace(/\D/g, ''));
+          let breakdown = [];
+          
+          if (selectedBooking) {
+            subTotalNum = Number(selectedBooking.totalPrice?.replace(/\D/g, '')) || 0;
             const discountNum = Number(discountAmount.replace(/\D/g, '')) || 0;
             finalTotalNum = subTotalNum - discountNum;
+
+            // Generate breakdown
+            const product = productList.find(p => p.id === selectedBooking.product_id);
+            if (product && selectedBooking.start_time && selectedBooking.end_time) {
+              const start = new Date(selectedBooking.start_time);
+              const end = new Date(selectedBooking.end_time);
+              const diffMs = end - start;
+              const diffHrs = diffMs / (1000 * 60 * 60);
+              const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+              const fmt = (num) => new Intl.NumberFormat('vi-VN').format(num);
+
+              const p6h = Number(product.price6h?.toString().replace(/\./g, '')) || 0;
+              const p1d = Number(product.price1Day?.toString().replace(/\./g, '')) || 0;
+              const p2d = Number(product.price2Days?.toString().replace(/\./g, '')) || 0;
+              const p3d = Number(product.price3Days?.toString().replace(/\./g, '')) || 0;
+              const pExtra = Number(product.price4DaysPlus?.toString().replace(/\./g, '')) || 0;
+
+              if (diffHrs <= 6) {
+                breakdown.push({ label: 'Gói 6 giờ', value: `${fmt(p6h)} VNĐ` });
+              } else if (diffDays === 1) {
+                breakdown.push({ label: 'Giá thuê 1 ngày', value: `${fmt(p1d)} VNĐ` });
+              } else if (diffDays === 2) {
+                breakdown.push({ label: 'Giá thuê 2 ngày', value: `${fmt(p2d)} VNĐ` });
+              } else if (diffDays === 3) {
+                breakdown.push({ label: 'Giá thuê 3 ngày', value: `${fmt(p3d)} VNĐ` });
+              } else if (diffDays >= 4) {
+                breakdown.push({ label: 'Giá thuê 3 ngày', value: `${fmt(p3d)} VNĐ` });
+                for (let i = 4; i <= diffDays; i++) {
+                  breakdown.push({ label: `Ngày phát sinh ${i}`, value: `${fmt(pExtra)} VNĐ` });
+                }
+              }
+            }
           }
           const finalTotalStr = new Intl.NumberFormat('vi-VN').format(finalTotalNum);
 
@@ -629,7 +671,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
             </header>
 
             <div style={{ overflowY: 'auto', padding: '1.5rem', flex: 1, backgroundColor: '#f5f5f5' }}>
-                <div style={{display: 'flex', gap: '1rem'}}>
+                <div style={{display: 'flex', gap: '1rem',paddingBottom:'1rem'}}>
                   <div style={{flex: 1}}>
                     <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TÀI SẢN CỌC:</label>
                     <input type="text" value={depositProperty} onChange={e => setDepositProperty(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px'}} />
@@ -642,8 +684,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
 
               <div className="bill-invoice-v2">
               <div className="bill-v2-header">
-                <h2>CHIN HA STORE</h2>
-                <p>MÃ HỢP ĐỒNG: {selectedBooking.id.toUpperCase()}</p>
+                <h2>CHINHA STORE</h2>
+                <p>Mã hợp đồng: {selectedBooking.id.toUpperCase()}</p>
               </div>
               
               <hr className="bill-v2-divider" />
@@ -663,7 +705,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       <span>NGÀY NHẬN</span>
                       <strong>{selectedBooking.startDate}</strong>
                     </div>
-                    <div className="date-box">
+                    <div className="date-box border-red">
                       <span>NGÀY TRẢ</span>
                       <strong>{selectedBooking.endDate}</strong>
                     </div>
@@ -672,17 +714,22 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               </div>
 
               <div className="bill-v2-customer-section">
-                <p>TÊN KHÁCH HÀNG: {selectedBooking.customerName.toUpperCase()}</p>
-                <p>SĐT: {selectedBooking.phone}</p>
-                <p>TÀI SẢN CỌC: {depositProperty.toUpperCase()}</p>
+                <p>Tên khách hàng: {selectedBooking.customerName.toUpperCase()}</p>
+                <p>Số điện thoại: {selectedBooking.phone}</p>
+                <p>Tài sản cọc: {depositProperty.toUpperCase()}</p>
+                <p>Nền tảng đặt lịch : {selectedBooking.rentalType === 'Manual' ? 'Đặt trực tiếp' : 'Qua Website'}</p>
               </div>
               
               <hr className="bill-v2-divider" />
               
               <div className="bill-v2-details-section">
                 <p className="details-title">CHI TIẾT</p>
-                <p>THỜI GIAN ĐẶT: {selectedBooking.startDate} đến {selectedBooking.endDate}</p>
-                <p>PHÂN LOẠI THUÊ: {selectedBooking.rentalType === 'Manual' ? 'Đặt trực tiếp' : 'Qua Website'}</p>
+                {breakdown.map((item, idx) => (
+                  <div key={idx} className="bill-v2-toc-item">
+                    <span className="bill-v2-toc-label">{item.label}</span>
+                    <span className="bill-v2-toc-value">{item.value}</span>
+                  </div>
+                ))}
               </div>
 
               <hr className="bill-v2-divider" />
