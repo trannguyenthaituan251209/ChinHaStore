@@ -473,6 +473,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                     <th>Tạo lúc</th>
                     <th>Nguồn</th>
                     <th>Trạng thái</th>
+                    <th>Thành tiền</th>
                     <th>Thao tác</th>
                   </tr>
                 </thead>
@@ -499,6 +500,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                           Chờ xác nhận
                         </span>
                       </td>
+                      <td><strong>{b.totalPrice} VNĐ</strong></td>
                       <td>
                         <button className="action-btn tick" onClick={() => handleMarkAsSeen(b.id)} title="Đánh dấu đã xem">
                           <CheckCircle size={18} style={{color: '#28a745'}} />
@@ -528,6 +530,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                 <th>Tạo lúc</th>
                 <th>Nguồn</th>
                 <th>Trạng thái</th>
+                <th>Thành tiền</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
@@ -558,6 +561,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                        b.status === 'Cancelled' ? 'Đã hủy' : b.status}
                     </span>
                   </td>
+                  <td><strong>{b.totalPrice} VNĐ</strong></td>
                   <td>
                     {activeSubtab === 'bills' && (
                       <button className="btn-bill-view" onClick={() => handleBillView(b)}>
@@ -572,7 +576,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               ))}
               {(activeSubtab === 'past' ? historyData : filteredData).length === 0 && (
                 <tr>
-                  <td colSpan="6" style={{textAlign: 'center', padding: '3rem', color: '#BBB'}}>Không tìm thấy kết quả phù hợp.</td>
+                  <td colSpan="8" style={{textAlign: 'center', padding: '3rem', color: '#BBB'}}>Không tìm thấy kết quả phù hợp.</td>
                 </tr>
               )}
             </tbody>
