@@ -213,6 +213,27 @@ const BookingManager = ({ showStatus }) => {
     }
   };
 
+  // Global Keyboard Listener for Modals
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsBillOpen(false);
+        setIsModalOpen(false);
+      }
+      if (e.key === 'Enter') {
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'TEXTAREA') {
+          setIsBillOpen(false);
+          setIsModalOpen(false);
+        }
+      }
+    };
+    
+    if (isBillOpen || isModalOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isBillOpen, isModalOpen]);
+
   // Form State
   const [formData, setFormData] = useState({
     customerName: '',
@@ -357,7 +378,24 @@ const BookingManager = ({ showStatus }) => {
               <RefreshCcw size={18} />
             </button>
             
-            <button className="btn-add-manual" onClick={() => { setFormData({ customerName: '', phone: '', product_id: productList[0]?.id || '', start_time: '', end_time: '', total_price: '0', status: 'Pending' }); setIsModalOpen(true); }}>
+            <button className="btn-add-manual" onClick={() => { 
+              const pad = (n) => n.toString().padStart(2, '0');
+              const d1 = new Date();
+              const d2 = new Date(); d2.setDate(d1.getDate() + 1);
+              const startStr = `${d1.getFullYear()}-${pad(d1.getMonth()+1)}-${pad(d1.getDate())}T07:00`;
+              const endStr = `${d2.getFullYear()}-${pad(d2.getMonth()+1)}-${pad(d2.getDate())}T07:00`;
+              
+              setFormData({ 
+                customerName: '', 
+                phone: '', 
+                product_id: productList[0]?.id || '', 
+                start_time: startStr, 
+                end_time: endStr, 
+                total_price: '0', 
+                status: 'Pending' 
+              }); 
+              setIsModalOpen(true); 
+            }}>
               <PlusCircle size={18} />
               Thêm đặt lịch
             </button>
@@ -697,7 +735,17 @@ const BookingManager = ({ showStatus }) => {
                   <input 
                     type="datetime-local" 
                     value={formData.start_time}
-                    onChange={e => setFormData({...formData, start_time: e.target.value})}
+                    onChange={e => {
+                      const newStart = e.target.value;
+                      let newEnd = formData.end_time;
+                      if (newStart) {
+                        const d = new Date(newStart);
+                        d.setDate(d.getDate() + 1);
+                        const pad = (n) => n.toString().padStart(2, '0');
+                        newEnd = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                      }
+                      setFormData({...formData, start_time: newStart, end_time: newEnd});
+                    }}
                     required 
                   />
                 </div>

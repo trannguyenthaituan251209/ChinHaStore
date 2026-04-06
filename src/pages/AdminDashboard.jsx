@@ -39,6 +39,19 @@ const AdminDashboard = ({ onLogout }) => {
     setStatusModal({ isOpen: true, type, message });
   };
 
+  // Close Global Status Modal on Esc/Enter
+  React.useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (statusModal.isOpen && (e.key === 'Escape' || e.key === 'Enter')) {
+        setStatusModal((prev) => ({ ...prev, isOpen: false }));
+      }
+    };
+    if (statusModal.isOpen) {
+      window.addEventListener('keydown', handleGlobalKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [statusModal.isOpen]);
+
   const fetchStats = async () => {
     try {
       const data = await adminService.getDashboardStats();
