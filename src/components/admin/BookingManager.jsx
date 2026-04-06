@@ -177,7 +177,72 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     if (!invoiceElement) return;
 
     try {
-      showStatus('Đang tạo ảnh hóa đơn...', 'success');
+      showStatus('Bắt đầu chuẩn bị hóa đơn...', 'success');
+      
+      const originalImgs = [];
+      const imgElements = invoiceElement.querySelectorAll('.bill-v2-product-image img');
+      
+      // 100% Local Base64 Placeholder SVG to ensure zero-CORS failure
+      const localPlaceholder = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNGNUY1RjUiLz48dGV4dCB4PSI2MCIgeT0iNjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iI0FBQSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Q0hJTkhBIFNUT1JFPC90ZXh0Pjwvc3ZnPg==";
+
+      for (const img of imgElements) {
+        if (img.src && img.src.startsWith('http')) {
+          try {
+            let dataUrl = null;
+
+            // Attempt 1: High-Performance Image CDN Proxy (weserv.nl)
+            try {
+              const controller1 = new AbortController();
+              const timeout1 = setTimeout(() => controller1.abort(), 12000); 
+              
+              const cleanUrl = img.src.replace(/^https?:\/\//, '');
+              const proxy1 = `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&output=jpg&q=80`;
+              
+              const response1 = await fetch(proxy1, { signal: controller1.signal });
+              if (response1.ok) {
+                const blob = await response1.blob();
+                dataUrl = await new Promise((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result);
+                  reader.onerror = reject;
+                  reader.readAsDataURL(blob);
+                });
+              }
+              clearTimeout(timeout1);
+            } catch (e1) {
+              console.warn('CDN Proxy failed, attempting secondary fallbacks...', e1.message);
+            }
+
+            // Attempt 2: AllOrigins (Secondary Failover)
+            if (!dataUrl) {
+              try {
+                const controller2 = new AbortController();
+                const timeout2 = setTimeout(() => controller2.abort(), 8000);
+                const proxy2 = `https://api.allorigins.win/get?url=${encodeURIComponent(img.src)}`;
+                const response2 = await fetch(proxy2, { signal: controller2.signal });
+                const data2 = await response2.json();
+                clearTimeout(timeout2);
+                if (data2.contents) dataUrl = data2.contents;
+              } catch (e2) {
+                console.warn('All proxies failed:', e2.message);
+              }
+            }
+
+            if (dataUrl) {
+              originalImgs.push({ el: img, src: img.src });
+              img.src = dataUrl;
+            } else {
+              throw new Error('Image host blocked all capture attempts');
+            }
+          } catch (e) {
+            console.warn('Final Image Guard: applying local placeholder...', e.message);
+            originalImgs.push({ el: img, src: img.src });
+            img.src = localPlaceholder;
+          }
+        }
+      }
+
+      showStatus('Đang Render hóa đơn 1:1...', 'success');
       const canvas = await html2canvas(invoiceElement, {
         scale: 3, 
         backgroundColor: '#ffffff',
@@ -189,16 +254,33 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
           if (el) {
             el.style.width = '450px';
             el.style.maxWidth = 'none';
+            
+            // Critical Fix: Sync the Base64 swap to the clone
+            const clonedImgs = el.querySelectorAll('.bill-v2-product-image img');
+            originalImgs.forEach((orig, idx) => {
+              if (clonedImgs[idx]) {
+                clonedImgs[idx].src = orig.el.src; // Use the already-swapped Base64 src
+              }
+            });
           }
         }
       });
+
+      // Cleanup
+      originalImgs.forEach(item => { item.el.src = item.src; });
+
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.download = `Hoa_Don_${selectedBooking?.id?.slice(0, 8)}.png`;
       link.href = dataUrl;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      
+      showStatus('Tải xuống thành công!', 'success');
     } catch (err) {
-      showStatus('Lỗi khi xuất hóa đơn: ' + err.message, 'error');
+      console.error('Download failure:', err);
+      showStatus('Lỗi khi tải: ' + (err.message || 'Lỗi xử lý ảnh'), 'error');
     }
   };
 
@@ -693,7 +775,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               <div className="bill-v2-product-section">
                 <div className="bill-v2-product-image">
                   {selectedBooking.productImage ? (
-                    <img src={selectedBooking.productImage} alt="Product" style={{width: '100%', height: '100%', objectFit: 'cover'}} crossOrigin="anonymous" />
+                    <img src={selectedBooking.productImage} alt="Product" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
                   ) : (
                     <div className="image-placeholder">ẢNH SẢN PHẨM</div>
                   )}
@@ -727,6 +809,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                 {breakdown.map((item, idx) => (
                   <div key={idx} className="bill-v2-toc-item">
                     <span className="bill-v2-toc-label">{item.label}</span>
+                    <div className="bill-v2-toc-dots"></div>
                     <span className="bill-v2-toc-value">{item.value}</span>
                   </div>
                 ))}

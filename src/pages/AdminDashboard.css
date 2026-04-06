@@ -2073,43 +2073,40 @@ html, body {
     text-transform: uppercase;
 }
 
-/* MASKED BACKGROUND TOC (1:1 CAPTURE STABLE) */
+/* "TABLE-CELL" TOC ARCHITECTURE (VIRTUAL BASELINE STABILITY) */
 .bill-v2-toc-item {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin: 0.1rem 0;
-    line-height: normal;
-}
-
-.bill-v2-toc-item::before {
-    content: "";
-    position: absolute;
-    bottom: 2px; /* Precision grounding at text-foot */
-    left: 0;
-    right: 0;
-    border-bottom: 1.5px dotted #ccc;
-    z-index: 1;
+    display: table;
+    width: 100%;
+    margin-bottom: 0.15rem;
+    border-collapse: collapse;
 }
 
 .bill-v2-toc-label {
-    position: relative;
-    z-index: 2;
-    background: #ffffff;
-    padding-right: 8px;
+    display: table-cell;
+    white-space: nowrap;
+    vertical-align: bottom; /* Physically ground at text-foot */
     font-family: inherit;
     font-size: 0.85rem;
-    line-height: normal;
+    padding-right: 6px;
+    padding-bottom: 1.5px; /* Precision text-foot grounding */
+}
+
+.bill-v2-toc-dots {
+    display: table-cell;
+    width: 100%;
+    vertical-align: bottom;
+    border-bottom: 1.5px dotted #ccc;
+    padding-bottom: 3.5px; /* Distance from text-foot baseline to line center */
 }
 
 .bill-v2-toc-value {
-    position: relative;
-    z-index: 2;
-    background: #ffffff;
-    padding-left: 8px;
+    display: table-cell;
+    white-space: nowrap;
+    vertical-align: bottom; /* Physically ground at text-foot */
     font-family: "ShopeeDisplayB", sans-serif;
     font-size: 0.85rem;
+    padding-left: 6px;
+    padding-bottom: 1.5px; /* Precision text-foot grounding */
 }
 
 .bill-v2-total-section {
