@@ -119,20 +119,25 @@ function App() {
   const [adminUser, setAdminUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
-  // SESSION HARDENING: Check for existing authoritative session on mount
+  // SESSION HARDENING: Check for session & record analytics visit
   useEffect(() => {
-    const checkSession = async () => {
+    const initApp = async () => {
       try {
         const user = await adminService.getUser();
         setAdminUser(user);
+        
+        // Record visit ONLY for non-admins (storefront visitors)
+        if (!isAdminHost && !isSecretPath) {
+          adminService.recordVisit();
+        }
       } catch (err) {
-        console.error('Session check failed:', err);
+        console.error('App init failed:', err);
       } finally {
         setAuthLoading(false);
       }
     };
-    checkSession();
-  }, []);
+    initApp();
+  }, [isAdminHost, isSecretPath]);
 
   const handleLoginSuccess = async () => {
     const user = await adminService.getUser();

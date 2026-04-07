@@ -229,6 +229,7 @@ html, body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .admin-stat-card {
@@ -238,64 +239,165 @@ html, body {
     border: var(--color-admin-border);
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     min-height: 180px;
-    transition: transform 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 0;
+    background-color: var(--color-admin-accent);
+    transition: height 0.3s ease;
 }
 
 .admin-stat-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.admin-stat-card:hover::after {
+    height: 100%;
 }
 
 .stat-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
 }
 
 .stat-header h4 {
-    font-size: 0.95rem;
-    color: #555;
-    font-weight: 600;
+    font-size: 0.85rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
 }
 
 .admin-stat-card.primary {
-    background-color: #FFF;
-    border: 2px solid #000; /* Distinct but square */
+    background-color: #000;
+    border-color: #000;
 }
 
 .admin-stat-card.primary h4,
-.admin-stat-card.primary .admin-stat-number {
-    color: #000;
+.admin-stat-card.primary .admin-stat-number,
+.admin-stat-card.primary .admin-stat-link {
+    color: #FFF;
+}
+
+.admin-stat-card.primary .eye-btn {
+    color: #FFF;
+    opacity: 0.7;
 }
 
 .admin-stat-number {
-    font-size: 2.8rem;
+    font-size: 3rem;
+    font-family: 'ShopeeDisplayB', sans-serif;
     font-weight: 700;
-    letter-spacing: -1px;
+    margin: 0.5rem 0;
+    line-height: 1;
 }
 
 .admin-stat-number small {
     font-size: 1rem;
     font-weight: 500;
-    opacity: 0.6;
+    margin-left: 5px;
+    opacity: 0.5;
 }
 
 .admin-stat-delta {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
-    margin-top: 0.5rem;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 600;
 }
 
-.delta-num {
-    font-size: 1.8rem;
+.delta-perc.positive { color: #2ecc71; }
+.delta-perc.negative { color: #e74c3c; }
+
+.admin-stat-link {
+    background: none;
+    border: none;
+    color: var(--color-admin-accent);
+    padding: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    margin-top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    width: fit-content;
+}
+
+/* == BOOKING SUMMARY (TODAY) == */
+.admin-stat-card.booking-summary {
+    grid-column: span 1;
+    background: linear-gradient(135deg, #FFF 0%, #FAFAFA 100%);
+}
+
+.booking-summary-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.booking-sub-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.8rem;
+    background-color: #FFF;
+    border: 1px solid #EEE;
+    text-align: center;
+}
+
+.booking-sub-stat span {
+    font-size: 0.75rem;
+    color: #999;
+    text-transform: uppercase;
     font-weight: 700;
 }
 
-.delta-perc {
-    font-size: 0.85rem;
-    font-weight: 600;
+.booking-sub-stat strong {
+    font-size: 1.5rem;
+    font-family: 'ShopeeDisplayB', sans-serif;
+    color: #111;
+}
+
+.booking-sub-stat strong.accent {
+    color: var(--color-admin-accent);
+}
+
+.mini-chart-placeholder {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 40px;
+    margin-top: 1rem;
+}
+
+.mini-bar {
+    flex: 1;
+    background-color: #EEE;
+    min-width: 8px;
+    transition: height 0.6s ease;
+}
+
+.admin-stat-card:hover .mini-bar {
+    background-color: var(--color-admin-accent);
+    opacity: 0.6;
 }
 
 .delta-perc.positive { color: #2E7D32; }

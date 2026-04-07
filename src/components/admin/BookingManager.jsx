@@ -742,6 +742,16 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               }
             }
           }
+          // Calculate deposit logic: 1 day or >5 days = 100%, 2-5 days = 50%
+          const startDT = new Date(selectedBooking.start_time);
+          const endDT = new Date(selectedBooking.end_time);
+          const dDays = Math.ceil((endDT - startDT) / (1000 * 60 * 60 * 24)) || 1;
+          
+          let dPercent = 100;
+          if (dDays >= 2 && dDays <= 5) dPercent = 50;
+          
+          const dAmount = Math.round(finalTotalNum * (dPercent / 100));
+          const dAmountStr = new Intl.NumberFormat('vi-VN').format(dAmount);
           const finalTotalStr = new Intl.NumberFormat('vi-VN').format(finalTotalNum);
 
           return (
@@ -764,7 +774,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                   </div>
                 </div>
 
-              <div className="bill-invoice-v2">
+              <div className="bill-invoice-v2" id="invoice-capture-area">
               <div className="bill-v2-header">
                 <h2>CHINHA STORE</h2>
                 <p>Mã hợp đồng: {selectedBooking.id.toUpperCase()}</p>
@@ -820,12 +830,17 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               <div className="bill-v2-total-section">
                 <div className="total-row"><span>TẠM TÍNH:</span> <span>{selectedBooking.totalPrice} VNĐ</span></div>
                 <div className="total-row"><span>GIẢM GIÁ:</span> <span>{new Intl.NumberFormat('vi-VN').format(Number(discountAmount.replace(/\D/g, '')) || 0)} VNĐ</span></div>
-                <div className="total-row main-total"><span>TỔNG CỘNG:</span> <span>{finalTotalStr} VNĐ</span></div>
+                <div className="total-row" style={{opacity: 0.7}}><span>TỔNG CHI PHÍ DỰ KIẾN:</span> <span>{finalTotalStr} VNĐ</span></div>
+                <div className="total-row main-total" style={{borderTop: '2px dashed #000', paddingTop: '10px', marginTop: '10px'}}>
+                  <span>TIỀN CỌC CẦN THANH TOÁN ({dPercent}%):</span> 
+                  <span style={{color: '#f60'}}>{dAmountStr} VNĐ</span>
+                </div>
+                <p style={{fontSize: '0.65rem', color: '#666', textAlign: 'right', marginTop: '5px'}}>* Thanh toán cọc để xác nhận giữ lịch.</p>
               </div>
               
               <div className="bill-v2-qr-section" style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 <img 
-                  src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${finalTotalNum}&addInfo=${selectedBooking.id.slice(0, 8)}`} 
+                  src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${dAmount}&addInfo=${selectedBooking.id.slice(0, 8)}`} 
                   alt="QR Code" 
                   className="qr-img" 
                   crossOrigin="anonymous" 

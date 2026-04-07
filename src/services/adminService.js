@@ -65,18 +65,39 @@ export const adminService = {
       .gte('start_time', tomorrowISO)
       .lt('start_time', nextWeek.toISOString());
 
+        // 7. Today Visits logic
+    const todayStr = today.toISOString().split('T')[0];
+    const { data: vData } = await supabase.from('daily_stats').select('visits').eq('date', todayStr).maybeSingle();
+    const tVisits = vData?.visits || 0;
+
+    // 8. Weekly Customers (Last 7 days)
+    const last7Str = new Date(today.getTime() - 6 * 86400000).toISOString();
+    const { data: cwD } = await supabase.from('bookings').select('customer_id').gte('created_at', last7Str).not('status', 'eq', 'Cancelled');
+    const wCust = new Set(cwD?.map(b => b.customer_id)).size;
+
     return {
       rentingToday: rentingToday || 0,
-      weeklyCustomers: 0, // Placeholder: requires complex weekly aggregation
-      weeklyDelta: '0%',
+      weeklyCustomers: wCust,
+      weeklyDelta: '▼ 0%', 
       todayRevenue: new Intl.NumberFormat('vi-VN').format(todayRevenue),
       upcomingEvents: upcomingEvents || 0,
-      todayVisits: 0, // Requires a separate analytics/traffic table
-      visitsDelta: '0%',
+      todayVisits: tVisits,
+      visitsDelta: '▲ 0%',
       bookingNew: bookingNew || 0,
       bookingReturned: bookingReturned || 0,
       bookingConfirmed: bookingConfirmed || 0
     };
+  },
+
+  async recordVisit() {
+    try {
+      const t = new Date().toISOString().split('T')[0];
+      const { error } = await supabase.rpc('increment_visits', { target_date: t });
+      if (error) {
+        const { data: c } = await supabase.from('daily_stats').select('visits').eq('date', t).maybeSingle();
+        await supabase.from('daily_stats').upsert({ date: t, visits: (c?.visits || 0) + 1 }, { onConflict: 'date' });
+      }
+    } catch(e) { console.warn('Stat block bypassed'); }
   },
 
   /**
@@ -222,45 +243,44 @@ export const adminService = {
    * Find or create a customer by phone number and name (Multi-Factor Handshake).
    * Prevents accidental merges AND unique constraint violations.
    */
-  async getOrCreateCustomer(customerData) {
+      async getOrCreateCustomer(customerData) {
     const { phone, full_name, email, city, social } = customerData;
     const cleanPhone = phone?.trim() || '0';
     const cleanName = full_name?.trim() || 'Khách lẻ';
 
-    // 1. ALWAYS check for high-precision match (Phone + Name) first
-    // This prevents violating the UNIQUE(phone, full_name) constraint
+    // 1. SEARCH FOR EXACT IDENTITY (NAME + PHONE)
+    // This supports multi-identity scenarios (borrowed SIMs, etc.)
     const { data: exactMatch } = await supabase
       .from('customers')
-      .select('id')
+      .select('id, full_name, phone')
       .eq('phone', cleanPhone)
       .ilike('full_name', cleanName)
       .maybeSingle();
 
-    if (exactMatch) return exactMatch.id;
-
-    // 2. If NOT a placeholder, we can also check if phone alone exists
-    // (This helps find existing customers if they change their name slightly but keep their real phone)
-    const isPlaceholder = cleanPhone === '0' || cleanPhone.toLowerCase() === 'none' || cleanPhone.length < 5;
-
-    if (!isPlaceholder) {
-      const { data: phoneMatch } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('phone', cleanPhone)
-        .maybeSingle();
-
-      if (phoneMatch) return phoneMatch.id;
+    if (exactMatch) {
+       // Optional: Update email/city if they are new
+       if (email || city || social) {
+         await supabase.from('customers').update({
+           email: email || '',
+           city: city || 'Hồ Chí Minh',
+           social: social || '',
+           updated_at: new Date().toISOString()
+         }).eq('id', exactMatch.id);
+       }
+       return exactMatch.id;
     }
 
-    // 3. Create new if neither high-precision nor phone-only match exists
+    // 2. CREATE NEW IDENTITY
+    // Even if phone exists for another name, we create a new distinct record
     const { data: created, error } = await supabase
       .from('customers')
       .insert({
         phone: cleanPhone,
         full_name: cleanName,
-        email,
-        city,
-        social
+        email: email || '',
+        city: city || 'Hồ Chí Minh',
+        social: social || '',
+        status: 'active'
       })
       .select('id')
       .single();
