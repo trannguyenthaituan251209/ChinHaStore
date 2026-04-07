@@ -248,6 +248,8 @@ const AdminDashboard = ({ onLogout }) => {
               placeholder="Tìm kiếm nhanh..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
+              name="admin-search-field"
             />
           </div>
           <div className="header-actions">

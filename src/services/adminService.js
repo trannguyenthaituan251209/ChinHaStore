@@ -148,6 +148,7 @@ export const adminService = {
         customer_id: b.customer_id,
         product_id: b.product_id,
         unit_id: b.unit_id,
+        deposit_type: b.deposit_type || 'standard',
         is_seen: b.is_seen,
         created_at: b.created_at
       };
@@ -209,6 +210,7 @@ export const adminService = {
         start_time: b.start_time,
         end_time: b.end_time,
         product_id: b.product_id,
+        deposit_type: b.deposit_type || 'standard',
         is_seen: b.is_seen
       };
     });
@@ -455,6 +457,7 @@ export const adminService = {
         start_time: formatTimestamp(bookingData.start_time),
         end_time: formatTimestamp(bookingData.end_time),
         rental_type: bookingData.rentalType,
+        deposit_type: bookingData.deposit_type || 'standard',
         total_price: bookingData.total_price,
         source: bookingData.source || 'Admin',
         status: bookingData.status || 'Pending',
@@ -853,6 +856,23 @@ export const adminService = {
     });
     if (error) throw error;
     return data;
+  },
+
+  /**
+   * RE-AUTHENTICATION HANDSHAKE:
+   * Verification step before high-risk actions (e.g. Deletion).
+   */
+  async verifyPassword(password) {
+    const { data: { user }, error: uErr } = await supabase.auth.getUser();
+    if (uErr || !user) throw new Error('Không thể xác minh phiên làm việc.');
+
+    const { error: pErr } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password,
+    });
+    
+    if (pErr) throw new Error('Mật khẩu quản trị không chính xác.');
+    return true;
   },
 
   /**

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import adminService from '../services/adminService';
 import ProductCard from '../components/ProductCard';
+import html2canvas from 'html2canvas';
 import './BookingPage.css';
 
 const BookingPage = () => {
@@ -26,11 +27,14 @@ const BookingPage = () => {
   const [cusEmail, setCusEmail] = useState('');
   const [cusCity, setCusCity] = useState('Hồ Chí Minh');
   const [cusSocial, setCusSocial] = useState('');
+  const [cusDepositType, setCusDepositType] = useState('standard'); // 'standard', 'property'
   
   const [result, setResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [availabilitySnapshot, setAvailabilitySnapshot] = useState(null);
+  const [isCopying, setIsCopying] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const renderGuideContent = () => (
     <div className="guide-content">
@@ -300,6 +304,7 @@ const BookingPage = () => {
         end_time: (rentalType==='SHIFT'?startDate:endDate) + 'T' + (rentalType==='SHIFT'?(shiftType==='A'?'13:00:00':'21:00:00'):(rentalType==='DAY'?'07:30:00':'19:00:00')),
         total_price: parseInt(result.price.replace(/\./g, '')),
         rentalType: rentalType,
+        deposit_type: cusDepositType,
         source: 'Website',
         breakdown: result.breakdown
       });
@@ -308,6 +313,85 @@ const BookingPage = () => {
       alert('Lỗi: ' + error.message);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCopyAccount = () => {
+    navigator.clipboard.writeText('000000407891 - SeaBank');
+    setIsCopying(true);
+    setTimeout(() => setIsCopying(false), 2000);
+  };
+
+  const handleDownloadInvoice = async () => {
+    const invoiceElement = document.getElementById('invoice-capture-area');
+    if (!invoiceElement) return;
+
+    try {
+      setIsDownloading(true);
+      
+      const originalImgs = [];
+      const imgElements = invoiceElement.querySelectorAll('.bill-v2-product-image img');
+      const localPlaceholder = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNGNUY1RjUiLz48dGV4dCB4PSI2MCIgeT0iNjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iI0FBQSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Q0hJTkhBIFNUT1JFPC90ZXh0Pjwvc3ZnPg==";
+
+      for (const img of imgElements) {
+        if (img.src && img.src.startsWith('http')) {
+          try {
+            let dataUrl = null;
+            // weserv proxy
+            try {
+              const proxy1 = `https://images.weserv.nl/?url=${encodeURIComponent(img.src.replace(/^https?:\/\//, ''))}&output=jpg&q=80`;
+              const response1 = await fetch(proxy1);
+              if (response1.ok) {
+                const blob = await response1.blob();
+                dataUrl = await new Promise((resolve) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result);
+                  reader.readAsDataURL(blob);
+                });
+              }
+            } catch (e1) { console.warn('Proxy 1 failed'); }
+
+            if (dataUrl) {
+              originalImgs.push({ el: img, src: img.src });
+              img.src = dataUrl;
+            }
+          } catch (e) {
+            originalImgs.push({ el: img, src: img.src });
+            img.src = localPlaceholder;
+          }
+        }
+      }
+
+      const canvas = await html2canvas(invoiceElement, {
+        scale: 3,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.getElementById('invoice-capture-area');
+          if (el) {
+            el.style.display = 'block';
+            el.style.width = '450px';
+            const clonedImgs = el.querySelectorAll('.bill-v2-product-image img');
+            originalImgs.forEach((orig, idx) => {
+              if (clonedImgs[idx]) clonedImgs[idx].src = orig.el.src;
+            });
+          }
+        }
+      });
+
+      originalImgs.forEach(item => { item.el.src = item.src; });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `ChinHaStore_Receipt.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Download failure:', err);
+      alert('Lỗi khi tải hóa đơn.');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -442,6 +526,29 @@ const BookingPage = () => {
                     <label>Mạng xã hội (Facebook/Zalo)</label>
                     <input type="text" placeholder="Link Facebook hoặc số Zalo" value={cusSocial} onChange={(e) => setCusSocial(e.target.value)} />
                   </div>
+
+                  <div className="form-group">
+                    <label>HÌNH THỨC ĐẶT CỌC (CHỌN 1 TRONG 2)</label>
+                    <div className="deposit-selector-grid">
+                      <div 
+                        className={`deposit-option-card ${cusDepositType === 'standard' ? 'active' : ''}`}
+                        onClick={() => setCusDepositType('standard')}
+                      >
+                        <div className="option-header">CƠ BẢN</div>
+                        <div className="option-desc">CCCD + 3.000.000 VNĐ</div>
+                        {cusDepositType === 'standard' && <div className="option-check">✓</div>}
+                      </div>
+                      <div 
+                        className={`deposit-option-card ${cusDepositType === 'property' ? 'active' : ''}`}
+                        onClick={() => setCusDepositType('property')}
+                      >
+                        <div className="option-header">TÀI SẢN</div>
+                        <div className="option-desc">CCCD + Tài sản (Laptop/Lens/...) tương đương</div>
+                        {cusDepositType === 'property' && <div className="option-check">✓</div>}
+                      </div>
+                    </div>
+                  </div>
+
                   <button className="btn-back-step" onClick={() => setStep(1)}>← QUAY LẠI CHỌN MÁY</button>
                 </div>
               )}
@@ -537,22 +644,170 @@ const BookingPage = () => {
         )}
 
         {step === 3 && (
-          <div className="success-container animate-in">
-            <div className="success-icon">✓</div>
-            <h1>GỬI THÔNG TIN THÀNH CÔNG!</h1>
-            <p className="success-msg">
-              Cảm ơn <strong>{cusName}</strong>. Chúng tôi đã nhận được yêu cầu đặt lịch của bạn.<br/>
-              ChinHaStore sẽ liên hệ với bạn sớm nhất qua số điện thoại <strong>{cusPhone}</strong> để xác nhận.
-            </p>
-            
-            <div className="order-summary-box">
-              <h3>Tóm tắt yêu cầu:</h3>
-              <p><strong>Thiết bị:</strong> {currentProduct.name}</p>
-              <p><strong>Thời gian:</strong> {result?.times.start} - {result?.times.end}</p>
-              <p><strong>Tổng cộng:</strong> {result?.price} VNĐ</p>
+          <div className="ticket-container animate-in">
+            <div className="booking-ticket" id="main-ticket-view">
+              <div className="ticket-header">
+                <h1>THÔNG TIN ĐẶT THUÊ</h1>
+                <p>Mã yêu cầu: #{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+              </div>
+
+              <div className="ticket-body">
+                <div className="ticket-grid-2">
+                  <div className="ticket-section">
+                    <div className="ticket-label">Khách Hàng</div>
+                    <div className="ticket-value">{cusName}</div>
+                    <div className="ticket-sub-value">{cusPhone}</div>
+                  </div>
+                  <div className="ticket-section">
+                    <div className="ticket-label">Thiết bị</div>
+                    <div className="ticket-equipment-box">
+                      <div className="ticket-value">{currentProduct.name}</div>
+                      {currentProduct.image && (
+                         <img src={currentProduct.image} alt="Device" className="ticket-device-img" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="ticket-section">
+                  <div className="ticket-label">Thời gian thuê</div>
+                  <div className="ticket-value">{result?.times.start} đến {result?.times.end}</div>
+                </div>
+
+                <div className="ticket-divider"></div>
+
+                <div className="ticket-section">
+                  <div className="ticket-label">Chi tiết giá</div>
+                  {result?.breakdown.map((item, idx) => (
+                    <div key={idx} className="ticket-line">
+                      <span>{item.label}</span>
+                      <span>{item.value} đ</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="ticket-divider"></div>
+
+                <div className="ticket-summary-row">
+                  {(() => {
+                    const priceNum = Number(result?.price?.replace(/\./g, '')) || 0;
+                    const durationDays = result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1;
+                    let dPerc = 100;
+                    if (durationDays >= 2 && durationDays <= 5) dPerc = 50;
+                    const dAmount = Math.round(priceNum * (dPerc / 100));
+                    const reqId = Math.random().toString(36).substr(2, 6).toUpperCase();
+
+                    return (
+                      <>
+                        <div className="ticket-summary-left">
+                          <img 
+                            src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${dAmount}&addInfo=${reqId}`} 
+                            alt="QR Code" 
+                            className="ticket-summary-qr" 
+                          />
+                          <div className="qr-text-small">QUÉT ĐỂ ĐẶT CỌC</div>
+                        </div>
+
+                        <div className="ticket-summary-right">
+                          <div className="summary-item">
+                            <span className="summary-label">HÌNH THỨC CỌC</span>
+                            <span className="summary-val">{cusDepositType === 'standard' ? 'CƠ BẢN' : 'TÀI SẢN'}</span>
+                          </div>
+                          <div className="summary-item">
+                            <span className="summary-label">SỐ TIỀN CỌC ({dPerc}%)</span>
+                            <span className="summary-val accent">{new Intl.NumberFormat('vi-VN').format(dAmount)} đ</span>
+                          </div>
+                          <div className="ticket-total-mini">
+                            <div className="ticket-label">TỔNG CỘNG</div>
+                            <div className="ticket-value-total">{result?.price} đ</div>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              <div className="ticket-actions-row">
+                <button className="btn-ticket-action secondary" onClick={handleCopyAccount}>
+                  {isCopying ? 'ĐÃ SAO CHÉP!' : 'Sao chép STK và Ngân Hàng'}
+                </button>
+                <button className="btn-ticket-action primary" onClick={handleDownloadInvoice} disabled={isDownloading}>
+                  {isDownloading ? 'ĐANG XỬ LÝ...' : 'Tải Hóa Đơn'}
+                </button>
+              </div>
+
+              <div className="ticket-footer">
+                <p>ChinHaStore sẽ liên hệ và nhận cọc để xác nhận lịch thuê.</p>
+                <p className="footer-brand">CHINHASTORE.OFFICIAL</p>
+              </div>
             </div>
 
-            <button className="btn-confirm-booking" style={{maxWidth: '300px'}} onClick={() => window.location.reload()}>QUAY LẠI TRANG CHỦ</button>
+            {/* HIDDEN INVOICE AREA FOR CAPTURE (MATCHES ADMIN DESIGN) */}
+            <div id="invoice-capture-area" style={{ position: 'absolute', left: '-9999px', top: '0', display: 'none' }}>
+              <div className="bill-invoice-v2">
+                <div className="bill-v2-header">
+                  <h2>CHINHA STORE</h2>
+                  <p>HÓA ĐƠN ĐẶT LỊCH</p>
+                </div>
+                <hr className="bill-v2-divider" />
+                <div className="bill-v2-product-section">
+                  {currentProduct.image && (
+                    <div className="bill-v2-product-image">
+                       <img src={currentProduct.image} alt="Product" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                    </div>
+                  )}
+                  <div className="bill-v2-product-info">
+                    <h4 className="camera-name">{currentProduct.name?.toUpperCase()}</h4>
+                    <div className="bill-v2-dates">
+                      <div className="date-box border-purple">
+                        <span>NHẬN MÁY</span>
+                        <strong>{result?.times.start}</strong>
+                      </div>
+                      <div className="date-box border-red">
+                        <span>TRẢ MÁY</span>
+                        <strong>{result?.times.end}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bill-v2-customer-section">
+                  <p>Khách hàng: {cusName.toUpperCase()}</p>
+                  <p>SĐT: {cusPhone}</p>
+                  <p>Hình thức cọc: {cusDepositType === 'standard' ? 'CƠ BẢN' : 'TÀI SẢN (CCCD + TÀI SẢN TƯƠNG ĐƯƠNG)'}</p>
+                </div>
+                <hr className="bill-v2-divider" />
+                <div className="bill-v2-details-section">
+                  {result?.breakdown.map((item, idx) => (
+                    <div key={idx} className="bill-v2-toc-item">
+                      <span className="bill-v2-toc-label">{item.label}</span>
+                      <div className="bill-v2-toc-dots"></div>
+                      <span className="bill-v2-toc-value">{item.value} VNĐ</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="bill-v2-total-section">
+                  <div className="total-row main-total">
+                    <span>TỔNG CHI PHÍ DỰ KIẾN:</span>
+                    <span style={{color: '#f60'}}>{result?.price} VNĐ</span>
+                  </div>
+                </div>
+                <div className="bill-v2-qr-section">
+                   <img 
+                      src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${Math.round((Number(result?.price?.replace(/\./g, '')) || 0) * ( (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) >= 2 && (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) <= 5 ? 0.5 : 1 ))}&addInfo=ORDER`} 
+                      alt="QR" 
+                      style={{width: '120px', height: '120px', marginBottom: '10px'}}
+                    />
+                   <p style={{fontSize: '0.9rem', fontWeight: 700, marginBottom: '5px'}}>THÔNG TIN THANH TOÁN CỌC</p>
+                   <p style={{fontSize: '0.8rem'}}>SEABANK: 000000407891</p>
+                   <p style={{fontSize: '0.8rem'}}>CHỦ TK: MAN HI CHIN</p>
+                </div>
+              </div>
+            </div>
+
+            <button className="btn-return-home" onClick={() => window.location.reload()}>
+              XÁC NHẬN & QUAY LẠI
+            </button>
           </div>
         )}
 

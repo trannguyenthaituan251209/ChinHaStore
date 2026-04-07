@@ -29,6 +29,9 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [conflicts, setConflicts] = useState([]);
   const [isChecking, setIsChecking] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [bookingToDelete, setBookingToDelete] = useState(null);
+  const [deletePassword, setDeletePassword] = useState('');
 
   // Filter Categories
   const [filterDevice, setFilterDevice] = useState('all');
@@ -45,20 +48,21 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   // Reload helper
   const reloadBookings = async () => {
     try {
+      setError(null);
       setLoading(true);
       const [bookings, productsData] = await Promise.all([
         adminService.getAllBookings(),
         adminService.getAllProducts()
       ]);
-      setData(bookings);
-      setProductList(productsData);
+      setData(bookings || []);
+      setProductList(productsData || []);
       
       // Default product for form
-      if (productsData.length > 0) {
+      if (productsData && productsData.length > 0) {
         setFormData(prev => ({ ...prev, product_id: productsData[0].id }));
       }
     } catch (err) {
-      setError('Lỗi khi cập nhật danh sách.');
+      setError('Lỗi khi cập nhật danh sách thiết bị/đặt lịch.');
     } finally {
       setLoading(false);
     }
@@ -84,12 +88,13 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   // Specialized History Fetcher (Server-side)
   const fetchHistoryPage = async (page) => {
     try {
+      setError(null);
       setIsHistoryLoading(true);
       const result = await adminService.getBookingsPaginated(page, PAGE_SIZE, { status: 'Returned' });
-      setHistoryData(result.data);
-      setHistoryCount(result.count);
+      setHistoryData(result.data || []);
+      setHistoryCount(result.count || 0);
     } catch (err) {
-      setError('Lỗi khi tải lịch sử.');
+      setError('Lỗi khi tải lịch sử thuê máy.');
     } finally {
       setIsHistoryLoading(false);
     }
@@ -169,6 +174,15 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const handleBillView = (booking) => {
     setSelectedBooking(booking);
     setDiscountAmount('0');
+    
+    // Auto-map deposit based on customer choice or admin override
+    const mapping = {
+      'standard': 'CCCD + 3.000.000 VNĐ',
+      'property': 'CCCD + TÀI SẢN TƯƠNG ĐƯƠNG',
+      'student': 'CCCD + 500k-1M + VNEID IMAGE'
+    };
+    setDepositProperty(mapping[booking.deposit_type] || 'CĂN CƯỚC CÔNG DÂN');
+    
     setIsBillOpen(true);
   };
 
@@ -300,20 +314,37 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       start_time: toLocalISO(booking.start_time), 
       end_time: toLocalISO(booking.end_time),
       total_price: booking.totalPrice?.replace(/\./g, '') || '0',
-      status: booking.status
+      status: booking.status,
+      deposit_type: booking.deposit_type || 'standard'
     });
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa đơn đặt lịch này?')) {
-      try {
-        await adminService.deleteBooking(id);
-        showStatus('Đã xóa đơn đặt lịch', 'success');
-        reloadBookings();
-      } catch (err) {
-        showStatus('Lỗi khi xóa: ' + err.message, 'error');
+  const handleDelete = (booking) => {
+    setBookingToDelete(booking);
+    setDeletePassword('');
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeletion = async () => {
+    if (!deletePassword) return;
+    setIsSubmitting(true);
+    try {
+      await adminService.verifyPassword(deletePassword);
+      await adminService.deleteBooking(bookingToDelete.id);
+      setIsDeleteModalOpen(false);
+      showStatus('Đã xóa đơn đặt lịch vĩnh viễn', 'success');
+      
+      // Await reloads to ensure UI is consistent before finishing submit state
+      if (activeSubtab === 'past') {
+        await fetchHistoryPage(historyPage);
+      } else {
+        await reloadBookings();
       }
+    } catch (err) {
+      showStatus(err.message, 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -323,20 +354,22 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       if (e.key === 'Escape') {
         setIsBillOpen(false);
         setIsModalOpen(false);
+        setIsDeleteModalOpen(false);
       }
       if (e.key === 'Enter') {
         if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'TEXTAREA') {
           setIsBillOpen(false);
           setIsModalOpen(false);
+          setIsDeleteModalOpen(false);
         }
       }
     };
     
-    if (isBillOpen || isModalOpen) {
+    if (isBillOpen || isModalOpen || isDeleteModalOpen) {
       window.addEventListener('keydown', handleKeyDown);
     }
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isBillOpen, isModalOpen]);
+  }, [isBillOpen, isModalOpen, isDeleteModalOpen]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -346,7 +379,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     start_time: '',
     end_time: '',
     total_price: '0',
-    status: 'Pending'
+    status: 'Pending',
+    deposit_type: 'standard'
   });
 
   // Auto-calculate price & Check Live Conflict
@@ -428,7 +462,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
           start_time: formData.start_time,
           end_time: formData.end_time,
           total_price: Number(formData.total_price),
-          status: formData.status
+          status: formData.status,
+          deposit_type: formData.deposit_type
         });
       } else {
         // 3. Specialized Create
@@ -504,7 +539,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                 start_time: startStr, 
                 end_time: endStr, 
                 total_price: '0', 
-                status: defaultStatus 
+                status: defaultStatus,
+                deposit_type: 'standard'
               }); 
               setIsModalOpen(true); 
             }}>
@@ -596,7 +632,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                           <CheckCircle size={18} style={{color: '#28a745'}} />
                         </button>
                         <button className="action-btn edit" onClick={() => handleEdit(b)} title="Sửa"><Edit3 size={16} /></button>
-                        <button className="action-btn delete" onClick={() => handleDelete(b.id)} title="Xóa"><Trash2 size={16} /></button>
+                        <button className="action-btn delete" onClick={() => handleDelete(b)} title="Xóa"><Trash2 size={16} /></button>
                       </td>
                     </tr>
                   ))}
@@ -660,7 +696,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       </button>
                     )}
                     <button className="action-btn edit" onClick={() => handleEdit(b)} title="Sửa"><Edit3 size={16} /></button>
-                    <button className="action-btn delete" onClick={() => handleDelete(b.id)} title="Xóa"><Trash2 size={16} /></button>
+                    <button className="action-btn delete" onClick={() => handleDelete(b)} title="Xóa"><Trash2 size={16} /></button>
                   </td>
                 </tr>
               ))}
@@ -862,6 +898,71 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
         })()
       )}
 
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && bookingToDelete && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal animate-in delete-confirm-modal" style={{ maxWidth: '450px' }}>
+            <header className="modal-header">
+              <h3 style={{ color: '#4b3c3cff' }}> XÁC NHẬN XÓA VĨNH VIỄN</h3>
+              <button className="close-btn" onClick={() => setIsDeleteModalOpen(false)}>×</button>
+            </header>
+            
+            <div className="modal-body" style={{ padding: '1.5rem' }}>
+              <p style={{ marginBottom: '1rem', fontSize: '0.95rem', lineHeight: '1.5' }}>
+                Hành động này sẽ <strong>xóa vĩnh viễn</strong> dữ liệu đặt lịch sau khỏi hệ thống. Thao tác này không thể hoàn tác.
+              </p>
+              
+              <div className="delete-event-details" style={{ 
+                backgroundColor: '#eb9173ff', 
+                border: '1px solid #f9f9f9ff', 
+                padding: '1rem',
+                marginBottom: '1.5rem'
+              }}>
+                <div style={{ marginBottom: '0.5rem' }}><strong>Khách hàng:</strong> {bookingToDelete.customerName}</div>
+                <div style={{ marginBottom: '0.5rem' }}><strong>SĐT:</strong> {bookingToDelete.phone}</div>
+                <div style={{ marginBottom: '0.5rem' }}><strong>Thiết bị:</strong> {bookingToDelete.productName}</div>
+                <div><strong>Thời gian:</strong> {bookingToDelete.startDate} - {bookingToDelete.endDate}</div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '0' }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px', fontSize: '0.85rem' }}>
+                  NHẬP MẬT KHẨU QUẢN TRỊ ĐỂ XÁC NHẬN:
+                </label>
+                <input 
+                  type="password" 
+                  className="login-input"
+                  style={{ width: '100%', borderColor: '#fca5a5' }}
+                  placeholder="Nhập mật khẩu của bạn..."
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  autoFocus
+                  autoComplete="new-password"
+                  name="admin-delete-verify-v2"
+                />
+              </div>
+            </div>
+
+            <footer className="modal-footer" style={{ borderTop: '1px solid #fee2e2', padding: '1rem', display: 'flex', gap: '1rem' }}>
+              <button 
+                className="btn-cancel" 
+                style={{ flex: 1, backgroundColor: '#f3f4f6', color: '#4b5563' }}
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                className="btn-save" 
+                style={{ flex: 1, backgroundColor: '#ef4444' }}
+                disabled={!deletePassword || isSubmitting}
+                onClick={confirmDeletion}
+              >
+                {isSubmitting ? 'Đang xác minh...' : 'XÓA NGAY'}
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
+
       {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="admin-modal-overlay">
@@ -963,6 +1064,24 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                     <option value="Cancelled">Đã hủy</option>
                   </select>
                 </div>
+              </div>
+              
+              <div className="form-group">
+                <label>PHƯƠNG THỨC ĐẶT CỌC (ADMIN OVERRIDE)</label>
+                <select 
+                  value={formData.deposit_type}
+                  onChange={e => setFormData({...formData, deposit_type: e.target.value})}
+                  style={{ borderColor: formData.deposit_type === 'student' ? '#eb9173' : '#d5d5d5' }}
+                >
+                  <option value="standard">Cơ bản: CCCD + 3.000.000 VNĐ</option>
+                  <option value="property">Tài sản: CCCD + Tài sản tương đương</option>
+                  <option value="student">Ưu đãi HSSV: CCCD + 500k-1M + VNEID</option>
+                </select>
+                {formData.deposit_type === 'student' && (
+                  <small style={{ color: '#eb9173', fontWeight: 600, marginTop: '4px', display: 'block' }}>
+                    💡 Chế độ ưu đãi HSSV đang được kích hoạt cho đơn này.
+                  </small>
+                )}
               </div>
                <div className="modal-footer">
                 {conflictError && (
