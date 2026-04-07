@@ -1114,6 +1114,46 @@ export const adminService = {
     } catch (err) {
       console.error('Error in sendBookingEmails:', err);
     }
+  },
+
+  /**
+   * Save a booking draft to Supabase.
+   */
+  async saveBookingDraft(phone, data) {
+    if (!phone) return;
+    const { error } = await supabase
+      .from('booking_drafts')
+      .upsert({ phone, data, updated_at: new Date().toISOString() }, { onConflict: 'phone' });
+    if (error) console.error('Error saving draft:', error);
+  },
+
+  /**
+   * Fetch a booking draft by phone.
+   */
+  async getBookingDraft(phone) {
+    if (!phone) return null;
+    const { data, error } = await supabase
+      .from('booking_drafts')
+      .select('data')
+      .eq('phone', phone)
+      .maybeSingle();
+    if (error) {
+      console.error('Error fetching draft:', error);
+      return null;
+    }
+    return data?.data || null;
+  },
+
+  /**
+   * Delete a booking draft.
+   */
+  async deleteBookingDraft(phone) {
+    if (!phone) return;
+    const { error } = await supabase
+      .from('booking_drafts')
+      .delete()
+      .eq('phone', phone);
+    if (error) console.error('Error deleting draft:', error);
   }
 };
 

@@ -27,7 +27,7 @@ const BookingPage = () => {
   const [cusEmail, setCusEmail] = useState('');
   const [cusCity, setCusCity] = useState('Hồ Chí Minh');
   const [cusSocial, setCusSocial] = useState('');
-  const [cusDepositType, setCusDepositType] = useState('standard'); // 'standard', 'property'
+  const [cusDepositType, setCusDepositType] = useState('standard'); 
   
   const [result, setResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,6 +35,88 @@ const BookingPage = () => {
   const [availabilitySnapshot, setAvailabilitySnapshot] = useState(null);
   const [isCopying, setIsCopying] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  // New state for cross-device recovery
+  const [remoteDraft, setRemoteDraft] = useState(null);
+  const [showRemotePrompt, setShowRemotePrompt] = useState(false);
+
+  // 1. RECOVER DATA FROM LOCAL STORAGE ON MOUNT
+  useEffect(() => {
+    const saved = localStorage.getItem('booking_draft');
+    if (saved) {
+      try {
+        const d = JSON.parse(saved);
+        if (d.selectedCamera) setSelectedCamera(d.selectedCamera);
+        if (d.startDate) setStartDate(d.startDate);
+        if (d.endDate) setEndDate(d.endDate);
+        if (d.rentalType) setRentalType(d.rentalType);
+        if (d.shiftType) setShiftType(d.shiftType);
+        if (d.cusName) setCusName(d.cusName);
+        if (d.cusPhone) setCusPhone(d.cusPhone);
+        if (d.cusEmail) setCusEmail(d.cusEmail);
+        if (d.cusCity) setCusCity(d.cusCity);
+        if (d.cusSocial) setCusSocial(d.cusSocial);
+        if (d.cusDepositType) setCusDepositType(d.cusDepositType);
+        if (d.step && d.step < 3) setStep(d.step);
+      } catch (err) { console.error('Error recovering draft:', err); }
+    }
+  }, []);
+
+  // 2. SAVE DATA TO LOCAL STORAGE & SUPABASE DRAFT
+  useEffect(() => {
+    if (step >= 3) return; // Don't save if finished
+    
+    const draftData = {
+      selectedCamera, startDate, endDate, rentalType, shiftType,
+      cusName, cusPhone, cusEmail, cusCity, cusSocial, cusDepositType,
+      step
+    };
+    
+    // Always update local for same-device recovery
+    localStorage.setItem('booking_draft', JSON.stringify(draftData));
+
+    // Debounced remote backup if we have a phone number
+    const timer = setTimeout(() => {
+      if (cusPhone && cusPhone.length >= 10) {
+        adminService.saveBookingDraft(cusPhone, draftData);
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [selectedCamera, startDate, endDate, rentalType, shiftType, cusName, cusPhone, cusEmail, cusCity, cusSocial, cusDepositType, step]);
+
+  // 3. CHECK FOR REMOTE DRAFT WHEN PHONE IS ENTERED
+  useEffect(() => {
+    const checkRemote = async () => {
+      if (cusPhone && cusPhone.length >= 10 && !remoteDraft) {
+        const d = await adminService.getBookingDraft(cusPhone);
+        if (d && (d.step > 1 || d.cusName)) {
+           // We found a draft that has more info than the current local state
+           setRemoteDraft(d);
+           setShowRemotePrompt(true);
+        }
+      }
+    };
+    checkRemote();
+  }, [cusPhone]);
+
+  const applyRemoteDraft = () => {
+    if (!remoteDraft) return;
+    const d = remoteDraft;
+    if (d.selectedCamera) setSelectedCamera(d.selectedCamera);
+    if (d.startDate) setStartDate(d.startDate);
+    if (d.endDate) setEndDate(d.endDate);
+    if (d.rentalType) setRentalType(d.rentalType);
+    if (d.shiftType) setShiftType(d.shiftType);
+    if (d.cusName) setCusName(d.cusName);
+    if (d.cusEmail) setCusEmail(d.cusEmail);
+    if (d.cusCity) setCusCity(d.cusCity);
+    if (d.cusSocial) setCusSocial(d.cusSocial);
+    if (d.cusDepositType) setCusDepositType(d.cusDepositType);
+    if (d.step && d.step < 3) setStep(d.step);
+    
+    setShowRemotePrompt(false);
+  };
 
   const renderGuideContent = () => (
     <div className="guide-content">
@@ -308,6 +390,10 @@ const BookingPage = () => {
         source: 'Website',
         breakdown: result.breakdown
       });
+      // Clear draft on success
+      localStorage.removeItem('booking_draft');
+      if (cusPhone) adminService.deleteBookingDraft(cusPhone);
+      
       setStep(3);
     } catch (error) {
       alert('Lỗi: ' + error.message);
@@ -399,6 +485,17 @@ const BookingPage = () => {
 
   return (
     <div className="booking-page animate-in">
+      {/* Remote Recovery Prompt */}
+      {showRemotePrompt && (
+        <div className="draft-recovery-bar animate-slide-down">
+          <p>Bạn chưa hoàn thành đơn đặt trước đó. Bạn có muốn khôi phục?</p>
+          <div className="draft-actions">
+             <button onClick={applyRemoteDraft}>KHÔI PHỤC</button>
+             <button className="btn-close-draft" onClick={() => setShowRemotePrompt(false)}>BỎ QUA</button>
+          </div>
+        </div>
+      )}
+
       <div className="container">
         <div className="booking-progress">
           <div className={`step-dot ${step >= 1 ? 'active' : ''}`}><span>1</span> CHỌN MÁY & NGÀY</div>
