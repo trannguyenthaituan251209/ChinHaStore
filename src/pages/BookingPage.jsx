@@ -33,7 +33,7 @@ const BookingPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [availabilitySnapshot, setAvailabilitySnapshot] = useState(null);
-  const [isCopying, setIsCopying] = useState(false);
+  const [isCopyingAccount, setIsCopyingAccount] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
   // New state for cross-device recovery
@@ -402,10 +402,10 @@ const BookingPage = () => {
     }
   };
 
-  const handleCopyAccount = () => {
-    navigator.clipboard.writeText('000000407891 - SeaBank');
-    setIsCopying(true);
-    setTimeout(() => setIsCopying(false), 2000);
+  const handleCopyAccountNum = () => {
+    navigator.clipboard.writeText('000000407891');
+    setIsCopyingAccount(true);
+    setTimeout(() => setIsCopyingAccount(false), 2000);
   };
 
   const handleDownloadInvoice = async () => {
@@ -744,7 +744,7 @@ const BookingPage = () => {
           <div className="ticket-container animate-in">
             <div className="booking-ticket" id="main-ticket-view">
               <div className="ticket-header">
-                <h1>THÔNG TIN ĐẶT THUÊ</h1>
+                <h1>PHIẾU THANH TOÁN GIỮ LỊCH</h1>
                 <p>Mã yêu cầu: #{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
               </div>
 
@@ -778,9 +778,35 @@ const BookingPage = () => {
                   {result?.breakdown.map((item, idx) => (
                     <div key={idx} className="ticket-line">
                       <span>{item.label}</span>
+                      <span>.................................................................................</span>
                       <span>{item.value} đ</span>
                     </div>
                   ))}
+                </div>
+                <div className="ticket-divider"></div>
+
+                <div className="ticket-section bank-details-on-ticket">
+                  <div className="ticket-label">Thông tin thanh toán</div>
+                  <div className="bank-info-line">
+                    <span className="bank-info-label">Ngân hàng:</span>
+                    <strong className="bank-info-val">SeaBank</strong>
+                  </div>
+                  <div className="bank-info-line">
+                    <span className="bank-info-label">Số tài khoản:</span>
+                    <div className="account-number-box">
+                      <strong className="bank-info-val">000000407891</strong>
+                      <button className="btn-copy-mini" onClick={handleCopyAccountNum}>
+                        {isCopyingAccount ? 'ĐÃ SAO CHÉP' : 'SAO CHÉP'}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="bank-info-line">
+                    <span className="bank-info-label">Chủ tài khoản:</span>
+                    <strong className="bank-info-val">MAN HI CHIN</strong>
+                  </div>
+                  <div className="notice-box">
+                    <p className="notice-text">ChinHa Store đã nhận được thông tin của bạn. Chúng tôi sẽ liên hệ lại trong vòng 15 phút để xác nhận đơn hàng và chốt lịch khi nhận được thanh toán giữ chỗ của bạn. Nếu sau 15 phút bạn không được liên hệ vui lòng gọi số 0842204207 (Hi Chin) hoặc 0911792003 (Thái Tuấn). Lưu ý: Giờ hoạt động của ChinHaStore là từ 7:30 sáng đến 22:00 hàng ngày </p>
+                  </div>
                 </div>
 
                 <div className="ticket-divider"></div>
@@ -826,9 +852,6 @@ const BookingPage = () => {
               </div>
 
               <div className="ticket-actions-row">
-                <button className="btn-ticket-action secondary" onClick={handleCopyAccount}>
-                  {isCopying ? 'ĐÃ SAO CHÉP!' : 'Sao chép STK và Ngân Hàng'}
-                </button>
                 <button className="btn-ticket-action primary" onClick={handleDownloadInvoice} disabled={isDownloading}>
                   {isDownloading ? 'ĐANG XỬ LÝ...' : 'Tải Hóa Đơn'}
                 </button>
@@ -857,11 +880,11 @@ const BookingPage = () => {
                   <div className="bill-v2-product-info">
                     <h4 className="camera-name">{currentProduct.name?.toUpperCase()}</h4>
                     <div className="bill-v2-dates">
-                      <div className="date-box border-purple">
+                      <div className="date-box">
                         <span>NHẬN MÁY</span>
                         <strong>{result?.times.start}</strong>
                       </div>
-                      <div className="date-box border-red">
+                      <div className="date-box">
                         <span>TRẢ MÁY</span>
                         <strong>{result?.times.end}</strong>
                       </div>

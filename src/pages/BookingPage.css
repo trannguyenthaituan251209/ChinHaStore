@@ -715,13 +715,13 @@ html, body {
 
 .summary-label {
   font-size: 0.65rem;
-  font-weight: 800;
+  font-family: "ShopeeDisplayB", sans-serif !important;
   color: #999;
 }
 
 .summary-val {
   font-size: 0.85rem;
-  font-weight: 700;
+  font-family: "ShopeeDisplayB", sans-serif !important;
   color: #111;
 }
 
@@ -734,8 +734,8 @@ html, body {
   display: flex;
   justify-content: space-between;
   font-size: 0.85rem;
-  font-weight: 600;
   color: #444;
+  font-family: "ShopeeDisplayM", sans-serif;
 }
 
 .ticket-total-row {
@@ -830,7 +830,15 @@ html, body {
   color: #999;
   font-weight: 500;
 }
-
+.notice-box{
+  margin-top: 1rem;
+}
+.notice-text{
+  font-size: 0.8rem;
+  color: #ca9090;
+  line-height: 1.5;
+  font-family: "ShopeeDisplayM", sans-serif;
+}
 .footer-brand {
   margin-top: 1rem !important;
   font-weight: 900;
@@ -855,7 +863,7 @@ html, body {
 
 .ticket-actions-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 0.8rem;
   margin-top: 1.5rem;
   width: 100%;
@@ -892,9 +900,10 @@ html, body {
 }
 
 .ticket-value-total {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: 900;
   color: #111;
+  font-family: "ShopeeDisplayB", sans-serif !important;
 }
 
 /* == PORTED INVOICE V2 STYLES FOR CAPTURE == */
@@ -913,10 +922,10 @@ html, body {
 .bill-v2-header p { font-size: 0.7rem; margin: 0; opacity: 0.8; }
 .bill-v2-divider { border: none; border-top: 1.5px solid #000; margin: 0.6rem 0; }
 .bill-v2-product-section { display: flex; gap: 1rem; margin-bottom: 0.8rem; align-items: center; }
-.bill-v2-product-info { flex: 1; min-width: 0; }
-.camera-name { font-size: 1rem; margin: 0 0 0.6rem 0; line-height: 1.1; text-transform: uppercase; }
+.bill-v2-product-info { flex: 1; min-width: 0; text-align: center; }
+.camera-name { font-size: 1rem; margin: 0 0 0.6rem 0; line-height: 1.1; text-transform: uppercase; font-weight: bold; }
 .bill-v2-dates { display: flex; gap: 0.5rem; justify-content: space-between; }
-.date-box { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0.3rem; flex: 1; background: #fff; border: 1px solid #eee; }
+.date-box { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0.3rem; flex: 1; background: #fff;}
 .date-box span { font-size: 0.65rem; margin-bottom: 0.15rem; font-weight: bold; opacity: 0.6; }
 .date-box strong { font-size: 0.8rem; }
 .bill-v2-customer-section p { font-size: 0.9rem; margin: 0.3rem 0; }
@@ -927,7 +936,15 @@ html, body {
 .bill-v2-toc-value { display: table-cell; white-space: nowrap; vertical-align: bottom; font-size: 0.85rem; padding-left: 6px; font-weight: bold; }
 .bill-v2-total-section { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; margin-top: 0.8rem; }
 .main-total { font-size: 1.2rem; font-weight: bold; margin-top: 0.4rem; border-top: 2px solid #000; padding-top: 0.4rem; }
-.bill-v2-qr-section { text-align: center; margin-top: 1rem; border: 1px dashed #ccc; padding: 1rem 0.5rem; }
+.bill-v2-qr-section { 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center; 
+  margin-top: 1rem; 
+  border: 1px dashed #ccc; 
+  padding: 1rem 0.5rem; 
+}
 
 /* RESPONSIVE */
 @media (max-width: 1024px) {
@@ -1105,3 +1122,52 @@ html, body {
     flex: 1;
   }
 }
+
+
+/* Bank Details on Ticket UI */
+.bank-details-on-ticket {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 0.5rem 0;
+}
+
+.bank-info-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.bank-info-label {
+  color: #777;
+  font-size: 0.9rem;
+  font-family: "ShopeeDisplayB", sans-serif;
+}
+
+.bank-info-val {
+ color: #111;
+ font-family: "ShopeeDisplayM", sans-serif;
+}
+
+.account-number-box {
+ display: flex;
+ align-items: center;
+ gap: 0.8rem;
+}
+
+.btn-copy-mini {
+ padding: 2px 8px;
+ font-size: 0.6rem;
+ font-weight: 900;
+ color: #a5a5a5;
+ cursor: pointer;
+ transition: all 0.2s ease;
+ font-family: "ShopeeDisplayB", sans-serif;
+}
+
+.btn-copy-mini:hover {
+ background-color: #eb9173ff;
+ color: #fff;
+}
+
