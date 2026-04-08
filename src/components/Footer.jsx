@@ -33,9 +33,9 @@ const Footer = () => {
 
           <div className="footer-contact">
             <h4 className="footer-heading">LIÊN HỆ</h4>
-            <p>124 Lê Thánh Tông, Phường Buôn Ma Thuột, Tỉnh Đăk Lăk</p>
-            <p>0842204207</p>
-            <p>thaituantrannguyen@gmail.com</p>
+            <p href="https://maps.app.goo.gl/jNToF7Fc4keUdDkBA" target="_blank" rel="noreferrer">124 Lê Thánh Tông, Phường Buôn Ma Thuột, Tỉnh Đăk Lăk</p>
+            <p href="tel:0842204207">0842204207</p>
+            <p href="mailto:[EMAIL_ADDRESS]">thaituantrannguyen@gmail.com</p>
           </div>
         </div>
 

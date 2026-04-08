@@ -610,6 +610,33 @@ html, body {
 }
 
 /* == MODALS == */
+.bill-type-selector {
+  background: #eee;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.type-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #888;
+  cursor: pointer;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: all 0.2s;
+  font-family: var(--font-primary);
+}
+
+.type-tab.active {
+  background: #fff;
+  color: var(--color-admin-accent);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
 .admin-modal-overlay {
     position: fixed;
     top: 0;
@@ -676,6 +703,8 @@ html, body {
 
 .modal-form {
     padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .form-row {

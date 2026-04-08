@@ -149,6 +149,7 @@ export const adminService = {
         product_id: b.product_id,
         unit_id: b.unit_id,
         deposit_type: b.deposit_type || 'standard',
+        city: b.city || '',
         is_seen: b.is_seen,
         created_at: b.created_at
       };
@@ -211,6 +212,7 @@ export const adminService = {
         end_time: b.end_time,
         product_id: b.product_id,
         deposit_type: b.deposit_type || 'standard',
+        city: b.city || '',
         is_seen: b.is_seen
       };
     });

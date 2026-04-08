@@ -24,6 +24,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [depositProperty, setDepositProperty] = useState('CĂN CƯỚC CÔNG DÂN');
   const [discountAmount, setDiscountAmount] = useState('0');
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [billType, setBillType] = useState('type1'); // 'type1', 'type2', 'type3', 'type4'
   const [productList, setProductList] = useState([]);
   const [conflictError, setConflictError] = useState(null);
   const [conflicts, setConflicts] = useState([]);
@@ -182,7 +183,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       'student': 'CCCD + 500k-1M + VNEID IMAGE'
     };
     setDepositProperty(mapping[booking.deposit_type] || 'CĂN CƯỚC CÔNG DÂN');
-    
+    setBillType('type1'); // Reset to type 1 when opening
     setIsBillOpen(true);
   };
 
@@ -788,7 +789,12 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
           
           const dAmount = Math.round(finalTotalNum * (dPercent / 100));
           const dAmountStr = new Intl.NumberFormat('vi-VN').format(dAmount);
-          const finalTotalStr = new Intl.NumberFormat('vi-VN').format(finalTotalNum);
+          
+          // Extract numeric security deposit from depositProperty string (e.g., "CCCD + 3.000.000 VNĐ")
+          const securityDepositNum = Number(depositProperty.replace(/\D/g, '')) || 0;
+          const displayTotalWithSecurity = finalTotalNum + securityDepositNum;
+          const finalTotalStr = new Intl.NumberFormat('vi-VN').format(displayTotalWithSecurity);
+          const remainingAmount = displayTotalWithSecurity - dAmount;
 
           return (
             <div className="admin-modal-overlay">
@@ -799,6 +805,13 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
             </header>
 
             <div style={{ overflowY: 'auto', padding: '1.5rem', flex: 1, backgroundColor: '#f5f5f5' }}>
+                <div className="bill-type-selector" style={{display: 'flex', gap: '5px', marginBottom: '15px', overflowX: 'auto', paddingBottom: '5px'}}>
+                  <button className={`type-tab ${billType === 'type1' ? 'active' : ''}`} onClick={() => setBillType('type1')}>HĐ cọc</button>
+                  <button className={`type-tab ${billType === 'type2' ? 'active' : ''}`} onClick={() => setBillType('type2')}>P.Thu cọc</button>
+                  <button className={`type-tab ${billType === 'type3' ? 'active' : ''}`} onClick={() => setBillType('type3')}>HĐ Còn lại</button>
+                  <button className={`type-tab ${billType === 'type4' ? 'active' : ''}`} onClick={() => setBillType('type4')}>P.Thu cuối</button>
+                </div>
+
                 <div style={{display: 'flex', gap: '1rem',paddingBottom:'1rem'}}>
                   <div style={{flex: 1}}>
                     <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TÀI SẢN CỌC:</label>
@@ -813,7 +826,13 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               <div className="bill-invoice-v2" id="invoice-capture-area">
               <div className="bill-v2-header">
                 <h2>CHINHA STORE</h2>
-                <p>Mã hợp đồng: {selectedBooking.id.toUpperCase()}</p>
+                <p>
+                  {billType === 'type1' && 'HÓA ĐƠN THANH TOÁN GIỮ LỊCH'}
+                  {billType === 'type2' && 'PHIẾU THU TIỀN CỌC'}
+                  {billType === 'type3' && 'HÓA ĐƠN THANH TOÁN CÒN LẠI'}
+                  {billType === 'type4' && 'BIÊN LAI THANH TOÁN'}
+                </p>
+                <p style={{fontSize: '0.6rem', marginTop: '4px'}}>Mã hợp đồng: {selectedBooking.id.toUpperCase()}</p>
               </div>
               
               <hr className="bill-v2-divider" />
@@ -844,6 +863,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               <div className="bill-v2-customer-section">
                 <p>Tên khách hàng: {selectedBooking.customerName.toUpperCase()}</p>
                 <p>Số điện thoại: {selectedBooking.phone}</p>
+                <p>Nhận máy tại: {selectedBooking.city || 'TẠI CỬA HÀNG (22 LÊ THÁNH TÔNG)'}</p>
                 <p>Tài sản cọc: {depositProperty.toUpperCase()}</p>
                 <p>Nền tảng đặt lịch : {selectedBooking.rentalType === 'Manual' ? 'Đặt trực tiếp' : 'Qua Website'}</p>
               </div>
@@ -864,26 +884,50 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               <hr className="bill-v2-divider" />
               
               <div className="bill-v2-total-section">
-                <div className="total-row"><span>TẠM TÍNH:</span> <span>{selectedBooking.totalPrice} VNĐ</span></div>
+                <div className="total-row"><span>TỔNG CHI PHÍ:</span> <span>{selectedBooking.totalPrice} VNĐ</span></div>
                 <div className="total-row"><span>GIẢM GIÁ:</span> <span>{new Intl.NumberFormat('vi-VN').format(Number(discountAmount.replace(/\D/g, '')) || 0)} VNĐ</span></div>
-                <div className="total-row" style={{opacity: 0.7}}><span>TỔNG CHI PHÍ DỰ KIẾN:</span> <span>{finalTotalStr} VNĐ</span></div>
-                <div className="total-row main-total" style={{borderTop: '2px dashed #000', paddingTop: '10px', marginTop: '10px'}}>
-                  <span>TIỀN CỌC CẦN THANH TOÁN ({dPercent}%):</span> 
-                  <span style={{color: '#f60'}}>{dAmountStr} VNĐ</span>
-                </div>
-                <p style={{fontSize: '0.65rem', color: '#666', textAlign: 'right', marginTop: '5px'}}>* Thanh toán cọc để xác nhận giữ lịch.</p>
+                
+                {(billType === 'type1' || billType === 'type2') ? (
+                  <>
+                    <div className="total-row main-total" style={{borderTop: '2px dashed #000', paddingTop: '10px', marginTop: '10px'}}>
+                      <span>{billType === 'type1' ? 'TIỀN CỌC CẦN THANH TOÁN' : 'SỐ TIỀN ĐÃ CỌC'} ({dPercent}%):</span> 
+                      <span style={{color: '#f60'}}>{dAmountStr} VNĐ</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="total-row"><span>ĐÃ THANH TOÁN GIỮ LỊCH:</span> <span>{dAmountStr} VNĐ</span></div>
+                    {securityDepositNum > 0 && (
+                      <div className="total-row"><span>TIỀN CỌC CHÂN MÁY/TÀI SẢN:</span> <span>{new Intl.NumberFormat('vi-VN').format(securityDepositNum)} VNĐ</span></div>
+                    )}
+                    <div className="total-row main-total" style={{borderTop: '2px dashed #000', paddingTop: '10px', marginTop: '10px'}}>
+                      <span>{billType === 'type3' ? 'SỐ TIỀN CẦN THANH TOÁN CÒN LẠI' : 'SỐ TIỀN ĐÃ TẤT TOÁN'}:</span> 
+                      <span style={{color: '#f60'}}>
+                        {billType === 'type3' ? new Intl.NumberFormat('vi-VN').format(remainingAmount) : finalTotalStr} VNĐ
+                      </span>
+                    </div>
+                  </>
+                )}
+                <p style={{fontSize: '0.65rem', color: '#666', textAlign: 'right', marginTop: '5px'}}>
+                  {billType === 'type1' && '* Thanh toán cọc để xác nhận giữ lịch.'}
+                  {billType === 'type2' && '* Đã nhận được tiền cọc giữ thiết bị.'}
+                  {billType === 'type3' && '* Thanh toán phần còn lại khi nhận máy.'}
+                  {billType === 'type4' && '* Đã hoàn tất mọi nghĩa vụ thanh toán.'}
+                </p>
               </div>
               
-              <div className="bill-v2-qr-section" style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                <img 
-                  src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${dAmount}&addInfo=${selectedBooking.id.slice(0, 8)}`} 
-                  alt="QR Code" 
-                  className="qr-img" 
-                  crossOrigin="anonymous" 
-                />
-                <p>SEABANK</p>
-                <p>MAN HI CHIN</p>
-              </div>
+              {(billType === 'type1' || billType === 'type3') && (
+                <div className="bill-v2-qr-section" style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                  <img 
+                    src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${billType === 'type1' ? dAmount : remainingAmount}&addInfo=${selectedBooking.id.slice(0, 8)}${billType === 'type3' ? ' CON LAI' : ''}`} 
+                    alt="QR Code" 
+                    className="qr-img" 
+                    crossOrigin="anonymous" 
+                  />
+                  <p>SEABANK</p>
+                  <p>MAN HI CHIN</p>
+                </div>
+              )}
               </div>
             </div>
 
