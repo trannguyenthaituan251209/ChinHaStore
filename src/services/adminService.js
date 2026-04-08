@@ -128,7 +128,7 @@ export const adminService = {
         year: 'numeric',
         hour12: false,
         timeZone: 'Asia/Ho_Chi_Minh'
-      }) : 'N/A';
+      }).replace(' ', ' - ') : 'N/A';
 
       return {
         id: b.id,
@@ -196,7 +196,7 @@ export const adminService = {
         year: 'numeric',
         hour12: false,
         timeZone: 'Asia/Ho_Chi_Minh'
-      }) : 'N/A';
+      }).replace(' ', ' - ') : 'N/A';
 
       return {
         id: b.id,
@@ -321,7 +321,7 @@ export const adminService = {
       .from('bookings')
       .select('unit_id')
       .eq('product_id', productId)
-      .in('status', ['Confirmed', 'Returned'])
+      .in('status', ['Confirmed', 'Renting', 'Returned'])
       .lt('start_time', endTime)
       .gt('end_time', startTime);
 
@@ -368,7 +368,7 @@ export const adminService = {
       .from('bookings')
       .select('unit_id, start_time, end_time')
       .eq('product_id', productId)
-      .in('status', ['Confirmed', 'Returned'])
+      .in('status', ['Confirmed', 'Renting', 'Returned'])
       .lt('start_time', thirtyDaysLater.toISOString())
       .gt('end_time', now.toISOString());
 
@@ -399,7 +399,7 @@ export const adminService = {
         customers (full_name)
       `)
       .eq('product_id', productId)
-      .in('status', ['Confirmed', 'Returned'])
+      .in('status', ['Confirmed', 'Renting', 'Returned'])
       .lt('start_time', endTime)
       .gt('end_time', startTime);
 
@@ -1019,37 +1019,59 @@ export const adminService = {
             month: '2-digit', 
             year: 'numeric',
             timeZone: 'Asia/Ho_Chi_Minh'
-        });
+        }).replace(' ', ' - ');
       };
 
-      // Initialize EmailJS once at the start
       emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
 
-      // Generate both a raw array (for loops) and a pre-formatted string (for backup)
-      const breakdownData = (breakdown || []).map(item => ({
-        label: item.label,
-        value: item.value
-      }));
+      // --- CALCULATE FINANCIALS FOR THE EMAIL ---
+      const totalVal = Number(bookingData.total_price) || 0;
+      const discVal = Number(String(bookingData.discount_amount || '0').replace(/\D/g, '')) || 0;
+      const finalNet = totalVal - discVal;
+      
+      const startDT = new Date(bookingData.start_time);
+      const endDT = new Date(bookingData.end_time);
+      const dDays = Math.ceil((endDT - startDT) / (1000 * 60 * 60 * 24)) || 1;
+      let dPercent = 100;
+      if (dDays >= 2 && dDays <= 5) dPercent = 50;
 
-      // Generate HTML rows - FLAT STRING (no newlines) to prevent EmailJS corruption
+      const dAmountNum = Math.round(finalNet * (dPercent / 100));
+      const securityDepositNum = Number(String(bookingData.deposit_property || '').replace(/\D/g, '')) || 0;
+      const totalCombined = finalNet + securityDepositNum;
+
+      // Generate Boutique Price Table HTML for EmailJS (Flat string to prevent corruption)
       const priceTableHtml = (breakdown || []).length > 0 
-        ? breakdown.map(item => `<tr><td style="color: #4a5568; padding: 5px 0;">${item.label}:</td><td style="text-align: right; color: #1a202c; font-weight: 500;">${item.value} VNĐ</td></tr>`).join('')
-        : '<tr><td colspan="2" style="color: #718096; padding: 5px 0;">Đang tính toán...</td></tr>';
+        ? breakdown.map(item => `
+            <tr>
+              <td style="padding: 4px 5px 4px 0; white-space: nowrap; color: #333333; font-size: 14px;">${item.label}</td>
+              <td width="100%" style="border-bottom: 1.5px dotted #cccccc; position: relative; bottom: 4px;">&nbsp;</td>
+              <td align="right" style="padding: 4px 0 4px 5px; white-space: nowrap; font-weight: 700; color: #000000; font-size: 14px;">${item.value} VNĐ</td>
+            </tr>
+          `).join('')
+        : '<tr><td colspan="3" style="color: #718096; padding: 5px 0;">Đang tính toán...</td></tr>';
 
-      // Data for both internal replacement and EmailJS
       const templateData = {
+        order_id: (bookingData.id || 'P-NEW').toUpperCase(),
+        order_id_short: (bookingData.id || 'P-NEW').slice(0, 8).toUpperCase(),
         customer_name: bookingData.customerName || 'Quý khách',
-        phone: bookingData.phone || 'Chưa cung cấp',
+        customer_phone: bookingData.phone || 'Chưa cung cấp',
         product_name: product?.name || 'Sản phẩm',
         product_image: product?.image_url || 'https://via.placeholder.com/100',
         start_date: format(bookingData.start_time),
         end_date: format(bookingData.end_time),
-        total_price: new Intl.NumberFormat('vi-VN').format(bookingData.total_price),
-        location: bookingData.city || 'Chưa rõ',
-        social: bookingData.social || 'Chưa rõ',
-        rental_package: bookingData.rentalType || 'Thanh toán linh hoạt',
-        price_table: priceTableHtml,
-        price_breakdown_rows: priceTableHtml 
+        delivery_info: bookingData.city || 'Tại cửa hàng (22 Lê Thánh Tông)',
+        deposit_property: bookingData.deposit_property || 'CCCD + 3.000.000 VNĐ',
+        source: bookingData.source || 'Website',
+        
+        // Formatted Prices
+        total_price: new Intl.NumberFormat('vi-VN').format(totalCombined),
+        discount_amount: new Intl.NumberFormat('vi-VN').format(discVal),
+        deposit_amount: new Intl.NumberFormat('vi-VN').format(dAmountNum),
+        deposit_amount_numeric: dAmountNum,
+        remaining_amount: new Intl.NumberFormat('vi-VN').format(totalCombined - dAmountNum),
+        
+        // HTML Content
+        price_table_html: priceTableHtml
       };
 
       const replaceAll = (text) => {
@@ -1057,7 +1079,6 @@ export const adminService = {
         let result = text;
         Object.entries(templateData).forEach(([key, val]) => {
           if (typeof val === 'string' || typeof val === 'number') {
-            // Remove any potential hidden characters that break EmailJS
             const safeVal = String(val).replace(/\n/g, ' ').trim();
             result = result.split(`{{${key}}}`).join(safeVal);
           }
@@ -1070,23 +1091,15 @@ export const adminService = {
         const adminSubject = replaceAll(config.admin_notice.subject);
         const adminTo = (config.admin_notice.recipient && config.admin_notice.recipient.trim()) || 'manhichin.chinhastore@gmail.com';
         
-        console.log('--- EMAILJS SENDING (ADMIN THREAD) ---');
-        console.log('Recipient:', adminTo);
-
         await emailjs.send(
           import.meta.env.VITE_EMAILJS_SERVICE_ID,
           import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
           {
             ...templateData,
-            header_title: 'THÔNG BÁO ĐƠN HÀNG MỚI',
-            greeting: 'Chào Mẫn Hi Chin,',
-            intro_text: 'Bạn vừa nhận được một yêu cầu đặt máy mới từ Website ChinHaStore. Vui lòng kiểm tra chi tiết bên dưới:',
-            footer_note: 'Yêu cầu này cần được xử lý sớm trên Admin Dashboard. Hãy liên hệ khách hàng ngay để xác nhận lịch trình.',
             subject: adminSubject,
             to_email: adminTo
           }
         );
-        console.log('✅ Admin Notification Sent');
       }
 
       // 2. Send Customer Invoice
@@ -1094,18 +1107,11 @@ export const adminService = {
       if (config.customer_invoice.enabled && customerTo) {
         const customerSubject = replaceAll(config.customer_invoice.subject);
 
-        console.log('--- EMAILJS SENDING (CUSTOMER THREAD) ---');
-        console.log('Recipient:', customerTo);
-
         await emailjs.send(
           import.meta.env.VITE_EMAILJS_SERVICE_ID,
           import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
           {
             ...templateData,
-            header_title: 'XÁC NHẬN ĐẶT HÀNG',
-            greeting: `Xin chào ${templateData.customer_name},`,
-            intro_text: `Cảm ơn bạn đã lựa chọn ChinHaStore! Chúng mình đã nhận được yêu cầu đặt thuê máy ${templateData.product_name} của bạn. Chi tiết lịch trình và báo giá được liệt kê bên dưới:`,
-            footer_note: `Lưu ý: Nhân viên ChinHaStore sẽ liên hệ với bạn sớm nhất có thể qua số điện thoại ${templateData.phone} để chốt lịch và nhận cọc. Đơn hàng chỉ được xác nhận chính thức sau khi đặt cọc thành công.`,
             subject: customerSubject,
             to_email: customerTo
           }
@@ -1115,6 +1121,48 @@ export const adminService = {
 
     } catch (err) {
       console.error('Error in sendBookingEmails:', err);
+    }
+  },
+
+  /**
+   * Automatically transitions statuses based on current time.
+   * Confirmed -> Renting (if start_time passed)
+   * Renting -> Returned (if end_time passed)
+   */
+  async autoSyncStatuses() {
+    try {
+      const now = new Date().toISOString();
+      
+      // 1. Confirmed -> Renting (started but not yet finished)
+      const { data: toRenting, error: e1 } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('status', 'Confirmed')
+        .lte('start_time', now)
+        .gt('end_time', now);
+      
+      if (e1) throw e1;
+      if (toRenting?.length > 0) {
+        const ids = toRenting.map(b => b.id);
+        await supabase.from('bookings').update({ status: 'Renting' }).in('id', ids);
+        console.log(`Auto-synced ${ids.length} bookings to [Renting]`);
+      }
+
+      // 2. Renting/Confirmed -> Returned (Finished)
+      const { data: toFinished, error: e2 } = await supabase
+        .from('bookings')
+        .select('id')
+        .in('status', ['Confirmed', 'Renting'])
+        .lte('end_time', now);
+
+      if (e2) throw e2;
+      if (toFinished?.length > 0) {
+        const ids = toFinished.map(b => b.id);
+        await supabase.from('bookings').update({ status: 'Returned' }).in('id', ids);
+        console.log(`Auto-synced ${ids.length} bookings to [Returned/Completed]`);
+      }
+    } catch (err) {
+      console.error('Error in autoSyncStatuses:', err);
     }
   },
 

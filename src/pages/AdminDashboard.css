@@ -558,7 +558,7 @@ html, body {
 
 /* Booking Status Text - Color Only */
 .status-text {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 700;
 }
 
@@ -568,6 +568,10 @@ html, body {
 
 .status-text.confirmed {
     color: #2980b9; /* Professional Blue */
+}
+
+.status-text.renting {
+    color: #1abc9c; /* Vibrant Teal/Aqua for Renting */
 }
 
 .status-text.returned {
@@ -582,7 +586,7 @@ html, body {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
-    min-width: 800px;
+    min-width: 1200px;
     font-family: "ShopeeDisplayR", sans-serif;
     background-color: #fff;
     border: 1px solid #EEE;

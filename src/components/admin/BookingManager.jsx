@@ -70,6 +70,9 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   };
 
   React.useEffect(() => {
+    // 1. Trigger automated status transitions (Confirmed -> Renting -> Completed)
+    adminService.autoSyncStatuses();
+
     reloadBookings();
     
     // Real-time synchronization
@@ -120,10 +123,10 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     const isActuallyRenting = (b) => {
       const start = new Date(b.start_time);
       const end = new Date(b.end_time);
-      return b.status === 'Confirmed' && start <= now && end >= now;
+      return (b.status === 'Renting' || b.status === 'Confirmed') && start <= now && end >= now;
     };
 
-    if (activeSubtab === 'renting') matchesTab = isActuallyRenting(b);
+    if (activeSubtab === 'renting') matchesTab = isActuallyRenting(b) || b.status === 'Renting';
     else if (activeSubtab === 'future') {
       const start = new Date(b.start_time);
       matchesTab = (b.status === 'Pending' || (b.status === 'Confirmed' && start > now));
@@ -576,7 +579,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               <option value="all">Tất cả trạng thái</option>
               <option value="Pending">Chờ xác nhận</option>
               <option value="Confirmed">Đã chốt lịch</option>
-              <option value="Returned">Đã trả máy</option>
+              <option value="Renting">Đang thuê</option>
+              <option value="Returned">Đã hoàn thành</option>
               <option value="Cancelled">Đã hủy</option>
             </select>
           </div>
@@ -684,8 +688,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                     <span className={`status-text ${b.status.toLowerCase()}`}>
                       {b.status === 'Pending' ? 'Chờ xác nhận' :
                        b.status === 'Confirmed' ? 'Đã chốt lịch' :
-                       b.status === 'Returned' ? 'Đã trả máy' :
-                       b.status === 'Cancelled' ? 'Đã hủy' : b.status}
+                       b.status === 'Renting' ? 'Đang thuê' :
+                       b.status === 'Returned' ? 'Đã hoàn thành' : b.status}
                     </span>
                   </td>
                   <td><strong>{b.totalPrice} VNĐ</strong></td>
@@ -1104,7 +1108,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                   >
                     <option value="Pending">Chờ xác nhận</option>
                     <option value="Confirmed">Đã chốt lịch</option>
-                    <option value="Returned">Đã trả máy</option>
+                    <option value="Renting">Đang thuê</option>
+                    <option value="Returned">Đã hoàn thành</option>
                     <option value="Cancelled">Đã hủy</option>
                   </select>
                 </div>
