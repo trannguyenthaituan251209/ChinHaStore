@@ -319,7 +319,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       end_time: toLocalISO(booking.end_time),
       total_price: booking.totalPrice?.replace(/\./g, '') || '0',
       status: booking.status,
-      deposit_type: booking.deposit_type || 'standard'
+      deposit_type: booking.deposit_type || 'standard',
+      city: booking.city || ''
     });
     setIsModalOpen(true);
   };
@@ -384,7 +385,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     end_time: '',
     total_price: '0',
     status: 'Pending',
-    deposit_type: 'standard'
+    deposit_type: 'standard',
+    city: ''
   });
 
   // Auto-calculate price & Check Live Conflict
@@ -455,7 +457,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       // 1. Ensure customer identity is resolved/updated
       const customerId = await adminService.getOrCreateCustomer({
         phone: formData.phone,
-        full_name: formData.customerName
+        full_name: formData.customerName,
+        city: formData.city
       });
 
       if (formData.id) {
@@ -467,7 +470,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
           end_time: formData.end_time,
           total_price: Number(formData.total_price),
           status: formData.status,
-          deposit_type: formData.deposit_type
+          deposit_type: formData.deposit_type,
+          city: formData.city
         });
       } else {
         // 3. Specialized Create
@@ -544,7 +548,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                 end_time: endStr, 
                 total_price: '0', 
                 status: defaultStatus,
-                deposit_type: 'standard'
+                deposit_type: 'standard',
+                city: ''
               }); 
               setIsModalOpen(true); 
             }}>
@@ -1039,6 +1044,15 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                     required 
                   />
                 </div>
+              </div>
+              <div className="form-group">
+                <label>Địa chỉ nhận / trả máy</label>
+                <input 
+                  type="text" 
+                  placeholder="VD: 123 Lê Thánh Tông, Buôn Ma Thuột..."
+                  value={formData.city} 
+                  onChange={e => setFormData({...formData, city: e.target.value})}
+                />
               </div>
               <div className="form-group">
                 <label>Thiết bị</label>

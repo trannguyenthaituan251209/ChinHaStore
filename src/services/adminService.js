@@ -108,7 +108,7 @@ export const adminService = {
       .from('bookings')
       .select(`
         *,
-        customers (full_name, phone),
+        customers (full_name, phone, city),
         products (name, image_url),
         inventory_units (serial_number)
       `)
@@ -149,7 +149,7 @@ export const adminService = {
         product_id: b.product_id,
         unit_id: b.unit_id,
         deposit_type: b.deposit_type || 'standard',
-        city: b.city || '',
+        city: b.city || b.customers?.city || '',
         is_seen: b.is_seen,
         created_at: b.created_at
       };
@@ -167,7 +167,7 @@ export const adminService = {
       .from('bookings')
       .select(`
         *,
-        customers (full_name, phone),
+        customers (full_name, phone, city),
         products (name)
       `, { count: 'exact' })
       .order('start_time', { ascending: false });
@@ -212,7 +212,7 @@ export const adminService = {
         end_time: b.end_time,
         product_id: b.product_id,
         deposit_type: b.deposit_type || 'standard',
-        city: b.city || '',
+        city: b.city || b.customers?.city || '',
         is_seen: b.is_seen
       };
     });
@@ -791,6 +791,16 @@ export const adminService = {
       .from('customers')
       .select('*')
       .order('full_name');
+    if (error) throw error;
+    return data;
+  },
+
+  async createCustomer(customer) {
+    const { data, error } = await supabase
+      .from('customers')
+      .insert(customer)
+      .select()
+      .single();
     if (error) throw error;
     return data;
   },

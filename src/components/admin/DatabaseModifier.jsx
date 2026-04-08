@@ -44,6 +44,26 @@ const DatabaseModifier = ({ showStatus }) => {
     status: 'active'
   });
 
+  const [customerForm, setCustomerForm] = useState({
+    full_name: '',
+    phone: '',
+    email: '',
+    city: '',
+    social: '',
+    status: 'active'
+  });
+
+  const [bookingForm, setBookingForm] = useState({
+    customerName: '',
+    phone: '',
+    product_id: '',
+    start_time: '',
+    end_time: '',
+    total_price: '0',
+    status: 'Pending',
+    city: ''
+  });
+
   // Import States
   const [importData, setImportData] = useState([]);
   const [importStatus, setImportStatus] = useState('idle'); // 'idle', 'review', 'importing', 'done'
@@ -114,6 +134,33 @@ const DatabaseModifier = ({ showStatus }) => {
         quantity: item.quantity || 1,
         status: item.status || 'active'
       });
+    } else if (type === 'customer') {
+      setCustomerForm({
+        full_name: item.full_name || '',
+        phone: item.phone || '',
+        email: item.email || '',
+        city: item.city || '',
+        social: item.social || '',
+        status: item.status || 'active'
+      });
+    } else if (type === 'booking') {
+      const toLocalISO = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        const offset = d.getTimezoneOffset() * 60000;
+        return new Date(d.getTime() - offset).toISOString().slice(0, 16);
+      };
+
+      setBookingForm({
+        customerName: item.customerName || '',
+        phone: item.phone || '',
+        product_id: item.product_id || '',
+        start_time: toLocalISO(item.start_time),
+        end_time: toLocalISO(item.end_time),
+        total_price: item.totalPrice?.replace(/\./g, '') || item.total_price || '0',
+        status: item.status || 'Pending',
+        city: item.city || ''
+      });
     }
     setModalType(type);
   };
@@ -133,6 +180,30 @@ const DatabaseModifier = ({ showStatus }) => {
         quantity: 1,
         status: 'active'
       });
+    } else if (type === 'customer') {
+      setCustomerForm({
+        full_name: '',
+        phone: '',
+        email: '',
+        city: '',
+        social: '',
+        status: 'active'
+      });
+    } else if (type === 'booking') {
+      const pad = (n) => n.toString().padStart(2, '0');
+      const d1 = new Date();
+      const d2 = new Date(); d2.setDate(d1.getDate() + 1);
+      
+      setBookingForm({
+        customerName: '',
+        phone: '',
+        product_id: data.cameras[0]?.id || '',
+        start_time: `${d1.getFullYear()}-${pad(d1.getMonth()+1)}-${pad(d1.getDate())}T07:30`,
+        end_time: `${d2.getFullYear()}-${pad(d2.getMonth()+1)}-${pad(d2.getDate())}T07:30`,
+        total_price: '0',
+        status: 'Pending',
+        city: ''
+      });
     }
     setModalType(type);
   };
@@ -151,6 +222,51 @@ const DatabaseModifier = ({ showStatus }) => {
       showStatus('Đã lưu dữ liệu sản phẩm', 'success');
     } catch (err) {
       showStatus('Lỗi khi lưu sản phẩm: ' + err.message, 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveCustomer = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      if (currentItem) {
+        await adminService.updateCustomer(currentItem.id, customerForm);
+      } else {
+        await adminService.createCustomer(customerForm);
+      }
+      setModalType(null);
+      fetchData();
+      showStatus('Đã lưu thông tin khách hàng', 'success');
+    } catch (err) {
+      showStatus('Lỗi khi lưu khách hàng: ' + err.message, 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveBooking = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      if (currentItem) {
+        await adminService.updateBooking(currentItem.id, {
+          ...bookingForm,
+          total_price: Number(bookingForm.total_price)
+        });
+      } else {
+        await adminService.createBooking({
+          ...bookingForm,
+          total_price: Number(bookingForm.total_price),
+          rentalType: 'Manual'
+        });
+      }
+      setModalType(null);
+      fetchData();
+      showStatus('Đã lưu thông tin đặt lịch', 'success');
+    } catch (err) {
+      showStatus('Lỗi khi lưu đặt lịch: ' + err.message, 'error');
     } finally {
       setIsSaving(false);
     }
@@ -547,18 +663,172 @@ const DatabaseModifier = ({ showStatus }) => {
         </div>
       )}
 
-      {/* Placeholder for others */}
-      {(modalType === 'customer' || modalType === 'booking') && (
+      {modalType === 'customer' && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal animate-in" style={{maxWidth: '400px'}}>
+          <div className="admin-modal animate-in" style={{maxWidth: '500px'}}>
             <header className="modal-header">
-              <h3>{currentItem ? 'CẬP NHẬT' : 'THÊM MỚI'}</h3>
+              <h3>{currentItem ? 'SỬA THÔNG TIN KHÁCH' : 'THÊM KHÁCH MỚI'}</h3>
               <button className="close-btn" onClick={() => setModalType(null)}>×</button>
             </header>
-            <div style={{padding: '2rem', textAlign: 'center'}}>
-              <p>Trình chỉnh sửa chi tiết cho <strong>{modalType}</strong> sẽ ra mắt ở phiên bản sau.</p>
-              <button className="btn-save" style={{marginTop: '1.5rem'}} onClick={() => setModalType(null)}>Đã hiểu</button>
-            </div>
+            <form className="admin-form" onSubmit={handleSaveCustomer}>
+              <div className="form-grid">
+                <div className="form-group full-width">
+                  <label>Họ và tên</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={customerForm.full_name}
+                    onChange={e => setCustomerForm({...customerForm, full_name: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Số điện thoại</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={customerForm.phone}
+                    onChange={e => setCustomerForm({...customerForm, phone: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input 
+                    type="email" 
+                    value={customerForm.email}
+                    onChange={e => setCustomerForm({...customerForm, email: e.target.value})}
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label>Địa chỉ</label>
+                  <input 
+                    type="text" 
+                    placeholder="VD: 23 Lê Thánh Tông, Buôn Ma Thuột..."
+                    value={customerForm.city}
+                    onChange={e => setCustomerForm({...customerForm, city: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Mạng xã hội (Link Facebook/Zalo)</label>
+                  <input 
+                    type="text" 
+                    value={customerForm.social}
+                    onChange={e => setCustomerForm({...customerForm, social: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Trạng thái</label>
+                  <select 
+                    value={customerForm.status}
+                    onChange={e => setCustomerForm({...customerForm, status: e.target.value})}
+                  >
+                    <option value="active">Hoạt động</option>
+                    <option value="disabled">Vô hiệu hóa</option>
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>HỦY</button>
+                <button type="submit" className="btn-save" disabled={isSaving}>
+                  {isSaving ? 'ĐANG LƯU...' : 'LƯU THAY ĐỔI'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {modalType === 'booking' && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal animate-in" style={{maxWidth: '550px'}}>
+            <header className="modal-header">
+              <h3>{currentItem ? 'SỬA ĐƠN ĐẶT LỊCH' : 'THÊM ĐƠN THỦ CÔNG'}</h3>
+              <button className="close-btn" onClick={() => setModalType(null)}>×</button>
+            </header>
+            <form className="admin-form" onSubmit={handleSaveBooking}>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Tên khách hàng</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={bookingForm.customerName}
+                    onChange={e => setBookingForm({...bookingForm, customerName: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Số điện thoại</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={bookingForm.phone}
+                    onChange={e => setBookingForm({...bookingForm, phone: e.target.value})}
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label>Địa chỉ nhận / trả máy</label>
+                  <input 
+                    type="text" 
+                    placeholder="VD: 123 Lê Thánh Tông, Buôn Ma Thuột..."
+                    value={bookingForm.city}
+                    onChange={e => setBookingForm({...bookingForm, city: e.target.value})}
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label>Thiết bị thuê</label>
+                  <select 
+                    value={bookingForm.product_id}
+                    onChange={e => setBookingForm({...bookingForm, product_id: e.target.value})}
+                  >
+                    {data.cameras.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Ngày bắt đầu</label>
+                  <input 
+                    type="datetime-local" 
+                    required 
+                    value={bookingForm.start_time}
+                    onChange={e => setBookingForm({...bookingForm, start_time: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Ngày kết thúc</label>
+                  <input 
+                    type="datetime-local" 
+                    required 
+                    value={bookingForm.end_time}
+                    onChange={e => setBookingForm({...bookingForm, end_time: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Thành tiền (VNĐ)</label>
+                  <input 
+                    type="number" 
+                    value={bookingForm.total_price}
+                    onChange={e => setBookingForm({...bookingForm, total_price: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Trạng thái</label>
+                  <select 
+                    value={bookingForm.status}
+                    onChange={e => setBookingForm({...bookingForm, status: e.target.value})}
+                  >
+                    <option value="Pending">Chờ xác nhận</option>
+                    <option value="Confirmed">Đã chốt lịch</option>
+                    <option value="Renting">Đang thuê</option>
+                    <option value="Returned">Đã trả máy</option>
+                    <option value="Cancelled">Đã hủy</option>
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>HỦY</button>
+                <button type="submit" className="btn-save" disabled={isSaving}>
+                  {isSaving ? 'ĐANG LƯU...' : 'XÁC NHẬN'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
