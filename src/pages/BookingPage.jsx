@@ -17,8 +17,8 @@ const BookingPage = () => {
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
   const [selectedCamera, setSelectedCamera] = useState(initialId || '');
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState(tomorrow);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [rentalType, setRentalType] = useState('DAY'); 
   const [shiftType, setShiftType] = useState('A'); 
   
@@ -146,12 +146,9 @@ const BookingPage = () => {
         const activeProducts = data.filter(p => p.status === 'active');
         setProductList(activeProducts);
         
-        // Ensure starting product is active
-        if (!selectedCamera && activeProducts.length > 0) {
-          setSelectedCamera(initialId || activeProducts[0].id);
-        } else if (selectedCamera && !activeProducts.some(p => p.id === selectedCamera)) {
-          // If a direct link target is disabled, reset to first active
-          setSelectedCamera(activeProducts[0]?.id || '');
+        // Removed auto-fill to allow for manual selection
+        if (selectedCamera && !activeProducts.some(p => p.id === selectedCamera)) {
+          setSelectedCamera('');
         }
       } catch (err) {
         console.error('Error fetching products:', err);
@@ -176,7 +173,10 @@ const BookingPage = () => {
     fetchSnapshot();
   }, [selectedCamera]);
 
-  const currentProduct = productList.find(p => p.id === selectedCamera) || productList[0] || {};
+  const currentProduct = productList.find(p => p.id === selectedCamera) || {
+    name: 'Hãy chọn thiết bị',
+    image: 'https://via.placeholder.com/150?text=No+Selection'
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -187,14 +187,14 @@ const BookingPage = () => {
 
   useEffect(() => {
     const runCalculation = async () => {
-      if (startDate && (endDate || rentalType === 'SHIFT')) {
+      if (selectedCamera && startDate && (endDate || rentalType === 'SHIFT')) {
         await calculateBooking();
       } else {
         setResult(null);
       }
     };
     runCalculation();
-  }, [startDate, endDate, selectedCamera, rentalType, shiftType, availabilitySnapshot]);
+  }, [startDate, endDate, selectedCamera, rentalType, shiftType, availabilitySnapshot, productList]);
 
   const calculateBooking = async () => {
     try {
@@ -515,6 +515,7 @@ const BookingPage = () => {
                   <div className="form-group">
                     <label>THIẾT BỊ</label>
                     <select value={selectedCamera} onChange={(e) => setSelectedCamera(e.target.value)}>
+                      {!initialId && <option value="" disabled>Hãy chọn thiết bị</option>}
                       {productList.map(p => (
                         <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
@@ -681,7 +682,13 @@ const BookingPage = () => {
                     <span className="res-total">{result.price} VNĐ</span>
                   </div>
                   {step === 1 ? (
-                    <button className="btn-confirm-booking" onClick={handleNextStep}>BƯỚC TIẾP THEO</button>
+                    <button 
+                      className={`btn-confirm-booking ${(!selectedCamera || !startDate || (rentalType !== 'SHIFT' && !endDate)) ? 'disabled' : ''}`} 
+                      onClick={handleNextStep}
+                      disabled={!selectedCamera || !startDate || (rentalType !== 'SHIFT' && !endDate)}
+                    >
+                      BƯỚC TIẾP THEO
+                    </button>
                   ) : (
                     <button 
                       className="btn-confirm-booking" 

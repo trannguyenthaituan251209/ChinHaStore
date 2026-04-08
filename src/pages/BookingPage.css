@@ -1171,3 +1171,14 @@ html, body {
  color: #fff;
 }
 
+
+
+/* Disabled State for Action Buttons */
+.btn-confirm-booking.disabled {
+  background-color: #f0f0f0 !important;
+  color: #ccc !important;
+  cursor: not-allowed;
+  border: 1px solid #eee;
+  pointer-events: none;
+}
+
