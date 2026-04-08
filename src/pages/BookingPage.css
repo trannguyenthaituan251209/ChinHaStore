@@ -365,7 +365,6 @@ html, body {
 .deposit-option-card {
   padding: 20px;
   border: 2px solid #eef2f6;
-  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -378,27 +377,32 @@ html, body {
 }
 
 .deposit-option-card:hover {
-  border-color: #eb9173ff;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(235, 145, 115, 0.1);
+  border-color: rgb(0, 0, 0);
 }
 
 .deposit-option-card.active {
-  border-color: #eb9173ff;
-  background: #fffafa;
+  background: #000000;
+}
+.deposit-option-card.active .option-header{
+  color: #FFF;
 }
 
 .deposit-option-card .option-header {
   font-weight: 700;
   font-size: 1rem;
-  color: #c9755b;
+  color: #000000;
   margin-bottom: 8px;
+  font-family: "ShopeeDisplayB", sans-serif;
 }
 
 .deposit-option-card .option-desc {
   font-size: 0.85rem;
-  color: #64748b;
+  color: #000000;
   line-height: 1.4;
+  font-family: "ShopeeDisplayR", sans-serif;
+}
+.deposit-option-card.active .option-desc{
+  color: #ffffff;
 }
 
 .deposit-option-card .option-check {

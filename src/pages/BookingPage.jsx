@@ -774,7 +774,6 @@ const BookingPage = () => {
                       >
                         <div className="option-header">CƠ BẢN</div>
                         <div className="option-desc">CCCD + 3.000.000 VNĐ</div>
-                        {cusDepositType === 'standard' && <div className="option-check">✓</div>}
                       </div>
                       <div 
                         className={`deposit-option-card ${cusDepositType === 'property' ? 'active' : ''}`}
@@ -782,7 +781,6 @@ const BookingPage = () => {
                       >
                         <div className="option-header">TÀI SẢN</div>
                         <div className="option-desc">CCCD + Tài sản (Laptop/Lens/...) tương đương</div>
-                        {cusDepositType === 'property' && <div className="option-check">✓</div>}
                       </div>
                     </div>
                   </div>
