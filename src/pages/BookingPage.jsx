@@ -130,6 +130,36 @@ const BookingPage = () => {
     setShowRemotePrompt(false);
   };
 
+  const getDraftSummary = (draft) => {
+    if (!draft || !draft.selectedCamera) return '';
+    const camName = productList.find(p => p.id === draft.selectedCamera)?.name || 'Thiết bị';
+    
+    const formatD = (dStr) => {
+      if (!dStr) return '';
+      const parts = dStr.split('-');
+      if (parts.length !== 3) return dStr;
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    };
+
+    let timeStr = '';
+    if (!draft.startDate) {
+      return `${camName} (Chưa chọn ngày)`;
+    }
+
+    if (draft.rentalType === 'SHIFT') {
+      const sType = draft.shiftType === 'B' ? '14:00 - 21:00' : '07:00 - 13:00';
+      timeStr = `${sType} ngày ${formatD(draft.startDate)}`;
+    } else if (draft.rentalType === 'DAY') {
+      timeStr = `07:30 ${formatD(draft.startDate)} - 07:30 ${formatD(draft.endDate)}`;
+    } else if (draft.rentalType === 'NIGHT') {
+      timeStr = `19:00 ${formatD(draft.startDate)} - 19:00 ${formatD(draft.endDate)}`;
+    } else {
+      timeStr = `${formatD(draft.startDate)} - ${formatD(draft.endDate)}`;
+    }
+
+    return `${camName} - ${timeStr}`;
+  };
+
   const renderGuideContent = () => (
     <div className="guide-content">
       <div className="guide-item">
@@ -504,6 +534,10 @@ const BookingPage = () => {
             {showRemotePrompt 
               ? "Bạn có một bản nháp từ điện thoại này. Khôi phục thông tin?" 
               : "Phát hiện đơn hàng chưa hoàn tất từ trước. Bạn có muốn khôi phục?"}
+            <br />
+            <span style={{ fontSize: '0.82rem', color: '#666', marginTop: '4px', display: 'block', fontWeight: 600 }}>
+              Bản nháp: {getDraftSummary(showRemotePrompt ? remoteDraft : localDraft)}
+            </span>
           </p>
           <div className="draft-actions">
              <button onClick={() => applyDraft(showRemotePrompt ? remoteDraft : localDraft)}>
