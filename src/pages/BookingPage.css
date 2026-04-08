@@ -189,6 +189,79 @@ html, body {
   border-color: #000;
 }
 
+/* Receiving Method Selector */
+.receive-method-selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.method-box {
+  flex: 1;
+  padding: 1.2rem;
+  border: 1px solid #DDD;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  background-color: #F8F8F8;
+  border-radius: 0;
+  font-family: "ShopeeDisplayB", sans-serif !important;
+}
+
+.method-box.active {
+  background-color: #000;
+  color: #FFF;
+  border-color: #000;
+}
+
+.store-address-box {
+  background-color: #f9f9f9;
+  padding: 1.2rem;
+  border: 1px solid #eee;
+}
+
+.store-address-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.store-address-content p {
+  margin: 0;
+  font-weight: 600;
+  color: #333;
+  font-family: "ShopeeDisplayB", sans-serif !important;
+}
+
+.map-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  width: fit-content;
+  transition: opacity 0.2s;
+}
+
+.map-link-btn:hover {
+  text-decoration: underline;
+  opacity: 0.8;
+}
+
+.form-notice {
+  display: block;
+  margin-top: 0.6rem;
+  font-size: 0.75rem;
+  color: #d9534f;
+  font-weight: 600;
+  font-family: "ShopeeDisplayR", sans-serif;
+  line-height: 1.4;
+}
+
 .rental-type-selector {
   display: flex;
   gap: 0;
@@ -733,9 +806,29 @@ html, body {
 .ticket-line {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   font-size: 0.85rem;
   color: #444;
   font-family: "ShopeeDisplayM", sans-serif;
+  width: 100%;
+  margin-bottom: 0.2rem;
+}
+
+.ticket-label-text {
+  white-space: nowrap;
+}
+
+.ticket-dots {
+  flex: 1;
+  border-bottom: 1px dotted #ccc;
+  margin: 0 8px;
+  position: relative;
+  bottom: 0.25rem;
+}
+
+.ticket-value-text {
+  white-space: nowrap;
+  font-weight: 700;
 }
 
 .ticket-total-row {

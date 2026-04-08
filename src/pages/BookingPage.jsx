@@ -25,7 +25,9 @@ const BookingPage = () => {
   const [cusName, setCusName] = useState('');
   const [cusPhone, setCusPhone] = useState('');
   const [cusEmail, setCusEmail] = useState('');
-  const [cusCity, setCusCity] = useState('Hồ Chí Minh');
+  const [cusCity, setCusCity] = useState('Buôn Ma Thuột');
+  const [cusAddress, setCusAddress] = useState('');
+  const [receiveMethod, setReceiveMethod] = useState('store'); // 'store' or 'delivery'
   const [cusSocial, setCusSocial] = useState('');
   const [cusDepositType, setCusDepositType] = useState('standard'); 
   
@@ -52,14 +54,23 @@ const BookingPage = () => {
         // Only show prompt if it's potentially useful (it has a camera or we're on Step 2)
         if (d.selectedCamera || d.step > 1 || d.cusName) {
            setLocalDraft(d);
-           // If direct navigation to a different device, we DEFINITELY shouldn't auto-restore
+
+           // AUTO-REPLACE IDENTITY INFO (Persistent across all cameras)
+           if (d.cusName) setCusName(d.cusName);
+           if (d.cusPhone) setCusPhone(d.cusPhone);
+           if (d.cusEmail) setCusEmail(d.cusEmail);
+           if (d.cusCity) setCusCity(d.cusCity);
+           if (d.cusAddress) setCusAddress(d.cusAddress);
+           if (d.cusSocial) setCusSocial(d.cusSocial);
+           if (d.cusDepositType) setCusDepositType(d.cusDepositType);
+           if (d.receiveMethod) setReceiveMethod(d.receiveMethod);
+
+           // Decide if we should show the prompt for FULL session recovery (Camera/Dates/Step)
            if (initialId && d.selectedCamera !== initialId) {
              setShowLocalPrompt(true);
            } else if (d.step > 1 || d.cusName) {
-             // If they were mid-process on the same device, also prompt to be safe
              setShowLocalPrompt(true);
            } else if (!initialId) {
-             // If they just opened the booking page with no ID, show prompt
              setShowLocalPrompt(true);
            }
         }
@@ -74,7 +85,7 @@ const BookingPage = () => {
     
     const draftData = {
       selectedCamera, startDate, endDate, rentalType, shiftType,
-      cusName, cusPhone, cusEmail, cusCity, cusSocial, cusDepositType,
+      cusName, cusPhone, cusEmail, cusCity, cusAddress, receiveMethod, cusSocial, cusDepositType,
       step
     };
     
@@ -89,7 +100,7 @@ const BookingPage = () => {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [hasInitialized, selectedCamera, startDate, endDate, rentalType, shiftType, cusName, cusPhone, cusEmail, cusCity, cusSocial, cusDepositType, step, showLocalPrompt, showRemotePrompt]);
+  }, [hasInitialized, selectedCamera, startDate, endDate, rentalType, shiftType, cusName, cusPhone, cusEmail, cusCity, cusAddress, receiveMethod, cusSocial, cusDepositType, step, showLocalPrompt, showRemotePrompt]);
 
   // 3. CHECK FOR REMOTE DRAFT WHEN PHONE IS ENTERED
   useEffect(() => {
@@ -120,6 +131,8 @@ const BookingPage = () => {
     if (d.cusPhone) setCusPhone(d.cusPhone);
     if (d.cusEmail) setCusEmail(d.cusEmail);
     if (d.cusCity) setCusCity(d.cusCity);
+    if (d.cusAddress) setCusAddress(d.cusAddress);
+    if (d.receiveMethod) setReceiveMethod(d.receiveMethod);
     if (d.cusSocial) setCusSocial(d.cusSocial);
     if (d.cusDepositType) setCusDepositType(d.cusDepositType);
     if (d.step && Number(d.step) < 3) {
@@ -421,7 +434,9 @@ const BookingPage = () => {
         customerName: cusName,
         phone: cusPhone,
         email: cusEmail,
-        city: cusCity,
+        city: receiveMethod === 'store' 
+          ? 'Nhận tại cửa hàng (22 Lê Thánh Tông)' 
+          : (cusAddress ? `${cusAddress}, ${cusCity}` : cusCity),
         social: cusSocial,
         product_id: selectedCamera,
         start_time: startDate + 'T' + (rentalType==='SHIFT'?(shiftType==='A'?'07:00:00':'14:00:00'):(rentalType==='DAY'?'07:30:00':'19:00:00')), 
@@ -678,10 +693,73 @@ const BookingPage = () => {
                   <div className="form-group">
                     <label>KHU VỰC THUÊ</label>
                     <div className="city-selector">
-                      <button className={`city-box ${cusCity === 'Hồ Chí Minh' ? 'active' : ''}`} onClick={() => setCusCity('Hồ Chí Minh')}>Hồ Chí Minh</button>
-                      <button className={`city-box ${cusCity === 'Buôn Ma Thuột' ? 'active' : ''}`} onClick={() => setCusCity('Buôn Ma Thuột')}>Buôn Ma Thuột</button>
+                      <button 
+                        className={`city-box ${cusCity === 'Hồ Chí Minh' ? 'active' : ''}`} 
+                        disabled={true}
+                        style={{ position: 'relative', opacity: 0.6, cursor: 'not-allowed' }}
+                      >
+                        Hồ Chí Minh
+                        <span style={{ display: 'block', fontSize: '0.7rem', color: '#888', marginTop: '2px', textTransform: 'lowercase' }}>(Coming back soon)</span>
+                      </button>
+                      <button 
+                        className={`city-box ${cusCity === 'Buôn Ma Thuột' ? 'active' : ''}`} 
+                        onClick={() => setCusCity('Buôn Ma Thuột')}
+                      >
+                        Buôn Ma Thuột
+                      </button>
                     </div>
                   </div>
+
+                  <div className="form-group">
+                    <label>HÌNH THỨC NHẬN MÁY</label>
+                    <div className="receive-method-selector">
+                      <button 
+                        className={`method-box ${receiveMethod === 'store' ? 'active' : ''}`}
+                        onClick={() => setReceiveMethod('store')}
+                      >
+                        Nhận tại cửa hàng
+                      </button>
+                      <button 
+                        className={`method-box ${receiveMethod === 'delivery' ? 'active' : ''}`}
+                        onClick={() => setReceiveMethod('delivery')}
+                      >
+                        Giao tận nơi
+                        <p style={{ display: 'block', fontSize: '0.7rem', color: 'rgba(174, 174, 174, 1)', marginTop: '2px' }}>(Có tính phí)</p>
+                      </button>
+                    </div>
+                  </div>
+
+                  {receiveMethod === 'store' ? (
+                    <div className="form-group store-address-box">
+                      <label>ĐỊA CHỈ CỬA HÀNG</label>
+                      <div className="store-address-content">
+                        <p>22 Lê Thánh Tông, Phường Buôn Ma Thuột, Tỉnh Đắk Lắk</p>
+                        <a 
+                          href="https://maps.app.goo.gl/jNToF7Fc4keUdDkBA" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="map-link-btn"
+                          title="Xem trên Google Maps"
+                        >
+                          Xem bản đồ
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="form-group">
+                      <label>ĐỊA CHỈ NHẬN MÁY</label>
+                      <input 
+                        type="text" 
+                        placeholder="Số nhà, Tên đường, Phường/Xã..." 
+                        value={cusAddress} 
+                        onChange={(e) => setCusAddress(e.target.value)} 
+                      />
+                      <small className="form-notice">
+                        * Phí giao hàng tính theo ứng dụng (Grab/Be/XanhSM) và do khách hàng thanh toán trực tiếp.
+                      </small>
+                    </div>
+                  )}
+
                   <div className="form-group">
                     <label>Mạng xã hội (Facebook/Zalo)</label>
                     <input type="text" placeholder="Link Facebook hoặc số Zalo" value={cusSocial} onChange={(e) => setCusSocial(e.target.value)} />
@@ -831,6 +909,12 @@ const BookingPage = () => {
                     <div className="ticket-sub-value">{cusPhone}</div>
                   </div>
                   <div className="ticket-section">
+                    <div className="ticket-label">Nhận Máy Tại</div>
+                    <div className="ticket-value">
+                      {receiveMethod === 'store' ? 'Cửa hàng (22 Lê Thánh Tông)' : (cusAddress || cusCity)}
+                    </div>
+                  </div>
+                  <div className="ticket-section">
                     <div className="ticket-label">Thiết bị</div>
                     <div className="ticket-equipment-box">
                       <div className="ticket-value">{currentProduct.name}</div>
@@ -852,9 +936,9 @@ const BookingPage = () => {
                   <div className="ticket-label">Chi tiết giá</div>
                   {result?.breakdown.map((item, idx) => (
                     <div key={idx} className="ticket-line">
-                      <span>{item.label}</span>
-                      <span>.................................................................................</span>
-                      <span>{item.value} đ</span>
+                      <span className="ticket-label-text">{item.label}</span>
+                      <span className="ticket-dots"></span>
+                      <span className="ticket-value-text">{item.value} đ</span>
                     </div>
                   ))}
                 </div>
@@ -943,7 +1027,7 @@ const BookingPage = () => {
               <div className="bill-invoice-v2">
                 <div className="bill-v2-header">
                   <h2>CHINHA STORE</h2>
-                  <p>HÓA ĐƠN ĐẶT LỊCH</p>
+                  <p>HÓA ĐƠN THANH TOÁN GIỮ LỊCH</p>
                 </div>
                 <hr className="bill-v2-divider" />
                 <div className="bill-v2-product-section">
@@ -969,7 +1053,8 @@ const BookingPage = () => {
                 <div className="bill-v2-customer-section">
                   <p>Khách hàng: {cusName.toUpperCase()}</p>
                   <p>SĐT: {cusPhone}</p>
-                  <p>Hình thức cọc: {cusDepositType === 'standard' ? 'CƠ BẢN' : 'TÀI SẢN (CCCD + TÀI SẢN TƯƠNG ĐƯƠNG)'}</p>
+                  <p>Nhận máy: {receiveMethod === 'store' ? 'Tại cửa hàng (22 Lê Thánh Tông)' : `Giao tận nơi (${cusAddress}, ${cusCity})`}</p>
+                  <p>Hình thức cọc: {cusDepositType === 'standard' ? 'Cơ bản' : 'Tài sản (CCCD + Tài sản tương đương)'}</p>
                 </div>
                 <hr className="bill-v2-divider" />
                 <div className="bill-v2-details-section">
@@ -1012,7 +1097,14 @@ const BookingPage = () => {
             <h2 className="rec-row-title">NGAY KHUNG GIỜ BẠN CHỌN, CHÚNG TÔI CÒN CÓ</h2>
             <div className="rec-product-grid">
               {result.recommendations.map(rec => (
-                <ProductCard key={rec.id} product={rec} onClick={(p) => setSelectedCamera(p.id)} />
+                <ProductCard 
+                  key={rec.id} 
+                  product={rec} 
+                  onClick={(p) => {
+                    setSelectedCamera(p.id);
+                    document.querySelector('.booking-page')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }} 
+                />
               ))}
             </div>
           </div>
