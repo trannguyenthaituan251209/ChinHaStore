@@ -39,32 +39,38 @@ const BookingPage = () => {
   // New state for cross-device recovery
   const [remoteDraft, setRemoteDraft] = useState(null);
   const [showRemotePrompt, setShowRemotePrompt] = useState(false);
+  const [localDraft, setLocalDraft] = useState(null);
+  const [showLocalPrompt, setShowLocalPrompt] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
-  // 1. RECOVER DATA FROM LOCAL STORAGE ON MOUNT
+  // 1. CHECK LOCAL STORAGE ON MOUNT
   useEffect(() => {
     const saved = localStorage.getItem('booking_draft');
     if (saved) {
       try {
         const d = JSON.parse(saved);
-        if (d.selectedCamera) setSelectedCamera(d.selectedCamera);
-        if (d.startDate) setStartDate(d.startDate);
-        if (d.endDate) setEndDate(d.endDate);
-        if (d.rentalType) setRentalType(d.rentalType);
-        if (d.shiftType) setShiftType(d.shiftType);
-        if (d.cusName) setCusName(d.cusName);
-        if (d.cusPhone) setCusPhone(d.cusPhone);
-        if (d.cusEmail) setCusEmail(d.cusEmail);
-        if (d.cusCity) setCusCity(d.cusCity);
-        if (d.cusSocial) setCusSocial(d.cusSocial);
-        if (d.cusDepositType) setCusDepositType(d.cusDepositType);
-        if (d.step && d.step < 3) setStep(d.step);
-      } catch (err) { console.error('Error recovering draft:', err); }
+        // Only show prompt if it's potentially useful (it has a camera or we're on Step 2)
+        if (d.selectedCamera || d.step > 1 || d.cusName) {
+           setLocalDraft(d);
+           // If direct navigation to a different device, we DEFINITELY shouldn't auto-restore
+           if (initialId && d.selectedCamera !== initialId) {
+             setShowLocalPrompt(true);
+           } else if (d.step > 1 || d.cusName) {
+             // If they were mid-process on the same device, also prompt to be safe
+             setShowLocalPrompt(true);
+           } else if (!initialId) {
+             // If they just opened the booking page with no ID, show prompt
+             setShowLocalPrompt(true);
+           }
+        }
+      } catch (err) { console.error('Error reading local draft:', err); }
     }
+    setHasInitialized(true);
   }, []);
 
   // 2. SAVE DATA TO LOCAL STORAGE & SUPABASE DRAFT
   useEffect(() => {
-    if (step >= 3) return; // Don't save if finished
+    if (!hasInitialized || step >= 3 || showLocalPrompt || showRemotePrompt) return; // Don't save if not ready, finished, or during recovery prompt
     
     const draftData = {
       selectedCamera, startDate, endDate, rentalType, shiftType,
@@ -83,7 +89,7 @@ const BookingPage = () => {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [selectedCamera, startDate, endDate, rentalType, shiftType, cusName, cusPhone, cusEmail, cusCity, cusSocial, cusDepositType, step]);
+  }, [hasInitialized, selectedCamera, startDate, endDate, rentalType, shiftType, cusName, cusPhone, cusEmail, cusCity, cusSocial, cusDepositType, step, showLocalPrompt, showRemotePrompt]);
 
   // 3. CHECK FOR REMOTE DRAFT WHEN PHONE IS ENTERED
   useEffect(() => {
@@ -100,21 +106,27 @@ const BookingPage = () => {
     checkRemote();
   }, [cusPhone]);
 
-  const applyRemoteDraft = () => {
-    if (!remoteDraft) return;
-    const d = remoteDraft;
+  const applyDraft = (draft) => {
+    if (!draft) return;
+    const d = draft;
+    console.log('Restoring draft:', d);
+    
     if (d.selectedCamera) setSelectedCamera(d.selectedCamera);
     if (d.startDate) setStartDate(d.startDate);
     if (d.endDate) setEndDate(d.endDate);
     if (d.rentalType) setRentalType(d.rentalType);
     if (d.shiftType) setShiftType(d.shiftType);
     if (d.cusName) setCusName(d.cusName);
+    if (d.cusPhone) setCusPhone(d.cusPhone);
     if (d.cusEmail) setCusEmail(d.cusEmail);
     if (d.cusCity) setCusCity(d.cusCity);
     if (d.cusSocial) setCusSocial(d.cusSocial);
     if (d.cusDepositType) setCusDepositType(d.cusDepositType);
-    if (d.step && d.step < 3) setStep(d.step);
+    if (d.step && Number(d.step) < 3) {
+      setStep(Number(d.step));
+    }
     
+    setShowLocalPrompt(false);
     setShowRemotePrompt(false);
   };
 
@@ -143,10 +155,9 @@ const BookingPage = () => {
     const fetchProducts = async () => {
       try {
         const data = await adminService.getAllProducts();
-        const activeProducts = data.filter(p => p.status === 'active');
+        const activeProducts = data.filter(p => p.status?.toLowerCase() === 'active');
         setProductList(activeProducts);
         
-        // Removed auto-fill to allow for manual selection
         if (selectedCamera && !activeProducts.some(p => p.id === selectedCamera)) {
           setSelectedCamera('');
         }
@@ -227,6 +238,7 @@ const BookingPage = () => {
       };
 
       const formatDate = (d) => d.toLocaleString('vi-VN', { 
+        hour: '2-digit', minute: '2-digit',
         weekday: 'long', day: '2-digit', month: '2-digit' 
       });
 
@@ -485,13 +497,27 @@ const BookingPage = () => {
 
   return (
     <div className="booking-page animate-in">
-      {/* Remote Recovery Prompt */}
-      {showRemotePrompt && (
+      {/* Recovery Prompts (Local or Remote) */}
+      {(showLocalPrompt || showRemotePrompt) && (
         <div className="draft-recovery-bar animate-slide-down">
-          <p>Bạn chưa hoàn thành đơn đặt trước đó. Bạn có muốn khôi phục?</p>
+          <p>
+            {showRemotePrompt 
+              ? "Bạn có một bản nháp từ điện thoại này. Khôi phục thông tin?" 
+              : "Phát hiện đơn hàng chưa hoàn tất từ trước. Bạn có muốn khôi phục?"}
+          </p>
           <div className="draft-actions">
-             <button onClick={applyRemoteDraft}>KHÔI PHỤC</button>
-             <button className="btn-close-draft" onClick={() => setShowRemotePrompt(false)}>BỎ QUA</button>
+             <button onClick={() => applyDraft(showRemotePrompt ? remoteDraft : localDraft)}>
+               KHÔI PHỤC
+             </button>
+             <button 
+                className="btn-close-draft" 
+                onClick={() => {
+                  setShowLocalPrompt(false);
+                  setShowRemotePrompt(false);
+                }}
+              >
+                BỎ QUA
+              </button>
           </div>
         </div>
       )}
@@ -515,7 +541,9 @@ const BookingPage = () => {
                   <div className="form-group">
                     <label>THIẾT BỊ</label>
                     <select value={selectedCamera} onChange={(e) => setSelectedCamera(e.target.value)}>
-                      {!initialId && <option value="" disabled>Hãy chọn thiết bị</option>}
+                      {(!selectedCamera || !productList.some(p => p.id === selectedCamera)) && (
+                        <option value="" disabled>Hãy chọn thiết bị</option>
+                      )}
                       {productList.map(p => (
                         <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
@@ -655,7 +683,13 @@ const BookingPage = () => {
             <div className="booking-result-side">
               {!result ? (
                 <div className="result-placeholder">
-                  <p>Vui lòng hoàn tất thông tin để xem báo giá dự kiến.</p>
+                  <p>
+                    {!selectedCamera 
+                      ? 'Vui lòng chọn thiết bị để xem báo giá.' 
+                      : (!startDate || (rentalType !== 'SHIFT' && !endDate))
+                        ? 'Vui lòng chọn đầy đủ ngày nhận và trả máy.'
+                        : 'Vui lòng hoàn tất thông tin để xem báo giá dự kiến.'}
+                  </p>
                 </div>
               ) : result.status === 'success' ? (
                 <div className="result-box success">
