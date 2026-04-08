@@ -547,16 +547,16 @@ const BookingPage = () => {
         <div className="draft-recovery-bar animate-slide-down">
           <p>
             {showRemotePrompt 
-              ? "Bạn có một bản nháp từ điện thoại này. Khôi phục thông tin?" 
+              ? "Bạn có một bản nháp từ thiết bị này. Khôi phục thông tin?" 
               : "Phát hiện đơn hàng chưa hoàn tất từ trước. Bạn có muốn khôi phục?"}
             <br />
-            <span style={{ fontSize: '0.82rem', color: '#666', marginTop: '4px', display: 'block', fontWeight: 600 }}>
+            <span style={{ fontSize: '0.82rem', color: '#ffffffff', marginTop: '4px', display: 'block', fontWeight: 600 }}>
               Bản nháp: {getDraftSummary(showRemotePrompt ? remoteDraft : localDraft)}
             </span>
           </p>
           <div className="draft-actions">
              <button onClick={() => applyDraft(showRemotePrompt ? remoteDraft : localDraft)}>
-               KHÔI PHỤC
+               QUAY LẠI BOOKING TRƯỚC ĐÓ
              </button>
              <button 
                 className="btn-close-draft" 
