@@ -483,33 +483,45 @@ export const adminService = {
    * Update a booking.
    */
   async updateBooking(id, updates) {
-    const { start_time, end_time, status, product_id } = updates;
+    const { start_time, end_time, status, product_id, city, customerName, phone, email, social } = updates;
 
-    // If updating time, status, or product, perform availability check
+    // 1. Fetch current booking data (always need customer_id for linked updates)
+    const { data: current, error: fErr } = await supabase
+      .from('bookings')
+      .select('product_id, start_time, end_time, status, unit_id, customer_id')
+      .eq('id', id)
+      .single();
+
+    if (fErr) throw fErr;
+
+    // 2. Update Customer Profile if customer-related fields are provided
+    if (city || customerName || phone || email || social) {
+      const customerUpdates = {};
+      if (city) customerUpdates.city = city;
+      if (customerName) customerUpdates.full_name = customerName;
+      if (phone) customerUpdates.phone = phone;
+      if (email) customerUpdates.email = email;
+      if (social) customerUpdates.social = social;
+
+      if (Object.keys(customerUpdates).length > 0 && current.customer_id) {
+        await this.updateCustomer(current.customer_id, customerUpdates);
+      }
+    }
+
+    // 3. Availability check if updating time/status/product
     if (start_time || end_time || status || product_id) {
-      // Fetch current booking data to handle partial updates
-      const { data: current, error: fErr } = await supabase
-        .from('bookings')
-        .select('product_id, start_time, end_time, status, unit_id')
-        .eq('id', id)
-        .single();
-
-      if (fErr) throw fErr;
-
       const finalProductId = product_id || current.product_id;
       const finalStart = start_time || current.start_time;
       const finalEnd = end_time || current.end_time;
       const finalStatus = status || current.status;
 
-      // Only check availability if status is active (Confirmed or Returned)
-      if (['Confirmed', 'Returned'].includes(finalStatus)) {
+      if (['Confirmed', 'Returned', 'Renting'].includes(finalStatus)) {
         const availableUnitId = await this.findAvailableUnit(finalProductId, finalStart, finalEnd, id);
 
         if (!availableUnitId) {
           throw new Error('Sản phẩm hiện đã hết máy sẵn sàng vào thời gian này. Vui lòng chọn thời gian hoặc sản phẩm khác.');
         }
 
-        // If the unit needs to change (or was assigned for the first time), update it
         updates.unit_id = availableUnitId;
       }
     }
@@ -522,7 +534,11 @@ export const adminService = {
       return `${ts}${hasSeconds ? '' : ':00'}+07:00`;
     };
 
-    const finalUpdates = { ...updates, is_seen: true };
+    // 4. Strip customer fields and update Bookings table
+    // eslint-disable-next-line no-unused-vars
+    const { city: _, customerName: __, phone: ___, email: ____, social: _____, ...bookingUpdates } = updates;
+    const finalUpdates = { ...bookingUpdates, is_seen: true };
+    
     if (finalUpdates.start_time) finalUpdates.start_time = formatTimestamp(finalUpdates.start_time);
     if (finalUpdates.end_time) finalUpdates.end_time = formatTimestamp(finalUpdates.end_time);
 
@@ -530,6 +546,7 @@ export const adminService = {
       .from('bookings')
       .update(finalUpdates)
       .eq('id', id);
+    
     if (error) throw error;
   },
 

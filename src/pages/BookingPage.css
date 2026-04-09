@@ -1149,6 +1149,29 @@ html, body {
   gap: 1rem;
 }
 
+.success-notification-bar {
+  background: #67d36b;
+  color: #fff;
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  width: 100%;
+  font-family: 'ShopeeDisplayM', sans-serif;
+  gap: 1rem;
+}
+
+.success-notification-bar p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
 .draft-recovery-bar p {
   margin: 0;
   font-size: 0.9rem;
@@ -1175,8 +1198,8 @@ html, body {
 }
 
 .draft-actions button:first-child {
-  background-color: #EB8F3D;
-  color: #fff;
+  background-color: #ffffff;
+  color: #000000;
 }
 
 .draft-actions button:hover {
@@ -1185,12 +1208,10 @@ html, body {
 
 .draft-actions .btn-close-draft {
   background-color: transparent;
-  color: #aaa;
-  border: 1px solid #444;
-}
+  color: #ffffff;
+} 
 
 .draft-actions .btn-close-draft:hover {
-  border-color: #666;
   color: #fff;
 }
 

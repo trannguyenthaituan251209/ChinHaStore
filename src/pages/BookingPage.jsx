@@ -37,6 +37,7 @@ const BookingPage = () => {
   const [availabilitySnapshot, setAvailabilitySnapshot] = useState(null);
   const [isCopyingAccount, setIsCopyingAccount] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showSuccessNotice, setShowSuccessNotice] = useState(false);
 
   // New state for cross-device recovery
   const [remoteDraft, setRemoteDraft] = useState(null);
@@ -435,7 +436,7 @@ const BookingPage = () => {
         phone: cusPhone,
         email: cusEmail,
         city: receiveMethod === 'store' 
-          ? 'Nhận tại cửa hàng (22 Lê Thánh Tông)' 
+          ? 'Nhận tại cửa hàng (23 Lê Thánh Tông)' 
           : (cusAddress ? `${cusAddress}, ${cusCity}` : cusCity),
         social: cusSocial,
         product_id: selectedCamera,
@@ -452,6 +453,7 @@ const BookingPage = () => {
       if (cusPhone) adminService.deleteBookingDraft(cusPhone);
       
       setStep(3);
+      setShowSuccessNotice(true);
     } catch (error) {
       alert('Lỗi: ' + error.message);
     } finally {
@@ -542,6 +544,24 @@ const BookingPage = () => {
 
   return (
     <div className="booking-page animate-in">
+      {/* Success Notification Bar */}
+      {step === 3 && showSuccessNotice && (
+        <div className="success-notification-bar animate-slide-down">
+          <p>
+            ChinHaStore đã nhận được thông tin đặt lịch của bạn và sẽ liên hệ trong vòng 15 phút
+            <br />
+            <span style={{ fontSize: '0.82rem', color: '#fff', marginTop: '4px', display: 'block', fontWeight: 600 }}>
+              Dưới đây là thông tin bạn đã đặt. Hãy tải hóa đơn về máy nếu bạn cần
+            </span>
+          </p>
+          <div className="draft-actions">
+            <button className="btn-close-draft" onClick={() => setShowSuccessNotice(false)}>
+              ĐÓNG
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Recovery Prompts (Local or Remote) */}
       {(showLocalPrompt || showRemotePrompt) && (
         <div className="draft-recovery-bar animate-slide-down">
@@ -733,7 +753,7 @@ const BookingPage = () => {
                     <div className="form-group store-address-box">
                       <label>ĐỊA CHỈ CỬA HÀNG</label>
                       <div className="store-address-content">
-                        <p>22 Lê Thánh Tông, Phường Buôn Ma Thuột, Tỉnh Đắk Lắk</p>
+                        <p>23 Lê Thánh Tông, Phường Buôn Ma Thuột, Tỉnh Đắk Lắk</p>
                         <a 
                           href="https://maps.app.goo.gl/jNToF7Fc4keUdDkBA" 
                           target="_blank" 
@@ -909,7 +929,7 @@ const BookingPage = () => {
                   <div className="ticket-section">
                     <div className="ticket-label">Nhận Máy Tại</div>
                     <div className="ticket-value">
-                      {receiveMethod === 'store' ? 'Cửa hàng (22 Lê Thánh Tông)' : (cusAddress || cusCity)}
+                      {receiveMethod === 'store' ? 'Cửa hàng (23 Lê Thánh Tông)' : (cusAddress || cusCity)}
                     </div>
                   </div>
                   <div className="ticket-section">
@@ -1051,7 +1071,7 @@ const BookingPage = () => {
                 <div className="bill-v2-customer-section">
                   <p>Khách hàng: {cusName.toUpperCase()}</p>
                   <p>SĐT: {cusPhone}</p>
-                  <p>Nhận máy: {receiveMethod === 'store' ? 'Tại cửa hàng (22 Lê Thánh Tông)' : `Giao tận nơi (${cusAddress}, ${cusCity})`}</p>
+                  <p>Nhận máy: {receiveMethod === 'store' ? 'Tại cửa hàng (23 Lê Thánh Tông)' : `Giao tận nơi (${cusAddress}, ${cusCity})`}</p>
                   <p>Hình thức cọc: {cusDepositType === 'standard' ? 'Cơ bản' : 'Tài sản (CCCD + Tài sản tương đương)'}</p>
                 </div>
                 <hr className="bill-v2-divider" />
