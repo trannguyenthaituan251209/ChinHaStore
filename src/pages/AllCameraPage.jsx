@@ -91,8 +91,37 @@ const AllCameraPage = () => {
     <div className="all-camera-page animate-in">
       <Helmet>
         <title>Kho Máy Ảnh | Thuê Máy Ảnh Buôn Ma Thuột - ChinHaStore</title>
+        <link rel="canonical" href="https://chinhastore.online/all-camera" />
         <meta name="description" content="Khám phá kho máy ảnh tại Buôn Ma Thuột. Thuê Canon R50, Ricoh GR III, Fujifilm X100VI và nhiều dòng máy khác. Giá thuê tốt nhất BMT." />
         <meta name="keywords" content="thue may anh bmt, thuê Canon R50, thuê máy ảnh fujifilm bmt" />
+        
+        {/* JSON-LD Product List Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "itemListElement": products.slice(0, 15).map((p, index) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "item": {
+                "@type": "Product",
+                "name": p.name,
+                "image": p.image_url,
+                "description": `Dịch vụ cho thuê ${p.name} uy tín tại Buôn Ma Thuột.`,
+                "offers": {
+                  "@type": "Offer",
+                  "price": p.price_1day?.toString().replace(/\./g, '') || "0",
+                  "priceCurrency": "VND",
+                  "availability": "https://schema.org/InStock",
+                  "seller": {
+                    "@type": "LocalBusiness",
+                    "name": "ChinHaStore"
+                  }
+                }
+              }
+            }))
+          })}
+        </script>
       </Helmet>
       {/* Breadcrumb / Top Bar */}
       <div className="catalog-header-bar">
