@@ -129,7 +129,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     if (activeSubtab === 'renting') matchesTab = isActuallyRenting(b) || b.status === 'Renting';
     else if (activeSubtab === 'future') {
       const start = new Date(b.start_time);
-      matchesTab = (b.status === 'Pending' || (b.status === 'Confirmed' && start > now));
+      matchesTab = (b.status === 'Pending' || b.status === 'Renting' || (b.status === 'Confirmed' && start > now));
     }
     else if (activeSubtab === 'past') matchesTab = b.status === 'Returned';
     
@@ -144,7 +144,25 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const pendingWebsiteBookings = data.filter(b => b.source === 'Website' && !b.is_seen && b.status === 'Pending');
   
   // The main table should only show acknowledged bookings, non-website bookings, or already processed bookings
-  const mainListData = filteredData.filter(b => b.is_seen || b.source !== 'Website' || b.status !== 'Pending');
+  const mainListData = filteredData
+    .filter(b => b.is_seen || b.source !== 'Website' || b.status !== 'Pending')
+    .sort((a, b) => {
+      // Priority sorting: Renting (0) > Pending (1) > Others (2)
+      const getWeight = (s) => {
+        if (s === 'Renting') return 0;
+        if (s === 'Pending') return 1;
+        if (s === 'Confirmed') return 2;
+        return 3;
+      };
+      
+      const weightA = getWeight(a.status);
+      const weightB = getWeight(b.status);
+      
+      if (weightA !== weightB) return weightA - weightB;
+      
+      // Secondary sort: Recent first (start_time descending)
+      return new Date(b.start_time) - new Date(a.start_time);
+    });
 
   const handleMarkAsSeen = async (id) => {
     try {
