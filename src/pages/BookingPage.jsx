@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import adminService from '../services/adminService';
 import ProductCard from '../components/ProductCard';
 import html2canvas from 'html2canvas';
@@ -544,6 +545,11 @@ const BookingPage = () => {
 
   return (
     <div className="booking-page animate-in">
+      <Helmet>
+        <title>Đặt Lịch Thuê Máy | Thuê Máy Ảnh Buôn Ma Thuột - ChinHaStore</title>
+        <meta name="description" content="Đặt lịch thuê máy ảnh nhanh chóng tại Buôn Ma Thuột. Canon R50, Fujifilm, Ricoh luôn sẵn sàng. LH: 0842204207." />
+        <meta name="keywords" content="đặt lịch thuê máy ảnh bmt, thuê canon r50 buôn ma thuột" />
+      </Helmet>
       {/* Success Notification Bar */}
       {step === 3 && showSuccessNotice && (
         <div className="success-notification-bar animate-slide-down">

@@ -1,0 +1,8 @@
+# robots.txt for ChinHaStore
+User-agent: *
+Allow: /
+Disallow: /quanly-chinha-trungtam/
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://chinhastore.online/sitemap.xml
