@@ -296,15 +296,25 @@ export const adminService = {
   /**
    * Finds the first available physical unit for a product during a time range.
    */
+  // --- UTILS ---
+  formatTimestamp(ts) {
+    if (!ts) return null;
+    if (ts.includes('+') || ts.includes('Z')) return ts;
+    const timePart = ts.split('T')[1] || '';
+    const hasSeconds = timePart.split(':').length === 3;
+    return `${ts}${hasSeconds ? '' : ':00'}+07:00`;
+  },
+
   async findAvailableUnit(productId, startTime, endTime, excludeBookingId = null) {
+    const startFormatted = this.formatTimestamp(startTime);
+    const endFormatted = this.formatTimestamp(endTime);
     if (!productId) return null;
 
     // 1. Get all units for this product type
     const { data: units, error: uErr } = await supabase
       .from('inventory_units')
       .select('id, serial_number')
-      .eq('product_id', productId)
-      .eq('status', 'Available');
+      .eq('product_id', productId);
 
     if (uErr) {
       console.error('Find units error:', uErr);
@@ -322,8 +332,8 @@ export const adminService = {
       .select('unit_id')
       .eq('product_id', productId)
       .in('status', ['Confirmed', 'Renting', 'Returned'])
-      .lt('start_time', endTime)
-      .gt('end_time', startTime);
+      .lt('start_time', endFormatted)
+      .gt('end_time', startFormatted);
 
     if (excludeBookingId) {
       query = query.neq('id', excludeBookingId);
@@ -354,8 +364,7 @@ export const adminService = {
     const { data: units, error: uErr } = await supabase
       .from('inventory_units')
       .select('id')
-      .eq('product_id', productId)
-      .eq('status', 'Available');
+      .eq('product_id', productId);
 
     if (uErr) throw uErr;
 
@@ -389,6 +398,8 @@ export const adminService = {
    */
   async getDetailedConflicts(productId, startTime, endTime, excludeBookingId = null) {
     if (!productId) return [];
+    const startFormatted = this.formatTimestamp(startTime);
+    const endFormatted = this.formatTimestamp(endTime);
 
     let query = supabase
       .from('bookings')
@@ -400,8 +411,8 @@ export const adminService = {
       `)
       .eq('product_id', productId)
       .in('status', ['Confirmed', 'Renting', 'Returned'])
-      .lt('start_time', endTime)
-      .gt('end_time', startTime);
+      .lt('start_time', endFormatted)
+      .gt('end_time', startFormatted);
 
     if (excludeBookingId) {
       query = query.neq('id', excludeBookingId);
@@ -441,23 +452,14 @@ export const adminService = {
       throw new Error('Sản phẩm hiện đã hết máy sẵn sàng vào thời gian này. Vui lòng chọn thời gian khác hoặc sản phẩm khác.');
     }
 
-    const formatTimestamp = (ts) => {
-      if (!ts) return null;
-      if (ts.includes('+') || ts.includes('Z')) return ts;
-      // If it already ends in :ss, don't add :00
-      const timePart = ts.split('T')[1] || '';
-      const hasSeconds = timePart.split(':').length === 3;
-      return `${ts}${hasSeconds ? '' : ':00'}+07:00`;
-    };
-
     const { data, error } = await supabase
       .from('bookings')
       .insert({
         customer_id: customerId,
         product_id: bookingData.product_id,
         unit_id: unitId,
-        start_time: formatTimestamp(bookingData.start_time),
-        end_time: formatTimestamp(bookingData.end_time),
+        start_time: this.formatTimestamp(bookingData.start_time),
+        end_time: this.formatTimestamp(bookingData.end_time),
         rental_type: bookingData.rentalType,
         deposit_type: bookingData.deposit_type || 'standard',
         total_price: bookingData.total_price,
@@ -526,21 +528,13 @@ export const adminService = {
       }
     }
 
-    const formatTimestamp = (ts) => {
-      if (!ts || typeof ts !== 'string') return ts;
-      if (ts.includes('+') || ts.includes('Z')) return ts;
-      const timePart = ts.split('T')[1] || '';
-      const hasSeconds = timePart.split(':').length === 3;
-      return `${ts}${hasSeconds ? '' : ':00'}+07:00`;
-    };
-
     // 4. Strip customer fields and update Bookings table
     // eslint-disable-next-line no-unused-vars
     const { city: _, customerName: __, phone: ___, email: ____, social: _____, ...bookingUpdates } = updates;
     const finalUpdates = { ...bookingUpdates, is_seen: true };
     
-    if (finalUpdates.start_time) finalUpdates.start_time = formatTimestamp(finalUpdates.start_time);
-    if (finalUpdates.end_time) finalUpdates.end_time = formatTimestamp(finalUpdates.end_time);
+    if (finalUpdates.start_time) finalUpdates.start_time = this.formatTimestamp(finalUpdates.start_time);
+    if (finalUpdates.end_time) finalUpdates.end_time = this.formatTimestamp(finalUpdates.end_time);
 
     const { error } = await supabase
       .from('bookings')
@@ -873,7 +867,7 @@ export const adminService = {
     return results;
   },
 
-  // --- AUTHENTICATION HARDENING ---
+  // --- AUTHENTICATION HARD
 
   /**
    * Authoritative Sign In for Admin command center
