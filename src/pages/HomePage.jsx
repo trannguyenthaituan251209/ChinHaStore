@@ -5,6 +5,7 @@ import FeaturedProducts from '../components/FeaturedProducts';
 import NeedsRecommendation from '../components/NeedsRecommendation';
 import HowItWorks from '../components/HowItWorks';
 import Commitments from '../components/Commitments';
+import BlogSection from '../components/BlogSection';
 import FinalCTA from '../components/FinalCTA';
 
 const HomePage = () => {
@@ -68,6 +69,7 @@ const HomePage = () => {
       <NeedsRecommendation />
       <HowItWorks />
       <Commitments />
+      <BlogSection />
       <FinalCTA />
     </div>
   );

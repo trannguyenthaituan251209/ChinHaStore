@@ -352,6 +352,7 @@ html, body {
   cursor: pointer;
   margin-top: 1.5rem;
   display: block;
+  font-family: 'ShopeeDisplayB', sans-serif;
 }
 
 /* Deposit Selector Styles */

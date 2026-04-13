@@ -12,11 +12,13 @@ import {
   EyeOff,
   CheckCircle,
   AlertCircle,
-  X
+  X,
+  BookOpen
 } from 'lucide-react';
 import BookingManager from '../components/admin/BookingManager';
 import DatabaseModifier from '../components/admin/DatabaseModifier';
 import ReportCenter from '../components/admin/ReportCenter';
+import BlogManager from '../components/admin/BlogManager';
 import { adminService } from '../services/adminService';
 import { supabase } from '../utils/supabase';
 import './AdminDashboard.css';
@@ -124,6 +126,7 @@ const AdminDashboard = ({ onLogout }) => {
   const navItems = [
     { id: 'dashboard', label: 'Tổng Quan', icon: LayoutDashboard },
     { id: 'manager', label: 'Đặt Lịch', icon: CalendarCheck },
+    { id: 'blog', label: 'Cẩm Nang', icon: BookOpen },
     { id: 'modify', label: 'Cài Đặt', icon: Settings },
     { id: 'report', label: 'Báo Cáo', icon: PieChart },
   ];
@@ -321,6 +324,7 @@ const AdminDashboard = ({ onLogout }) => {
         <main className="admin-content">
           {activeTab === 'dashboard' && renderDashboard()}
           {activeTab === 'manager' && <BookingManager showStatus={showStatus} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />}
+          {activeTab === 'blog' && <BlogManager showStatus={showStatus} />}
           {activeTab === 'modify' && <DatabaseModifier showStatus={showStatus} />}
           {activeTab === 'report' && <ReportCenter showStatus={showStatus} />}
         </main>

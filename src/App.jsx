@@ -8,6 +8,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import AllCameraPage from './pages/AllCameraPage';
 import LiveActivityContainer from './components/LiveActivityContainer';
+import BlogPage from './pages/BlogPage';
+import BlogPostDetail from './pages/BlogPostDetail';
 import { adminService } from './services/adminService';
 
 import './index.css';
@@ -191,6 +193,8 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/dat-lich" element={<BookingPage />} />
         <Route path="/all-camera" element={<AllCameraPage />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:slug" element={<BlogPostDetail />} />
         
         {/* Protected Secret Route on public domain */}
         <Route 
