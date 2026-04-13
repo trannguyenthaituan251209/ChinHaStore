@@ -7,6 +7,7 @@ import BookingPage from './pages/BookingPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import AllCameraPage from './pages/AllCameraPage';
+import LiveActivityContainer from './components/LiveActivityContainer';
 import { adminService } from './services/adminService';
 
 import './index.css';
@@ -185,6 +186,7 @@ function App() {
   return (
     <div className="app storefront-mode">
       {!isAdminMode && <Navbar />}
+      {!isAdminMode && <LiveActivityContainer />}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/dat-lich" element={<BookingPage />} />

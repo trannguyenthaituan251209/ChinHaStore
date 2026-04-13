@@ -6,20 +6,25 @@ import './FeaturedProducts.css';
 
 const FeaturedProducts = () => {
   const [productList, setProductList] = useState([]);
+  const [stats, setStats] = useState({ counts: {}, hotProductId: null });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchProductsAndStats = async () => {
       try {
-        const data = await adminService.getAllProducts();
-        setProductList(data);
+        const [pData, sData] = await Promise.all([
+          adminService.getAllProducts(),
+          adminService.getMonthlyProductStats()
+        ]);
+        setProductList(pData);
+        setStats(sData);
       } catch (err) {
-        console.error('Error fetching featured products:', err);
+        console.error('Error fetching featured products or stats:', err);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchProducts();
+    fetchProductsAndStats();
   }, []);
 
   if (isLoading) {
@@ -33,8 +38,10 @@ const FeaturedProducts = () => {
     );
   }
 
-  // Use the live list, or fallback if none
-  const displayProducts = productList.length > 0 ? productList : [];
+  // Filter for active products only and limit to featured selection (e.g., first 8)
+  const displayProducts = productList
+    .filter(p => p.status === 'active')
+    .slice(0, 8);
 
   return (
     <section className="featured-products">
@@ -47,7 +54,12 @@ const FeaturedProducts = () => {
 
         <div className="product-grid">
           {displayProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+              monthlyCount={stats.counts[product.id] || 0}
+              isHot={stats.hotProductId === product.id}
+            />
           ))}
         </div>
 

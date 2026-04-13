@@ -1225,6 +1225,76 @@ export const adminService = {
       .delete()
       .eq('phone', phone);
     if (error) console.error('Error deleting draft:', error);
+  },
+
+  /**
+   * Fetches rental counts for each product from the 1st of the current month.
+   */
+  async getMonthlyProductStats() {
+    try {
+      const now = new Date();
+      // Start of current month (local time, translated to ISO for comparison)
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfMonthISO = startOfMonth.toISOString();
+
+      const { data: bookings, error } = await supabase
+        .from('bookings')
+        .select('product_id')
+        .gte('start_time', startOfMonthISO)
+        .in('status', ['Confirmed', 'Renting', 'Returned']);
+
+      if (error) throw error;
+
+      const counts = {};
+      (bookings || []).forEach(b => {
+        counts[b.product_id] = (counts[b.product_id] || 0) + 1;
+      });
+
+      // Find the max count to determine the "Hot" product
+      let maxCount = 0;
+      let hotProductId = null;
+      Object.entries(counts).forEach(([id, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          hotProductId = id;
+        }
+      });
+
+      return { counts, hotProductId };
+    } catch (err) {
+      console.error('Error in getMonthlyProductStats:', err);
+      return { counts: {}, hotProductId: null };
+    }
+  },
+
+  /**
+   * Fetches the latest bookings to show in the "Live Activity" ticker.
+   */
+  async getRecentActivity() {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select(`
+          id,
+          created_at,
+          products (name),
+          customers (city)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      return (data || []).map(b => ({
+        id: b.id,
+        time: b.created_at,
+        productName: b.products?.name || 'Sản phẩm',
+        city: b.customers?.city || 'Buôn Ma Thuột'
+      }));
+    } catch (err) {
+      console.error('Error in getRecentActivity:', err);
+      return [];
+    }
   }
 };
 

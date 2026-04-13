@@ -18,7 +18,7 @@ const NeedsRecommendation = () => {
   useEffect(() => {
     const fetchAndMerge = async () => {
       try {
-        const dbProducts = await adminService.getAllProducts();
+        const dbProducts = (await adminService.getAllProducts()).filter(p => p.status === 'active');
         
         // Merge DB data with local metadata (theme, desc, designImage)
         const merged = metadataList.map(meta => {

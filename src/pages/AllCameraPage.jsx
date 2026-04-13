@@ -10,6 +10,7 @@ const AllCameraPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [stats, setStats] = useState({ counts: {}, hotProductId: null });
 
   // Filters State
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,18 +20,22 @@ const AllCameraPage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    const fetchAll = async () => {
+    const fetchAllAndStats = async () => {
       try {
-        const data = await adminService.getAllProducts();
-        setProducts(data);
+        const [pData, sData] = await Promise.all([
+          adminService.getAllProducts(),
+          adminService.getMonthlyProductStats()
+        ]);
+        setProducts(pData);
+        setStats(sData);
       } catch (err) {
-        console.error('Error fetching catalog:', err);
+        console.error('Error fetching catalog or stats:', err);
         setError('Không thể tải danh sách máy ảnh.');
       } finally {
         setLoading(false);
       }
     };
-    fetchAll();
+    fetchAllAndStats();
   }, []);
 
   // Drive available filters from data
@@ -202,7 +207,12 @@ const AllCameraPage = () => {
           {filteredProducts.length > 0 ? (
             <div className="catalog-grid">
               {filteredProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  monthlyCount={stats.counts[product.id] || 0}
+                  isHot={stats.hotProductId === product.id}
+                />
               ))}
             </div>
           ) : (

@@ -34,6 +34,75 @@
     <meta property="twitter:title" content="ChinHaStore | Thuê Máy Ảnh Buôn Ma Thuột" />
     <meta property="twitter:description" content="Dịch vụ cho thuê máy ảnh uy tín tại Buôn Ma Thuột. Canon R50, Fujifilm và nhiều dòng máy hot. LH: 0842204207." />
     <meta property="twitter:image" content="https://chinhastore.online/assets/image/hero_section.png" />
+    
+    <!-- Structured Data: LocalBusiness & Product -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "LocalBusiness",
+          "@id": "https://chinhastore.online/#organization",
+          "name": "ChinHaStore - Thuê Máy Ảnh Buôn Ma Thuột",
+          "url": "https://chinhastore.online/",
+          "logo": "https://chinhastore.online/assets/image/logo.png",
+          "image": "https://chinhastore.online/assets/image/hero_section.png",
+          "description": "Dịch vụ cho thuê máy ảnh, máy quay phim chuyên nghiệp tại Buôn Ma Thuột. Canon R50, Fujifilm, Ricoh GR III.",
+          "telephone": "0842204207",
+          "priceRange": "150000VND - 1000000VND",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "23 Lê Thánh Tông",
+            "addressLocality": "Buôn Ma Thuột",
+            "addressRegion": "Đắk Lắk",
+            "postalCode": "63000",
+            "addressCountry": "VN"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 12.6853,
+            "longitude": 108.0478
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "opens": "07:30",
+            "closes": "21:00"
+          }
+        },
+        {
+          "@type": "Product",
+          "name": "Canon EOS R50 - Thuê Máy Ảnh BMT",
+          "description": "Dòng máy Mirrorless phổ biến nhất tại ChinHaStore. Thích hợp cho du lịch và quay phim chất lượng cao. Đã có hơn 100 lượt thuê.",
+          "image": "https://chinhastore.online/assets/image/hero_section.png",
+          "brand": {
+            "@type": "Brand",
+            "name": "Canon"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": "https://chinhastore.online/",
+            "priceCurrency": "VND",
+            "price": "250000",
+            "availability": "https://schema.org/InStock"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5",
+            "reviewCount": "100"
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
