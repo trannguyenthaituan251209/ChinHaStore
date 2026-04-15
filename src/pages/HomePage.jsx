@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import HeroSection from '../components/HeroSection';
+import PromotionBanner from '../components/PromotionBanner';
 import FeaturedProducts from '../components/FeaturedProducts';
 import NeedsRecommendation from '../components/NeedsRecommendation';
 import HowItWorks from '../components/HowItWorks';
@@ -65,6 +66,7 @@ const HomePage = () => {
         </script>
       </Helmet>
       <HeroSection />
+      <PromotionBanner />
       <FeaturedProducts />
       <NeedsRecommendation />
       <HowItWorks />

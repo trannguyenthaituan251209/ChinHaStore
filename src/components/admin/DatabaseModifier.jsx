@@ -553,102 +553,133 @@ const DatabaseModifier = ({ showStatus }) => {
               <button className="close-btn" onClick={() => setModalType(null)}>×</button>
             </header>
             <form className="admin-form" onSubmit={handleSaveProduct}>
-              <div className="form-grid">
-                <div className="form-group full-width">
-                  <label>Tên máy ảnh</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={productForm.name}
-                    onChange={e => setProductForm({...productForm, name: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Phân loại</label>
-                  <select 
-                    value={productForm.category}
-                    onChange={e => setProductForm({...productForm, category: e.target.value})}
-                  >
-                    <option value="Mirrorless">Mirrorless</option>
-                    <option value="Compact">Compact</option>
-                    <option value="Action">Action</option>
-                    <option value="Film">Film</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Ảnh URL</label>
-                  <input 
-                    type="text" 
-                    placeholder="https://..."
-                    value={productForm.image_url}
-                    onChange={e => setProductForm({...productForm, image_url: e.target.value})}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Số lượng máy</label>
-                  <input 
-                    type="number" 
-                    min="1"
-                    required
-                    value={productForm.quantity}
-                    onChange={e => setProductForm({...productForm, quantity: e.target.value})}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="checkbox-label-vip" style={{display: 'flex', gap: '0.8rem', alignItems: 'center', cursor: 'pointer', marginTop: '0.5rem', fontWeight: '700', fontSize: '0.85rem'}}>
+              <div className="product-form-layout">
+                {/* Basic Info Section */}
+                <div className="form-section-group">
+                  <div className="form-group full-width">
+                    <label>Tên máy ảnh</label>
                     <input 
-                      type="checkbox" 
-                      style={{width: '20px', height: '20px'}}
-                      checked={productForm.status === 'active'}
-                      onChange={e => setProductForm({...productForm, status: e.target.checked ? 'active' : 'disabled'})}
+                      type="text" 
+                      required 
+                      value={productForm.name}
+                      onChange={e => setProductForm({...productForm, name: e.target.value})}
+                      placeholder="VD: Canon EOS R50"
                     />
-                    Cho phép thuê trên Website
-                  </label>
+                  </div>
+                  
+                  <div className="form-row-multi">
+                    <div className="form-group">
+                      <label>Phân loại</label>
+                      <select 
+                        value={productForm.category}
+                        onChange={e => setProductForm({...productForm, category: e.target.value})}
+                      >
+                        <option value="Mirrorless">Mirrorless</option>
+                        <option value="Compact">Compact</option>
+                        <option value="Action">Action</option>
+                        <option value="Film">Film</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Số lượng máy</label>
+                      <input 
+                        type="number" 
+                        min="1"
+                        required
+                        value={productForm.quantity}
+                        onChange={e => setProductForm({...productForm, quantity: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label>Ảnh bìa (URL)</label>
+                    <input 
+                      type="text" 
+                      placeholder="https://..."
+                      value={productForm.image_url}
+                      onChange={e => setProductForm({...productForm, image_url: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="toggle-switch-container" onClick={() => setProductForm({...productForm, status: productForm.status === 'active' ? 'disabled' : 'active'})}>
+                      <div className="toggle-label-text">
+                        <span className="main-label">Hiển thị trên Website</span>
+                        <span className="sub-label">Cho phép khách hàng nhìn thấy và đặt thuê máy này</span>
+                      </div>
+                      <div className="switch">
+                        <input 
+                          type="checkbox" 
+                          checked={productForm.status === 'active'}
+                          readOnly
+                        />
+                        <span className="slider"></span>
+                      </div>
+                    </label>
+                  </div>
                 </div>
-                
-                <h4 className="span-all" style={{marginTop: '0.5rem', opacity: 0.8, fontSize: '0.9rem'}}>BẢNG GIÁ (VNĐ)</h4>
-                
-                <div className="form-group">
-                  <label>6 Giờ</label>
-                  <input 
-                    type="text" 
-                    value={productForm.price_6h}
-                    onChange={e => setProductForm({...productForm, price_6h: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>1 Ngày</label>
-                  <input 
-                    type="text" 
-                    value={productForm.price_1day}
-                    onChange={e => setProductForm({...productForm, price_1day: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>2 Ngày</label>
-                  <input 
-                    type="text" 
-                    value={productForm.price_2days}
-                    onChange={e => setProductForm({...productForm, price_2days: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>3 Ngày</label>
-                  <input 
-                    type="text" 
-                    value={productForm.price_3days}
-                    onChange={e => setProductForm({...productForm, price_3days: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Ngày thứ 4+</label>
-                  <input 
-                    type="text" 
-                    value={productForm.price_4days_plus}
-                    onChange={e => setProductForm({...productForm, price_4days_plus: e.target.value})}
-                  />
+
+                {/* Price Matrix Section */}
+                <div className="form-price-section">
+                  <h4 className="price-section-title">BẢNG GIÁ CHO THUÊ</h4>
+                  <div className="price-matrix-grid">
+                    <div className="price-input-item">
+                      <label>6 Giờ</label>
+                      <div className="input-wrapper">
+                        <input 
+                          type="text" 
+                          value={productForm.price_6h}
+                          onChange={e => setProductForm({...productForm, price_6h: e.target.value})}
+                        />
+                        <span className="unit">VNĐ</span>
+                      </div>
+                    </div>
+                    <div className="price-input-item">
+                      <label>1 Ngày</label>
+                      <div className="input-wrapper">
+                        <input 
+                          type="text" 
+                          value={productForm.price_1day}
+                          onChange={e => setProductForm({...productForm, price_1day: e.target.value})}
+                        />
+                        <span className="unit">VNĐ</span>
+                      </div>
+                    </div>
+                    <div className="price-input-item">
+                      <label>2 Ngày</label>
+                      <div className="input-wrapper">
+                        <input 
+                          type="text" 
+                          value={productForm.price_2days}
+                          onChange={e => setProductForm({...productForm, price_2days: e.target.value})}
+                        />
+                        <span className="unit">VNĐ</span>
+                      </div>
+                    </div>
+                    <div className="price-input-item">
+                      <label>3 Ngày</label>
+                      <div className="input-wrapper">
+                        <input 
+                          type="text" 
+                          value={productForm.price_3days}
+                          onChange={e => setProductForm({...productForm, price_3days: e.target.value})}
+                        />
+                        <span className="unit">VNĐ</span>
+                      </div>
+                    </div>
+                    <div className="price-input-item stretch">
+                      <label>Từ ngày thứ 4 trở đi</label>
+                      <div className="input-wrapper">
+                        <input 
+                          type="text" 
+                          value={productForm.price_4days_plus}
+                          onChange={e => setProductForm({...productForm, price_4days_plus: e.target.value})}
+                        />
+                        <span className="unit">VNĐ / Ngày</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -668,7 +699,7 @@ const DatabaseModifier = ({ showStatus }) => {
           <div className="admin-modal animate-in" style={{maxWidth: '500px'}}>
             <header className="modal-header">
               <h3>{currentItem ? 'SỬA THÔNG TIN KHÁCH' : 'THÊM KHÁCH MỚI'}</h3>
-              <button className="close-btn" onClick={() => setModalType(null)}>×</button>
+              <button className="admin-modal-close-btn" onClick={() => setModalType(null)} aria-label="Đóng">×</button>
             </header>
             <form className="admin-form" onSubmit={handleSaveCustomer}>
               <div className="form-grid">
@@ -742,7 +773,7 @@ const DatabaseModifier = ({ showStatus }) => {
           <div className="admin-modal animate-in" style={{maxWidth: '550px'}}>
             <header className="modal-header">
               <h3>{currentItem ? 'SỬA ĐƠN ĐẶT LỊCH' : 'THÊM ĐƠN THỦ CÔNG'}</h3>
-              <button className="close-btn" onClick={() => setModalType(null)}>×</button>
+              <button className="close-btn" onClick={() => setModalType(null)} aria-label="Đóng">×</button>
             </header>
             <form className="admin-form" onSubmit={handleSaveBooking}>
               <div className="form-grid">

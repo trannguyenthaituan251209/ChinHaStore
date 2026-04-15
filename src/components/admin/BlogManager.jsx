@@ -50,6 +50,7 @@ const BlogManager = ({ showStatus }) => {
       content: '',
       excerpt: '',
       thumbnail_url: '',
+      is_banner: false,
       status: 'published'
     });
     setIsEditing(true);
@@ -146,7 +147,7 @@ const BlogManager = ({ showStatus }) => {
                 <button type="button" className="btn-secondary-admin" onClick={() => setShowPreview(!showPreview)}>
                    {showPreview ? <FileText size={16} /> : <Eye size={16} />} {showPreview ? 'Sửa Nội Dung' : 'Xem Trước'}
                 </button>
-                <button type="button" className="btn-close" onClick={() => setIsEditing(false)}><X size={20} /></button>
+                <button type="button" className="admin-modal-close-btn" onClick={() => setIsEditing(false)}><X size={20} /></button>
             </div>
           </div>
 
@@ -232,15 +233,15 @@ const BlogManager = ({ showStatus }) => {
                 />
               </div>
 
-              <div className="field-group">
-                <label>Trạng thái</label>
-                <select 
-                   value={currentPost.status}
-                   onChange={(e) => setCurrentPost({ ...currentPost, status: e.target.value })}
-                >
-                    <option value="published">Công khai</option>
-                    <option value="draft">Bản nháp</option>
-                </select>
+              <div className="field-group checkbox-group">
+                <label className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={currentPost.is_banner}
+                    onChange={(e) => setCurrentPost({ ...currentPost, is_banner: e.target.checked })}
+                  />
+                  <span>Đánh dấu là Banner (1366x768px)</span>
+                </label>
               </div>
 
               <button type="submit" className="btn-save-post">
@@ -273,9 +274,12 @@ const BlogManager = ({ showStatus }) => {
                     </div>
                   </td>
                   <td>
-                    <span className={`status-badge ${post.status}`}>
-                       {post.status === 'published' ? 'Công khai' : 'Bản nháp'}
-                    </span>
+                    <div className="status-badges">
+                      <span className={`status-badge ${post.status}`}>
+                         {post.status === 'published' ? 'Công khai' : 'Bản nháp'}
+                      </span>
+                      {post.is_banner && <span className="status-badge banner">Banner</span>}
+                    </div>
                   </td>
                   <td>{new Date(post.created_at).toLocaleDateString('vi-VN')}</td>
                   <td className="actions-cell">

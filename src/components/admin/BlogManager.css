@@ -217,6 +217,41 @@
 
 .status-badge.published {  color: #1E8E3E; }
 .status-badge.draft { color: #E37400; }
+.status-badge.banner { 
+    background-color: #7a7a7a; 
+    color: #FFF; 
+    padding: 2px 6px;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+.status-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.checkbox-group {
+    background: #F9F9F9;
+    padding: 1rem;
+    border: 1px solid #EEE;
+    margin-top: 1rem;
+}
+
+.checkbox-label {
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-bottom: 0 !important;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    cursor: pointer;
+}
 
 .actions-cell {
     display: flex;
@@ -255,22 +290,6 @@
     background-color: #F5F5F5;
 }
 
-.btn-close {
-    background: transparent;
-    border: none;
-    font-size: 1.8rem;
-    line-height: 1;
-    cursor: pointer;
-    opacity: 0.6;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.2s;
-}
-
-.btn-close:hover {
-    opacity: 1;
-}
 .admin-section-header-content h2{
     color: #000;
     font-family: 'ShopeeDisplayB';

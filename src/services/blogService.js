@@ -38,6 +38,19 @@ export const blogService = {
     return data;
   },
 
+  // Fetch banners for homepage
+  async getBanners() {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('status', 'published')
+      .eq('is_banner', true)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
   // Admin: Fetch all posts regardless of status
   async adminGetAllPosts() {
     const { data, error } = await supabase
