@@ -9,6 +9,7 @@ import AdminLogin from './pages/AdminLogin';
 import AllCameraPage from './pages/AllCameraPage';
 import BlogPage from './pages/BlogPage';
 import BlogPostDetail from './pages/BlogPostDetail';
+import ProductDetail from './pages/ProductDetail';
 import { adminService } from './services/adminService';
 
 import './index.css';
@@ -193,6 +194,7 @@ function App() {
         <Route path="/all-camera" element={<AllCameraPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostDetail />} />
+        <Route path="/camera/:slug" element={<ProductDetail />} />
         
         {/* Protected Secret Route on public domain */}
         <Route 

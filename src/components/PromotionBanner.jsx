@@ -66,6 +66,7 @@ const PromotionBanner = () => {
                                         <div className="banner-text">
                                             <span className="banner-tag">Chương Trình Mới</span>
                                             <h2 className="banner-title">{banner.title}</h2>
+                                            <p className="banner-excerpt">{banner.excerpt}</p>
                                         </div>
                                         <button className="btn-banner-action">
                                             Xem Chi Tiết ➔

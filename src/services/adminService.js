@@ -598,18 +598,62 @@ export const adminService = {
       image: p.image_url,
       designImage: p.design_image_url,
       status: p.status || 'active',
-      quantity: p.quantity || 1
+      quantity: p.quantity || 1,
+      slug: p.slug,
+      description: p.description,
+      sensor: p.sensor,
+      videoRes: p.video_res,
+      isoRange: p.iso_range,
+      mount: p.mount
     }));
   },
 
+  async getProductBySlug(slugOrId) {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId);
+    
+    let query = supabase.from('products').select('*');
+    
+    if (isUuid) {
+      query = query.or(`slug.eq."${slugOrId}",id.eq."${slugOrId}"`);
+    } else {
+      query = query.eq('slug', slugOrId);
+    }
+
+    const { data, error } = await query.maybeSingle();
+
+    if (error) throw error;
+    if (!data) return null;
+
+    return {
+      ...data,
+      price6h: data.price_6h,
+      price1Day: data.price_1day,
+      price2Days: data.price_2days,
+      price3Days: data.price_3days,
+      price4DaysPlus: data.price_4days_plus,
+      image: data.image_url,
+      designImage: data.design_image_url,
+      status: data.status || 'active',
+      quantity: data.quantity || 1,
+      slug: data.slug,
+      description: data.description,
+      sensor: data.sensor,
+      videoRes: data.video_res,
+      isoRange: data.iso_range,
+      mount: data.mount
+    };
+  },
+
   async createProduct(product) {
-    const { quantity, ...productData } = product;
+    const { quantity, videoRes, isoRange, ...productData } = product;
     const { data, error } = await supabase
       .from('products')
       .insert({ 
         ...productData, 
-        id: self.crypto.randomUUID(), // Manually generate ID to avoid null constraint
-        quantity: parseInt(quantity) || 1 
+        id: self.crypto.randomUUID(), 
+        quantity: parseInt(quantity) || 1,
+        video_res: videoRes,
+        iso_range: isoRange
       })
       .select()
       .single();
@@ -634,7 +678,7 @@ export const adminService = {
   },
 
   async updateProduct(id, updates) {
-    const { quantity, ...productData } = updates;
+    const { quantity, videoRes, isoRange, ...productData } = updates;
     
     // 1. Get current product to check quantity change
     const { data: current, error: fetchErr } = await supabase
@@ -648,7 +692,12 @@ export const adminService = {
     // 2. Update product info
     const { error } = await supabase
       .from('products')
-      .update({ ...productData, quantity: parseInt(quantity) })
+      .update({ 
+        ...productData, 
+        quantity: parseInt(quantity),
+        video_res: videoRes,
+        iso_range: isoRange
+      })
       .eq('id', id);
     if (error) throw error;
 

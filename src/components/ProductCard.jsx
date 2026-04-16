@@ -51,9 +51,9 @@ const ProductCard = ({ product, onClick, monthlyCount = 0, isHot = false }) => {
           <Link to={`/dat-lich?id=${product.id}`} className="btn-buy-vip" onClick={handleClick}>
             CHỌN THUÊ
           </Link>
-          <button className="btn-info-vip" onClick={handleClick}>
+          <Link to={`/camera/${product.slug || product.id}`} className="btn-info-vip">
             TÌM HIỂU THÊM
-          </button>
+          </Link>
         </div>
       </div>
     </div>

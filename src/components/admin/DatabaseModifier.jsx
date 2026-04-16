@@ -12,7 +12,8 @@ import {
   RefreshCcw,
   FileUp,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Settings
 } from 'lucide-react';
 import Papa from 'papaparse';
 import { adminService } from '../../services/adminService';
@@ -41,7 +42,14 @@ const DatabaseModifier = ({ showStatus }) => {
     price_3days: '',
     price_4days_plus: '',
     quantity: 1,
-    status: 'active'
+    status: 'active',
+    slug: '',
+    description: '',
+    sensor: '',
+    videoRes: '',
+    isoRange: '',
+    mount: '',
+    design_image_url: ''
   });
 
   const [customerForm, setCustomerForm] = useState({
@@ -132,7 +140,14 @@ const DatabaseModifier = ({ showStatus }) => {
         price_3days: item.price_3days || '0',
         price_4days_plus: item.price_4days_plus || '0',
         quantity: item.quantity || 1,
-        status: item.status || 'active'
+        status: item.status || 'active',
+        slug: item.slug || '',
+        description: item.description || '',
+        sensor: item.sensor || '',
+        videoRes: item.videoRes || '',
+        isoRange: item.isoRange || '',
+        mount: item.mount || '',
+        design_image_url: item.design_image_url || item.designImage || ''
       });
     } else if (type === 'customer') {
       setCustomerForm({
@@ -178,7 +193,14 @@ const DatabaseModifier = ({ showStatus }) => {
         price_3days: '0',
         price_4days_plus: '0',
         quantity: 1,
-        status: 'active'
+        status: 'active',
+        slug: '',
+        description: '',
+        sensor: '',
+        videoRes: '',
+        isoRange: '',
+        mount: '',
+        design_image_url: ''
       });
     } else if (type === 'customer') {
       setCustomerForm({
@@ -617,6 +639,103 @@ const DatabaseModifier = ({ showStatus }) => {
                         <span className="slider"></span>
                       </div>
                     </label>
+                  </div>
+                </div>
+
+                {/* Tech Specs Section */}
+                <div className="form-section-group">
+                  <h4 className="section-subtitle-admin">THÔNG SỐ KỸ THUẬT</h4>
+                  <div className="form-row-multi">
+                    <div className="form-group">
+                      <label>Cảm biến (Sensor)</label>
+                      <input 
+                        type="text" 
+                        value={productForm.sensor}
+                        onChange={e => setProductForm({...productForm, sensor: e.target.value})}
+                        placeholder="VD: Full-frame CMOS"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Ảnh đại diện (Thumbnail - 1:1)</label>
+                      <input 
+                        type="text" 
+                        value={productForm.image_url}
+                        onChange={e => setProductForm({...productForm, image_url: e.target.value})}
+                        placeholder="https://link-anh.png"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Ảnh Banner Detail (Poster - 797/448)</label>
+                      <input 
+                        type="text" 
+                        value={productForm.design_image_url}
+                        onChange={e => setProductForm({...productForm, design_image_url: e.target.value})}
+                        placeholder="https://link-anh-poster.png"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row-multi">
+                    <div className="form-group">
+                      <label>Video</label>
+                      <input 
+                        type="text" 
+                        value={productForm.videoRes}
+                        onChange={e => setProductForm({...productForm, videoRes: e.target.value})}
+                        placeholder="VD: 4K60p 10-bit"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Dải ISO</label>
+                      <input 
+                        type="text" 
+                        value={productForm.isoRange}
+                        onChange={e => setProductForm({...productForm, isoRange: e.target.value})}
+                        placeholder="VD: 100 - 51,200"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Slug & Description Section */}
+                <div className="form-section-group">
+                  <h4 className="section-subtitle-admin">NỘI DUNG CHI TIẾT (MARKDOWN)</h4>
+                  <div className="form-group full-width">
+                    <label>URL Slug (Dùng cho SEO)</label>
+                    <div className="slug-input-wrapper">
+                      <input 
+                        type="text" 
+                        value={productForm.slug}
+                        onChange={e => setProductForm({...productForm, slug: e.target.value})}
+                        placeholder="tên-may-anh-viet-lien"
+                      />
+                      <button 
+                        type="button" 
+                        className="btn-tiny"
+                        onClick={() => {
+                          const s = productForm.name
+                            .toLowerCase()
+                            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                            .replace(/[đĐ]/g, 'd')
+                            .replace(/([^0-9a-z-\s])/g, '')
+                            .replace(/(\s+)/g, '-')
+                            .replace(/-+/g, '-')
+                            .replace(/^-+|-+$/g, '');
+                          setProductForm({...productForm, slug: s});
+                        }}
+                      >
+                        Tự tạo
+                      </button>
+                    </div>
+                  </div>
+                  <div className="form-group full-width">
+                    <label>Mô tả chi tiết (Markdown)</label>
+                    <textarea 
+                      className="admin-markdown-editor"
+                      value={productForm.description}
+                      onChange={e => setProductForm({...productForm, description: e.target.value})}
+                      placeholder="Nhập nội dung giới thiệu máy ảnh tại đây... Có thể dùng Markdown."
+                      rows={10}
+                    />
                   </div>
                 </div>
 

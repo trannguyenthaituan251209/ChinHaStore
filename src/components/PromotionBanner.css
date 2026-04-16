@@ -6,12 +6,28 @@
 }
 
 .banner-container {
-    max-width: 1366px;
+    width: 100%;
+    max-width: 1200px; /* Sensible max-width for large screens */
     margin: 0 auto;
     position: relative;
     overflow: hidden;
     background-color: #f5f5f5;
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure the banner fits within the viewport height on desktop */
+@media (min-width: 769px) {
+    .banner-container {
+        /* Total height limited to 85% of viewport */
+        height: auto;
+        max-height: 85vh;
+        /* Dynamic width to maintain aspect ratio based on viewport height */
+        /* height = (width / ratio) + info_bar_height(90px) */
+        /* width = (85vh - 90px) * ratio */
+        max-width: min(1366px, calc((85vh - 100px) * (797 / 448)));
+    }
 }
 
 .banner-track {
@@ -39,7 +55,7 @@
 
 .banner-image-wrapper {
     width: 100%;
-    aspect-ratio: 1366 / 768;
+    aspect-ratio: 797 / 448; /* Exact ratio provided by user */
     position: relative;
     overflow: hidden;
 }
@@ -56,9 +72,10 @@
     width: 100%;
     background: #6f6464;
     color: #fff;
-    padding: 1.5rem 2rem;
+    padding: 1rem 2rem;
     display: flex;
     align-items: center;
+    min-height: 90px; /* Consistent height for calculation */
 }
 
 .banner-content {
@@ -71,6 +88,7 @@
 
 .banner-text {
     flex: 1;
+    min-width: 0; /* Important: Allow flex item to shrink below content width */
 }
 
 .banner-tag {
@@ -87,15 +105,28 @@
 
 .banner-title {
     font-family: 'ShopeeDisplayB';
-    font-size: 1.8rem;
+    font-size: 1.6rem; /* Slightly smaller title */
     line-height: 1.2;
-    margin-bottom: 0;
+    margin-bottom: 0.2rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+.banner-excerpt {
+    font-size: 0.9rem;
+    font-family: 'ShopeeDisplayR';
+    color: rgba(255,255,255,0.9);
+    margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Allow 2 lines as requested */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .btn-banner-action {
+    flex-shrink: 0; /* Never allow the button to be squeezed or pushed out */
     background-color: transparent;
     border: 1px solid #fff;
     color: #fff;
@@ -139,10 +170,15 @@
 .banner-nav.prev { left: 10px; }
 .banner-nav.next { right: 10px; }
 
+/* Move nav buttons up a bit since banner is shorter */
+.banner-nav {
+    top: 50%; /* Center on the whole slide (image + bar) */
+}
+
 /* Dots */
 .banner-dots {
     position: absolute;
-    bottom: 85px; /* Above the info bar */
+    bottom: 100px; /* Sitting above the 90px info bar */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
