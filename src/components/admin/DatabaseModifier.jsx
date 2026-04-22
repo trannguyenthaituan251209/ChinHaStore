@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import Papa from 'papaparse';
 import { adminService } from '../../services/adminService';
+import { supabase } from '../../utils/supabase';
 import '../../pages/AdminDashboard.css';
 
 const DatabaseModifier = ({ showStatus }) => {
@@ -97,6 +98,18 @@ const DatabaseModifier = ({ showStatus }) => {
 
   useEffect(() => {
     fetchData();
+
+    // Listen for real-time changes in products, customers, and bookings
+    const channel = supabase
+      .channel('db_modifier_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => fetchData())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleDelete = async (type, id) => {
@@ -133,7 +146,7 @@ const DatabaseModifier = ({ showStatus }) => {
     try {
       await adminService.updateProductStatus(id, newStatus);
       fetchData();
-      showStatus(newStatus === 'active' ? 'Đã cho phép hiển thị trên web' : 'Đã dừng hiển thị trên web', 'success');
+      // Success toast removed as per request
     } catch (err) {
       showStatus('Lỗi khi thay đổi trạng thái: ' + err.message, 'error');
     }

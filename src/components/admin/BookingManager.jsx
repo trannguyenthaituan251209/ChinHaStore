@@ -88,6 +88,9 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
         reloadBookings();
         if (activeSubtab === 'past') fetchHistoryPage(historyPage);
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        reloadBookings();
+      })
       .subscribe();
 
     return () => {
