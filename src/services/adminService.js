@@ -65,7 +65,7 @@ export const adminService = {
       .gte('start_time', tomorrowISO)
       .lt('start_time', nextWeek.toISOString());
 
-        // 7. Today Visits logic
+    // 7. Today Visits logic
     const todayStr = today.toISOString().split('T')[0];
     const { data: vData } = await supabase.from('daily_stats').select('visits').eq('date', todayStr).maybeSingle();
     const tVisits = vData?.visits || 0;
@@ -78,7 +78,7 @@ export const adminService = {
     return {
       rentingToday: rentingToday || 0,
       weeklyCustomers: wCust,
-      weeklyDelta: '▼ 0%', 
+      weeklyDelta: '▼ 0%',
       todayRevenue: new Intl.NumberFormat('vi-VN').format(todayRevenue),
       upcomingEvents: upcomingEvents || 0,
       todayVisits: tVisits,
@@ -97,7 +97,7 @@ export const adminService = {
         const { data: c } = await supabase.from('daily_stats').select('visits').eq('date', t).maybeSingle();
         await supabase.from('daily_stats').upsert({ date: t, visits: (c?.visits || 0) + 1 }, { onConflict: 'date' });
       }
-    } catch(e) { console.warn('Stat block bypassed'); }
+    } catch (e) { console.warn('Stat block bypassed'); }
   },
 
   /**
@@ -247,7 +247,7 @@ export const adminService = {
    * Find or create a customer by phone number and name (Multi-Factor Handshake).
    * Prevents accidental merges AND unique constraint violations.
    */
-      async getOrCreateCustomer(customerData) {
+  async getOrCreateCustomer(customerData) {
     const { phone, full_name, email, city, social } = customerData;
     const cleanPhone = phone?.trim() || '0';
     const cleanName = full_name?.trim() || 'Khách lẻ';
@@ -262,16 +262,16 @@ export const adminService = {
       .maybeSingle();
 
     if (exactMatch) {
-       // Optional: Update email/city if they are new
-       if (email || city || social) {
-         await supabase.from('customers').update({
-           email: email || '',
-           city: city || 'Hồ Chí Minh',
-           social: social || '',
-           updated_at: new Date().toISOString()
-         }).eq('id', exactMatch.id);
-       }
-       return exactMatch.id;
+      // Optional: Update email/city if they are new
+      if (email || city || social) {
+        await supabase.from('customers').update({
+          email: email || '',
+          city: city || 'Hồ Chí Minh',
+          social: social || '',
+          updated_at: new Date().toISOString()
+        }).eq('id', exactMatch.id);
+      }
+      return exactMatch.id;
     }
 
     // 2. CREATE NEW IDENTITY
@@ -532,7 +532,7 @@ export const adminService = {
     // eslint-disable-next-line no-unused-vars
     const { city: _, customerName: __, phone: ___, email: ____, social: _____, ...bookingUpdates } = updates;
     const finalUpdates = { ...bookingUpdates, is_seen: true };
-    
+
     if (finalUpdates.start_time) finalUpdates.start_time = this.formatTimestamp(finalUpdates.start_time);
     if (finalUpdates.end_time) finalUpdates.end_time = this.formatTimestamp(finalUpdates.end_time);
 
@@ -540,7 +540,7 @@ export const adminService = {
       .from('bookings')
       .update(finalUpdates)
       .eq('id', id);
-    
+
     if (error) throw error;
   },
 
@@ -604,15 +604,18 @@ export const adminService = {
       sensor: p.sensor,
       videoRes: p.video_res,
       isoRange: p.iso_range,
-      mount: p.mount
+      mount: p.mount,
+      display_title: p.display_title || '',
+      gallery_images: p.gallery_images || [],
+      combo_items: p.combo_items || []
     }));
   },
 
   async getProductBySlug(slugOrId) {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId);
-    
+
     let query = supabase.from('products').select('*');
-    
+
     if (isUuid) {
       query = query.or(`slug.eq."${slugOrId}",id.eq."${slugOrId}"`);
     } else {
@@ -640,7 +643,10 @@ export const adminService = {
       sensor: data.sensor,
       videoRes: data.video_res,
       isoRange: data.iso_range,
-      mount: data.mount
+      mount: data.mount,
+      display_title: data.display_title || '',
+      gallery_images: data.gallery_images || [],
+      combo_items: data.combo_items || []
     };
   },
 
@@ -648,12 +654,15 @@ export const adminService = {
     const { quantity, videoRes, isoRange, ...productData } = product;
     const { data, error } = await supabase
       .from('products')
-      .insert({ 
-        ...productData, 
-        id: self.crypto.randomUUID(), 
+      .insert({
+        ...productData,
+        id: self.crypto.randomUUID(),
         quantity: parseInt(quantity) || 1,
         video_res: videoRes,
-        iso_range: isoRange
+        iso_range: isoRange,
+        display_title: product.display_title || '',
+        gallery_images: product.gallery_images || [],
+        combo_items: product.combo_items || []
       })
       .select()
       .single();
@@ -679,24 +688,27 @@ export const adminService = {
 
   async updateProduct(id, updates) {
     const { quantity, videoRes, isoRange, ...productData } = updates;
-    
+
     // 1. Get current product to check quantity change
     const { data: current, error: fetchErr } = await supabase
       .from('products')
       .select('name, quantity')
       .eq('id', id)
       .single();
-    
+
     if (fetchErr) throw fetchErr;
 
     // 2. Update product info
     const { error } = await supabase
       .from('products')
-      .update({ 
-        ...productData, 
+      .update({
+        ...productData,
         quantity: parseInt(quantity),
         video_res: videoRes,
-        iso_range: isoRange
+        iso_range: isoRange,
+        display_title: updates.display_title || '',
+        gallery_images: updates.gallery_images || [],
+        combo_items: updates.combo_items || []
       })
       .eq('id', id);
     if (error) throw error;
@@ -942,7 +954,7 @@ export const adminService = {
       email: user.email,
       password,
     });
-    
+
     if (pErr) throw new Error('Mật khẩu quản trị không chính xác.');
     return true;
   },
@@ -1067,7 +1079,7 @@ export const adminService = {
     const { error } = await supabase
       .from('settings')
       .upsert({ key: 'email_config', value: config }, { onConflict: 'key' });
-    
+
     if (error) throw error;
   },
 
@@ -1077,18 +1089,18 @@ export const adminService = {
   async sendBookingEmails(bookingData, product, cusEmail, breakdown = []) {
     try {
       const config = await this.getEmailSettings();
-      
+
       const format = (d) => {
         if (!d) return 'Chưa rõ';
         const date = new Date(d);
         if (isNaN(date.getTime())) return 'Chưa rõ';
-        return date.toLocaleString('vi-VN', { 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            day: '2-digit', 
-            month: '2-digit', 
-            year: 'numeric',
-            timeZone: 'Asia/Ho_Chi_Minh'
+        return date.toLocaleString('vi-VN', {
+          hour: '2-digit',
+          minute: '2-digit',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          timeZone: 'Asia/Ho_Chi_Minh'
         }).replace(' ', ' - ');
       };
 
@@ -1098,7 +1110,7 @@ export const adminService = {
       const totalVal = Number(bookingData.total_price) || 0;
       const discVal = Number(String(bookingData.discount_amount || '0').replace(/\D/g, '')) || 0;
       const finalNet = totalVal - discVal;
-      
+
       const startDT = new Date(bookingData.start_time);
       const endDT = new Date(bookingData.end_time);
       const dDays = Math.ceil((endDT - startDT) / (1000 * 60 * 60 * 24)) || 1;
@@ -1110,7 +1122,7 @@ export const adminService = {
       const totalCombined = finalNet + securityDepositNum;
 
       // Generate Boutique Price Table HTML for EmailJS (Flat string to prevent corruption)
-      const priceTableHtml = (breakdown || []).length > 0 
+      const priceTableHtml = (breakdown || []).length > 0
         ? breakdown.map(item => `
             <tr>
               <td style="padding: 4px 5px 4px 0; white-space: nowrap; color: #333333; font-size: 14px;">${item.label}</td>
@@ -1132,14 +1144,14 @@ export const adminService = {
         delivery_info: bookingData.city || 'Tại cửa hàng (22 Lê Thánh Tông)',
         deposit_property: bookingData.deposit_property || 'CCCD + 3.000.000 VNĐ',
         source: bookingData.source || 'Website',
-        
+
         // Formatted Prices
         total_price: new Intl.NumberFormat('vi-VN').format(totalCombined),
         discount_amount: new Intl.NumberFormat('vi-VN').format(discVal),
         deposit_amount: new Intl.NumberFormat('vi-VN').format(dAmountNum),
         deposit_amount_numeric: dAmountNum,
         remaining_amount: new Intl.NumberFormat('vi-VN').format(totalCombined - dAmountNum),
-        
+
         // HTML Content
         price_table_html: priceTableHtml
       };
@@ -1160,7 +1172,7 @@ export const adminService = {
       if (config.admin_notice.enabled) {
         const adminSubject = replaceAll(config.admin_notice.subject);
         const adminTo = (config.admin_notice.recipient && config.admin_notice.recipient.trim()) || 'manhichin.chinhastore@gmail.com';
-        
+
         await emailjs.send(
           import.meta.env.VITE_EMAILJS_SERVICE_ID,
           import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
@@ -1202,7 +1214,7 @@ export const adminService = {
   async autoSyncStatuses() {
     try {
       const now = new Date().toISOString();
-      
+
       // 1. Confirmed -> Renting (started but not yet finished)
       const { data: toRenting, error: e1 } = await supabase
         .from('bookings')
@@ -1210,7 +1222,7 @@ export const adminService = {
         .eq('status', 'Confirmed')
         .lte('start_time', now)
         .gt('end_time', now);
-      
+
       if (e1) throw e1;
       if (toRenting?.length > 0) {
         const ids = toRenting.map(b => b.id);

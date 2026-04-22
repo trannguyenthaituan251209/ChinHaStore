@@ -1,211 +1,278 @@
 .product-detail-page {
-    background-color: #fff;
+    background: #fff;
+    color: #000;
     min-height: 100vh;
-    padding-bottom: 5rem;
+    padding-top: 80px; /* Space for fixed nav */
 }
 
+/* BREADCRUMB */
+.product-detail-breadcrumb {
+    max-width: 1300px;
+    margin: 1.5rem auto;
+    padding: 0 2rem;
+    font-size: 0.9rem;
+    color: #666;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-family: "ShopeeDisplayR"
+}
+
+.product-detail-breadcrumb a {
+    color: #000;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.product-detail-breadcrumb .active {
+    color: #999;
+}
+
+/* HEADER */
+.product-detail-header {
+    max-width: 1300px;
+    margin: 0 auto 2rem;
+    padding: 0 2rem;
+}
+
+.product-detail-main-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    letter-spacing: -1px;
+    font-family: "ShopeeDisplayB"
+}
+
+.product-detail-meta {
+    font-size: 0.9rem;
+    color: #888;
+    font-family: "ShopeeDisplayR";
+}
+
+/* HERO SECTION */
 .product-detail-hero {
-    position: relative;
-    background-color: #000;
-    color: #fff;
-    padding: 6rem 0 4rem;
-    overflow: hidden;
+    background: #fff;
+    padding-bottom: 4rem;
 }
 
 .product-detail-hero-content {
+    display: grid;
+    grid-template-columns: 100px 1.5fr 1fr;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    gap: 3rem;
+    align-items: flex-start;
+}
+
+/* GALLERY */
+.product-gallery-container {
+    height: 100%;
+}
+
+.thumbnail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.thumb-item {
+    width: 80px;
+    height: 80px;
+    background: #F5F5F5;
+    border: 1px solid #EEE;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+}
+
+.thumb-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.6;
+}
+
+.thumb-item:hover, .thumb-item.active {
+    border-color: #000;
+}
+
+.thumb-item.active img {
+    opacity: 1;
+}
+
+/* MAIN VISUAL */
+.product-hero-visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #FFF;
+}
+
+.hero-main-img {
+    max-width: 100%;
+    max-height: 600px;
+    object-fit: contain;
+}
+
+/* SPECS PANEL (RIGHT) */
+.product-hero-specs-panel {
+    background: #fff;
+}
+
+.specs-group h3, .combo-group h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #000;
+    padding-bottom: 0.5rem;
+    display: inline-block;
+    font-family: "ShopeeDisplayB";
+}
+
+.specs-list-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 3rem;
+}
+
+.spec-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2.5rem;
-    gap: 4rem;
+    font-size: 0.95rem;
+    font-family: "ShopeeDisplayR";
 }
 
-.product-hero-info {
-    flex: 1;
+.spec-row .label {
+    color: #666;
+    font-family: "ShopeeDisplayR";
 }
 
-.back-to-catalog {
+.spec-row .value {
+    font-weight: 600;
+    text-align: right;
+}
+
+/* COMBO SECTION */
+.combo-items-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 3rem;
+    font-family: "ShopeeDisplayR";
+}
+
+.combo-item {
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 0.5rem;
-    color: rgba(255,255,255,0.6);
-    text-decoration: none;
-    font-size: 0.9rem;
-    margin-bottom: 2rem;
-    transition: color 0.3s;
+    text-align: center;
 }
 
-.back-to-catalog:hover {
-    color: #fff;
+.combo-icon {
+    width: 110px;
+    height: 110px;
+    border: 1px solid #EEE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
 }
 
-.product-detail-title {
-    font-size: 3.5rem;
-    font-family: 'ShopeeDisplayB';
-    line-height: 1.1;
+.combo-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.combo-item span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #444;
+}
+
+/* ACTION SECTION */
+.hero-price-action {
+    padding-top: 2rem;
+    border-top: 1px dashed #DDD;
+}
+
+.price-box {
     margin-bottom: 1.5rem;
 }
 
-.product-hero-badges {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
+.price-val {
+    font-size: 2.2rem;
+    font-weight: 800;
+    font-family: "ShopeeDisplayB";
 }
 
-.product-badge {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.product-hero-price {
-    font-size: 2rem;
-    font-family: 'ShopeeDisplayB';
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-}
-
-.product-hero-price small {
+.price-unit {
+    color: #666;
     font-size: 1rem;
-    font-weight: normal;
-    color: rgba(255,255,255,0.6);
+    margin-left: 5px;
 }
 
-.product-hero-image {
-    flex: 1;
-    max-width: 600px;
-}
-
-.product-hero-image img {
+.btn-book-hero {
     width: 100%;
-    height: auto;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    padding: 1.2rem;
+    background: #000;
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s;
 }
 
-/* LAYOUT BODY */
+.btn-book-hero:hover {
+    background: #333;
+    transform: translateY(-2px);
+}
+
+/* BODY / DESCRIPTION */
 .product-detail-body {
-    max-width: 1400px;
+    max-width: 1300px;
     margin: 0 auto;
-    padding: 4rem 2.5rem;
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 5rem;
+    padding: 4rem 2rem;
+    border-top: 1px solid #EEE;
 }
 
-.product-description-container h2 {
-    font-family: 'ShopeeDisplayB';
-    font-size: 1.8rem;
+.description-header h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
     margin-bottom: 2rem;
-    text-transform: uppercase;
-    border-bottom: 2px solid #000;
+    background: #000;
+    color: #fff;
     display: inline-block;
-    padding-bottom: 0.5rem;
+    padding: 5px 15px;
 }
 
 .product-markdown-content {
-    font-family: 'ShopeeDisplayR';
-    line-height: 1.8;
     font-size: 1.1rem;
+    line-height: 1.8;
     color: #333;
-}
-
-.product-markdown-content p {
-    margin-bottom: 1.5rem;
-}
-
-.product-markdown-content h3 {
-    font-family: 'ShopeeDisplayB';
-    margin: 2.5rem 0 1rem;
-}
-
-.product-markdown-content ul {
-    margin-bottom: 1.5rem;
-    padding-left: 1.5rem;
-}
-
-/* SIDEBAR SPECS */
-.product-sidebar-specs {
-    position: sticky;
-    top: 120px;
-    height: fit-content;
-}
-
-.specs-card {
-    background: #fdfdfd;
-    border: 1px solid #eee;
-    padding: 2rem;
-}
-
-.specs-card h3 {
-    font-family: 'ShopeeDisplayB';
-    font-size: 1.2rem;
-    margin-bottom: 1.5rem;
-    text-transform: uppercase;
-}
-
-.specs-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-}
-
-.spec-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-}
-
-.spec-label {
-    font-size: 0.75rem;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.spec-value {
-    font-family: 'ShopeeDisplayB';
-    font-size: 1rem;
-    color: #000;
-}
-
-.btn-book-now-fixed {
-    width: 100%;
-    background-color: #000;
-    color: #fff;
-    padding: 1.2rem;
-    border: none;
-    font-family: 'ShopeeDisplayB';
-    font-size: 1rem;
-    margin-top: 2rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.btn-book-now-fixed:hover {
-    background-color: #333;
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    font-family: "ShopeeDisplayR";
 }
 
 /* RELATED MACHINES */
 .related-machines-section {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 4rem 2.5rem;
+    max-width: 1300px;
+    margin: 4rem auto;
+    padding: 0 2rem;
     border-top: 1px solid #eee;
+    padding-top: 4rem;
 }
 
 .related-machines-section h2 {
-    font-family: 'ShopeeDisplayB';
     font-size: 1.8rem;
+    font-weight: 800;
     margin-bottom: 3rem;
     text-align: center;
 }
@@ -219,23 +286,28 @@
 /* RESPONSIVE */
 @media (max-width: 1024px) {
     .product-detail-hero-content {
-        flex-direction: column;
-        text-align: center;
-    }
-    .product-detail-title {
-        font-size: 2.5rem;
-    }
-    .product-hero-badges {
-        justify-content: center;
-    }
-    .product-hero-price {
-        justify-content: center;
-    }
-    .product-detail-body {
         grid-template-columns: 1fr;
-        padding-top: 2rem;
+        gap: 2rem;
     }
-    .product-sidebar-specs {
-        position: static;
+
+    .product-gallery-container {
+        order: 2;
+    }
+
+    .thumbnail-list {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .product-hero-visual {
+        order: 1;
+    }
+
+    .product-hero-specs-panel {
+        order: 3;
+    }
+
+    .product-detail-main-title {
+        font-size: 2rem;
     }
 }

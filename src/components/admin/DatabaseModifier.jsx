@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Camera, 
-  Users, 
-  Calendar, 
-  PlusCircle, 
-  Edit3, 
+import {
+  Camera,
+  Users,
+  Calendar,
+  PlusCircle,
+  Edit3,
   Trash2,
   Package,
   User as UserIcon,
@@ -13,11 +13,19 @@ import {
   FileUp,
   CheckCircle,
   AlertCircle,
-  Settings
+  Settings,
+  FileText,
+  Eye,
+  Bold,
+  Italic,
+  Heading2,
+  Link as LinkIcon
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 import Papa from 'papaparse';
 import { adminService } from '../../services/adminService';
-import { supabase } from '../../utils/supabase';
 import '../../pages/AdminDashboard.css';
 
 const DatabaseModifier = ({ showStatus }) => {
@@ -27,7 +35,7 @@ const DatabaseModifier = ({ showStatus }) => {
   const [error, setError] = useState(null);
 
   // Modals
-  const [modalType, setModalType] = useState(null); // 'camera', 'customer', 'booking' or null
+  const [modalType, setModalType] = useState(null); // 'camera', 'customer', 'booking', 'desc_editor'
   const [currentItem, setCurrentItem] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
@@ -50,7 +58,10 @@ const DatabaseModifier = ({ showStatus }) => {
     videoRes: '',
     isoRange: '',
     mount: '',
-    design_image_url: ''
+    design_image_url: '',
+    gallery_images: [],
+    display_title: '',
+    combo_items: []
   });
 
   const [customerForm, setCustomerForm] = useState({
@@ -98,18 +109,6 @@ const DatabaseModifier = ({ showStatus }) => {
 
   useEffect(() => {
     fetchData();
-
-    // Listen for real-time changes in products, customers, and bookings
-    const channel = supabase
-      .channel('db_modifier_realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, () => fetchData())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => fetchData())
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const handleDelete = async (type, id) => {
@@ -141,12 +140,11 @@ const DatabaseModifier = ({ showStatus }) => {
   };
 
   const handleToggleStatus = async (id, currentStatus) => {
-    // Toggles between 'active' and 'disabled'
     const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
     try {
       await adminService.updateProductStatus(id, newStatus);
       fetchData();
-      // Success toast removed as per request
+      showStatus(newStatus === 'active' ? 'Đã cho phép hiển thị trên web' : 'Đã dừng hiển thị trên web', 'success');
     } catch (err) {
       showStatus('Lỗi khi thay đổi trạng thái: ' + err.message, 'error');
     }
@@ -172,7 +170,10 @@ const DatabaseModifier = ({ showStatus }) => {
         videoRes: item.videoRes || '',
         isoRange: item.isoRange || '',
         mount: item.mount || '',
-        design_image_url: item.design_image_url || item.designImage || ''
+        design_image_url: item.design_image_url || item.designImage || '',
+        gallery_images: item.gallery_images || [],
+        display_title: item.display_title || '',
+        combo_items: item.combo_items || []
       });
     } else if (type === 'customer') {
       setCustomerForm({
@@ -205,6 +206,33 @@ const DatabaseModifier = ({ showStatus }) => {
     setModalType(type);
   };
 
+  const handleEditDescription = (item) => {
+    setCurrentItem(item);
+    setProductForm({
+      name: item.name || '',
+      category: item.category || 'Mirrorless',
+      image_url: item.image_url || '',
+      price_6h: item.price_6h || '0',
+      price_1day: item.price_1day || '0',
+      price_2days: item.price_2days || '0',
+      price_3days: item.price_3days || '0',
+      price_4days_plus: item.price_4days_plus || '0',
+      quantity: item.quantity || 1,
+      status: item.status || 'active',
+      slug: item.slug || '',
+      description: item.description || '',
+      sensor: item.sensor || '',
+      videoRes: item.videoRes || '',
+      isoRange: item.isoRange || '',
+      mount: item.mount || '',
+      design_image_url: item.design_image_url || item.designImage || '',
+      gallery_images: item.gallery_images || [],
+      display_title: item.display_title || '',
+      combo_items: item.combo_items || []
+    });
+    setModalType('desc_editor');
+  };
+
   const handleAdd = (type) => {
     setCurrentItem(null);
     if (type === 'camera') {
@@ -225,7 +253,10 @@ const DatabaseModifier = ({ showStatus }) => {
         videoRes: '',
         isoRange: '',
         mount: '',
-        design_image_url: ''
+        design_image_url: '',
+        gallery_images: [],
+        display_title: '',
+        combo_items: []
       });
     } else if (type === 'customer') {
       setCustomerForm({
@@ -240,13 +271,13 @@ const DatabaseModifier = ({ showStatus }) => {
       const pad = (n) => n.toString().padStart(2, '0');
       const d1 = new Date();
       const d2 = new Date(); d2.setDate(d1.getDate() + 1);
-      
+
       setBookingForm({
         customerName: '',
         phone: '',
         product_id: data.cameras[0]?.id || '',
-        start_time: `${d1.getFullYear()}-${pad(d1.getMonth()+1)}-${pad(d1.getDate())}T07:30`,
-        end_time: `${d2.getFullYear()}-${pad(d2.getMonth()+1)}-${pad(d2.getDate())}T07:30`,
+        start_time: `${d1.getFullYear()}-${pad(d1.getMonth() + 1)}-${pad(d1.getDate())}T07:30`,
+        end_time: `${d2.getFullYear()}-${pad(d2.getMonth() + 1)}-${pad(d2.getDate())}T07:30`,
         total_price: '0',
         status: 'Pending',
         city: ''
@@ -344,9 +375,9 @@ const DatabaseModifier = ({ showStatus }) => {
           {p.status === 'active' ? 'Đang cho thuê' : 'Ngừng cho thuê'}
         </span>
         <label className="switch-slim">
-          <input 
-            type="checkbox" 
-            checked={p.status === 'active'} 
+          <input
+            type="checkbox"
+            checked={p.status === 'active'}
             onChange={() => handleToggleStatus(p.id, p.status)}
             disabled={p.status === 'archived'}
           />
@@ -355,10 +386,8 @@ const DatabaseModifier = ({ showStatus }) => {
       </div>
 
       <div className="item-actions">
-        <button className="action-btn archive" onClick={() => handleToggleArchive(p.id, p.status)} title={p.status === 'archived' ? 'Khôi phục' : 'Lưu trữ (Ẩn hoàn toàn)'}>
-          <FileUp size={16} />
-        </button>
-        <button className="action-btn edit" onClick={() => handleEdit('camera', p)} title="Sửa"><Edit3 size={16} /></button>
+        <button className="action-btn desc" onClick={() => handleEditDescription(p)} title="Viết mô tả & specs"><FileText size={16} /></button>
+        <button className="action-btn edit" onClick={() => handleEdit('camera', p)} title="Sửa nhanh"><Edit3 size={16} /></button>
         <button className="action-btn delete" onClick={() => handleDelete('camera', p.id)} title="Xóa vĩnh viễn"><Trash2 size={16} /></button>
       </div>
     </div>
@@ -369,7 +398,7 @@ const DatabaseModifier = ({ showStatus }) => {
       <div className="mini-icon-circle">
         <UserIcon size={18} />
       </div>
-      <div className="item-details" style={{flex: 1}}>
+      <div className="item-details" style={{ flex: 1 }}>
         <strong>{c.full_name}</strong>
         <span>{c.phone}</span>
       </div>
@@ -385,7 +414,7 @@ const DatabaseModifier = ({ showStatus }) => {
       <div className="mini-icon-circle highlight">
         <ShoppingBag size={18} />
       </div>
-      <div className="item-details" style={{flex: 1}}>
+      <div className="item-details" style={{ flex: 1 }}>
         <strong>#{b.id.slice(0, 6)} - {b.customerName}</strong>
         <span>{b.productName} ({b.status})</span>
       </div>
@@ -418,8 +447,8 @@ const DatabaseModifier = ({ showStatus }) => {
       </div>
 
       <div className="modifier-content">
-        {loading && <p style={{textAlign: 'center', padding: '2rem'}}>Đang tải dữ liệu...</p>}
-        {error && <p style={{textAlign: 'center', color: 'red', padding: '2rem'}}>{error}</p>}
+        {loading && <p style={{ textAlign: 'center', padding: '2rem' }}>Đang tải dữ liệu...</p>}
+        {error && <p style={{ textAlign: 'center', color: 'red', padding: '2rem' }}>{error}</p>}
 
         {!loading && !error && (
           <>
@@ -497,15 +526,15 @@ const DatabaseModifier = ({ showStatus }) => {
                 <div className="section-header">
                   <h3>Trung Tâm Di Trú Dữ Liệu</h3>
                 </div>
-                
+
                 {importStatus === 'idle' && (
                   <div className="import-drop-zone">
                     <FileUp size={48} />
                     <h4>Kéo thả file CSV chứa dữ liệu đặt lịch</h4>
                     <p>Hệ thống sẽ tự động ánh xạ cột Khách hàng, SĐT và Thiết bị.</p>
-                    <input 
-                      type="file" 
-                      accept=".csv" 
+                    <input
+                      type="file"
+                      accept=".csv"
                       onChange={(e) => {
                         const file = e.target.files[0];
                         if (file) {
@@ -530,12 +559,10 @@ const DatabaseModifier = ({ showStatus }) => {
                         <button className="btn-cancel" onClick={() => setImportStatus('idle')}>Hủy</button>
                         <button className="btn-save" onClick={async () => {
                           setImportStatus('importing');
-                          // Map CSV rows to DB format
-                          // Assuming simple mapping for this implementation
                           const mappedBookings = importData.map(row => ({
                             customerName: row.customerName || row.name || 'Khách',
                             phone: row.phone || row.sdt || '',
-                            product_id: data.cameras[0]?.id, // Default to first for safety, user can refine
+                            product_id: data.cameras[0]?.id, 
                             start_time: row.start_time || row.ngay_thue,
                             end_time: row.end_time || row.ngay_tra,
                             status: 'Returned',
@@ -609,35 +636,33 @@ const DatabaseModifier = ({ showStatus }) => {
         )}
       </div>
 
-      {/* Simple Mutation UI placeholder or Link to dedicated managers */}
       {modalType === 'camera' && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal animate-in" style={{maxWidth: '500px'}}>
+          <div className="admin-modal animate-in" style={{ maxWidth: '500px' }}>
             <header className="modal-header">
               <h3>{currentItem ? 'SỬA THÔNG TIN MÁY' : 'THÊM MÁY MỚI'}</h3>
               <button className="close-btn" onClick={() => setModalType(null)}>×</button>
             </header>
             <form className="admin-form" onSubmit={handleSaveProduct}>
               <div className="product-form-layout">
-                {/* Basic Info Section */}
                 <div className="form-section-group">
                   <div className="form-group full-width">
                     <label>Tên máy ảnh</label>
-                    <input 
-                      type="text" 
-                      required 
+                    <input
+                      type="text"
+                      required
                       value={productForm.name}
-                      onChange={e => setProductForm({...productForm, name: e.target.value})}
+                      onChange={e => setProductForm({ ...productForm, name: e.target.value })}
                       placeholder="VD: Canon EOS R50"
                     />
                   </div>
-                  
+
                   <div className="form-row-multi">
                     <div className="form-group">
                       <label>Phân loại</label>
-                      <select 
+                      <select
                         value={productForm.category}
-                        onChange={e => setProductForm({...productForm, category: e.target.value})}
+                        onChange={e => setProductForm({ ...productForm, category: e.target.value })}
                       >
                         <option value="Mirrorless">Mirrorless</option>
                         <option value="Compact">Compact</option>
@@ -647,30 +672,30 @@ const DatabaseModifier = ({ showStatus }) => {
                     </div>
                     <div className="form-group">
                       <label>Số lượng máy</label>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         min="1"
                         required
                         value={productForm.quantity}
-                        onChange={e => setProductForm({...productForm, quantity: e.target.value})}
+                        onChange={e => setProductForm({ ...productForm, quantity: e.target.value })}
                       />
                     </div>
                   </div>
 
                   <div className="form-group full-width">
                     <label>Ảnh bìa (URL)</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="https://..."
                       value={productForm.image_url}
-                      onChange={e => setProductForm({...productForm, image_url: e.target.value})}
+                      onChange={e => setProductForm({ ...productForm, image_url: e.target.value })}
                     />
                   </div>
 
                   <div className="form-group">
                     <div className="toggle-switch-container" onClick={(e) => {
                       if (e.target.tagName !== 'INPUT') {
-                        setProductForm({...productForm, status: productForm.status === 'active' ? 'disabled' : 'active'});
+                        setProductForm({ ...productForm, status: productForm.status === 'active' ? 'disabled' : 'active' });
                       }
                     }}>
                       <div className="toggle-label-text">
@@ -678,10 +703,10 @@ const DatabaseModifier = ({ showStatus }) => {
                         <span className="sub-label">Cho phép khách hàng nhìn thấy và đặt thuê máy này</span>
                       </div>
                       <div className="switch">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={productForm.status === 'active'}
-                          onChange={(e) => setProductForm({...productForm, status: e.target.checked ? 'active' : 'disabled'})}
+                          onChange={(e) => setProductForm({ ...productForm, status: e.target.checked ? 'active' : 'disabled' })}
                         />
                         <span className="slider"></span>
                       </div>
@@ -689,172 +714,40 @@ const DatabaseModifier = ({ showStatus }) => {
                   </div>
                 </div>
 
-                {/* Tech Specs Section */}
                 <div className="form-section-group">
-                  <h4 className="section-subtitle-admin">THÔNG SỐ KỸ THUẬT</h4>
+                  <h4 className="section-subtitle-admin">GIÁ THUÊ (VNĐ)</h4>
                   <div className="form-row-multi">
                     <div className="form-group">
-                      <label>Cảm biến (Sensor)</label>
-                      <input 
-                        type="text" 
-                        value={productForm.sensor}
-                        onChange={e => setProductForm({...productForm, sensor: e.target.value})}
-                        placeholder="VD: Full-frame CMOS"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Ảnh đại diện (Thumbnail - 1:1)</label>
-                      <input 
-                        type="text" 
-                        value={productForm.image_url}
-                        onChange={e => setProductForm({...productForm, image_url: e.target.value})}
-                        placeholder="https://link-anh.png"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Ảnh Banner Detail (Poster - 797/448)</label>
-                      <input 
-                        type="text" 
-                        value={productForm.design_image_url}
-                        onChange={e => setProductForm({...productForm, design_image_url: e.target.value})}
-                        placeholder="https://link-anh-poster.png"
-                      />
-                    </div>
-                  </div>
-                  <div className="form-row-multi">
-                    <div className="form-group">
-                      <label>Video</label>
-                      <input 
-                        type="text" 
-                        value={productForm.videoRes}
-                        onChange={e => setProductForm({...productForm, videoRes: e.target.value})}
-                        placeholder="VD: 4K60p 10-bit"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Dải ISO</label>
-                      <input 
-                        type="text" 
-                        value={productForm.isoRange}
-                        onChange={e => setProductForm({...productForm, isoRange: e.target.value})}
-                        placeholder="VD: 100 - 51,200"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Slug & Description Section */}
-                <div className="form-section-group">
-                  <h4 className="section-subtitle-admin">NỘI DUNG CHI TIẾT (MARKDOWN)</h4>
-                  <div className="form-group full-width">
-                    <label>URL Slug (Dùng cho SEO)</label>
-                    <div className="slug-input-wrapper">
-                      <input 
-                        type="text" 
-                        value={productForm.slug}
-                        onChange={e => setProductForm({...productForm, slug: e.target.value})}
-                        placeholder="tên-may-anh-viet-lien"
-                      />
-                      <button 
-                        type="button" 
-                        className="btn-tiny"
-                        onClick={() => {
-                          const s = productForm.name
-                            .toLowerCase()
-                            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                            .replace(/[đĐ]/g, 'd')
-                            .replace(/([^0-9a-z-\s])/g, '')
-                            .replace(/(\s+)/g, '-')
-                            .replace(/-+/g, '-')
-                            .replace(/^-+|-+$/g, '');
-                          setProductForm({...productForm, slug: s});
-                        }}
-                      >
-                        Tự tạo
-                      </button>
-                    </div>
-                  </div>
-                  <div className="form-group full-width">
-                    <label>Mô tả chi tiết (Markdown)</label>
-                    <textarea 
-                      className="admin-markdown-editor"
-                      value={productForm.description}
-                      onChange={e => setProductForm({...productForm, description: e.target.value})}
-                      placeholder="Nhập nội dung giới thiệu máy ảnh tại đây... Có thể dùng Markdown."
-                      rows={10}
-                    />
-                  </div>
-                </div>
-
-                {/* Price Matrix Section */}
-                <div className="form-price-section">
-                  <h4 className="price-section-title">BẢNG GIÁ CHO THUÊ</h4>
-                  <div className="price-matrix-grid">
-                    <div className="price-input-item">
                       <label>6 Giờ</label>
-                      <div className="input-wrapper">
-                        <input 
-                          type="text" 
-                          value={productForm.price_6h}
-                          onChange={e => setProductForm({...productForm, price_6h: e.target.value})}
-                        />
-                        <span className="unit">VNĐ</span>
-                      </div>
+                      <input type="text" value={productForm.price_6h} onChange={e => setProductForm({...productForm, price_6h: e.target.value})} />
                     </div>
-                    <div className="price-input-item">
+                    <div className="form-group">
                       <label>1 Ngày</label>
-                      <div className="input-wrapper">
-                        <input 
-                          type="text" 
-                          value={productForm.price_1day}
-                          onChange={e => setProductForm({...productForm, price_1day: e.target.value})}
-                        />
-                        <span className="unit">VNĐ</span>
-                      </div>
+                      <input type="text" value={productForm.price_1day} onChange={e => setProductForm({...productForm, price_1day: e.target.value})} />
                     </div>
-                    <div className="price-input-item">
+                  </div>
+                  <div className="form-row-multi">
+                    <div className="form-group">
                       <label>2 Ngày</label>
-                      <div className="input-wrapper">
-                        <input 
-                          type="text" 
-                          value={productForm.price_2days}
-                          onChange={e => setProductForm({...productForm, price_2days: e.target.value})}
-                        />
-                        <span className="unit">VNĐ</span>
-                      </div>
+                      <input type="text" value={productForm.price_2days} onChange={e => setProductForm({...productForm, price_2days: e.target.value})} />
                     </div>
-                    <div className="price-input-item">
+                    <div className="form-group">
                       <label>3 Ngày</label>
-                      <div className="input-wrapper">
-                        <input 
-                          type="text" 
-                          value={productForm.price_3days}
-                          onChange={e => setProductForm({...productForm, price_3days: e.target.value})}
-                        />
-                        <span className="unit">VNĐ</span>
-                      </div>
+                      <input type="text" value={productForm.price_3days} onChange={e => setProductForm({...productForm, price_3days: e.target.value})} />
                     </div>
-                    <div className="price-input-item stretch">
-                      <label>Từ ngày thứ 4 trở đi</label>
-                      <div className="input-wrapper">
-                        <input 
-                          type="text" 
-                          value={productForm.price_4days_plus}
-                          onChange={e => setProductForm({...productForm, price_4days_plus: e.target.value})}
-                        />
-                        <span className="unit">VNĐ / Ngày</span>
-                      </div>
-                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Từ ngày thứ 4</label>
+                    <input type="text" value={productForm.price_4days_plus} onChange={e => setProductForm({...productForm, price_4days_plus: e.target.value})} />
                   </div>
                 </div>
               </div>
-              
-              <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>HỦY</button>
+              <footer className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>Hủy</button>
                 <button type="submit" className="btn-save" disabled={isSaving}>
-                  {isSaving ? 'ĐANG LƯU...' : 'LƯU THAY ĐỔI'}
+                  {isSaving ? 'ĐANG LƯU...' : 'LƯU SẢN PHẨM'}
                 </button>
-              </div>
+              </footer>
             </form>
           </div>
         </div>
@@ -862,73 +755,30 @@ const DatabaseModifier = ({ showStatus }) => {
 
       {modalType === 'customer' && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal animate-in" style={{maxWidth: '500px'}}>
+          <div className="admin-modal animate-in" style={{ maxWidth: '500px' }}>
             <header className="modal-header">
               <h3>{currentItem ? 'SỬA THÔNG TIN KHÁCH' : 'THÊM KHÁCH MỚI'}</h3>
-              <button className="admin-modal-close-btn" onClick={() => setModalType(null)} aria-label="Đóng">×</button>
+              <button className="close-btn" onClick={() => setModalType(null)}>×</button>
             </header>
             <form className="admin-form" onSubmit={handleSaveCustomer}>
-              <div className="form-grid">
-                <div className="form-group full-width">
-                  <label>Họ và tên</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={customerForm.full_name}
-                    onChange={e => setCustomerForm({...customerForm, full_name: e.target.value})}
-                  />
-                </div>
+              <div className="form-group">
+                <label>Họ và tên</label>
+                <input type="text" required value={customerForm.full_name} onChange={e => setCustomerForm({...customerForm, full_name: e.target.value})} />
+              </div>
+              <div className="form-row-multi">
                 <div className="form-group">
                   <label>Số điện thoại</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={customerForm.phone}
-                    onChange={e => setCustomerForm({...customerForm, phone: e.target.value})}
-                  />
+                  <input type="text" required value={customerForm.phone} onChange={e => setCustomerForm({...customerForm, phone: e.target.value})} />
                 </div>
                 <div className="form-group">
                   <label>Email</label>
-                  <input 
-                    type="email" 
-                    value={customerForm.email}
-                    onChange={e => setCustomerForm({...customerForm, email: e.target.value})}
-                  />
-                </div>
-                <div className="form-group full-width">
-                  <label>Địa chỉ</label>
-                  <input 
-                    type="text" 
-                    placeholder="VD: 23 Lê Thánh Tông, Buôn Ma Thuột..."
-                    value={customerForm.city}
-                    onChange={e => setCustomerForm({...customerForm, city: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Mạng xã hội (Link Facebook/Zalo)</label>
-                  <input 
-                    type="text" 
-                    value={customerForm.social}
-                    onChange={e => setCustomerForm({...customerForm, social: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Trạng thái</label>
-                  <select 
-                    value={customerForm.status}
-                    onChange={e => setCustomerForm({...customerForm, status: e.target.value})}
-                  >
-                    <option value="active">Hoạt động</option>
-                    <option value="disabled">Vô hiệu hóa</option>
-                  </select>
+                  <input type="email" value={customerForm.email} onChange={e => setCustomerForm({...customerForm, email: e.target.value})} />
                 </div>
               </div>
-              <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>HỦY</button>
-                <button type="submit" className="btn-save" disabled={isSaving}>
-                  {isSaving ? 'ĐANG LƯU...' : 'LƯU THAY ĐỔI'}
-                </button>
-              </div>
+              <footer className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>Hủy</button>
+                <button type="submit" className="btn-save" disabled={isSaving}>LƯU THÔNG TIN</button>
+              </footer>
             </form>
           </div>
         </div>
@@ -936,96 +786,250 @@ const DatabaseModifier = ({ showStatus }) => {
 
       {modalType === 'booking' && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal animate-in" style={{maxWidth: '550px'}}>
+          <div className="admin-modal animate-in" style={{ maxWidth: '500px' }}>
             <header className="modal-header">
-              <h3>{currentItem ? 'SỬA ĐƠN ĐẶT LỊCH' : 'THÊM ĐƠN THỦ CÔNG'}</h3>
-              <button className="close-btn" onClick={() => setModalType(null)} aria-label="Đóng">×</button>
+              <h3>{currentItem ? 'SỬA ĐƠN ĐẶT LỊCH' : 'TẠO ĐƠN THỦ CÔNG'}</h3>
+              <button className="close-btn" onClick={() => setModalType(null)}>×</button>
             </header>
             <form className="admin-form" onSubmit={handleSaveBooking}>
-              <div className="form-grid">
+              <div className="form-group">
+                <label>Tên khách hàng</label>
+                <input type="text" required value={bookingForm.customerName} onChange={e => setBookingForm({...bookingForm, customerName: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label>SĐT</label>
+                <input type="text" required value={bookingForm.phone} onChange={e => setBookingForm({...bookingForm, phone: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label>Thiết bị thuê</label>
+                <select value={bookingForm.product_id} onChange={e => setBookingForm({...bookingForm, product_id: e.target.value})}>
+                  {data.cameras.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+              <div className="form-row-multi">
                 <div className="form-group">
-                  <label>Tên khách hàng</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={bookingForm.customerName}
-                    onChange={e => setBookingForm({...bookingForm, customerName: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Số điện thoại</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={bookingForm.phone}
-                    onChange={e => setBookingForm({...bookingForm, phone: e.target.value})}
-                  />
-                </div>
-                <div className="form-group full-width">
-                  <label>Địa chỉ nhận / trả máy</label>
-                  <input 
-                    type="text" 
-                    placeholder="VD: 123 Lê Thánh Tông, Buôn Ma Thuột..."
-                    value={bookingForm.city}
-                    onChange={e => setBookingForm({...bookingForm, city: e.target.value})}
-                  />
-                </div>
-                <div className="form-group full-width">
-                  <label>Thiết bị thuê</label>
-                  <select 
-                    value={bookingForm.product_id}
-                    onChange={e => setBookingForm({...bookingForm, product_id: e.target.value})}
-                  >
-                    {data.cameras.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
+                  <label>Bắt đầu</label>
+                  <input type="datetime-local" value={bookingForm.start_time} onChange={e => setBookingForm({...bookingForm, start_time: e.target.value})} />
                 </div>
                 <div className="form-group">
-                  <label>Ngày bắt đầu</label>
-                  <input 
-                    type="datetime-local" 
-                    required 
-                    value={bookingForm.start_time}
-                    onChange={e => setBookingForm({...bookingForm, start_time: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Ngày kết thúc</label>
-                  <input 
-                    type="datetime-local" 
-                    required 
-                    value={bookingForm.end_time}
-                    onChange={e => setBookingForm({...bookingForm, end_time: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Thành tiền (VNĐ)</label>
-                  <input 
-                    type="number" 
-                    value={bookingForm.total_price}
-                    onChange={e => setBookingForm({...bookingForm, total_price: e.target.value})}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Trạng thái</label>
-                  <select 
-                    value={bookingForm.status}
-                    onChange={e => setBookingForm({...bookingForm, status: e.target.value})}
-                  >
-                    <option value="Pending">Chờ xác nhận</option>
-                    <option value="Confirmed">Đã chốt lịch</option>
-                    <option value="Renting">Đang thuê</option>
-                    <option value="Returned">Đã trả máy</option>
-                    <option value="Cancelled">Đã hủy</option>
-                  </select>
+                  <label>Kết thúc</label>
+                  <input type="datetime-local" value={bookingForm.end_time} onChange={e => setBookingForm({...bookingForm, end_time: e.target.value})} />
                 </div>
               </div>
-              <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>HỦY</button>
-                <button type="submit" className="btn-save" disabled={isSaving}>
-                  {isSaving ? 'ĐANG LƯU...' : 'XÁC NHẬN'}
-                </button>
-              </div>
+              <footer className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>Hủy</button>
+                <button type="submit" className="btn-save" disabled={isSaving}>LƯU ĐƠN HÀNG</button>
+              </footer>
             </form>
+          </div>
+        </div>
+      )}
+
+      {modalType === 'desc_editor' && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal full-editor-modal animate-in">
+            <header className="modal-header">
+              <div className="header-left">
+                <FileText size={20} />
+                <h3>SOẠN THẢO CHI TIẾT: {productForm.name}</h3>
+              </div>
+              <div className="header-actions">
+                <button type="button" className="btn-save-top" onClick={handleSaveProduct} disabled={isSaving}>
+                  {isSaving ? 'ĐANG LƯU...' : 'LƯU TẤT CẢ'}
+                </button>
+                <button className="close-btn" onClick={() => setModalType(null)}>×</button>
+              </div>
+            </header>
+
+            <div className="full-editor-form">
+              <div className="full-editor-layout">
+                <div className="editor-left">
+                  <div className="editor-config-grid">
+                    <div className="form-group full-width">
+                      <label>Tiêu đề hiển thị (H1 - Heading chính của trang chi tiết)</label>
+                      <input 
+                        type="text" 
+                        value={productForm.display_title} 
+                        onChange={e => setProductForm({...productForm, display_title: e.target.value})}
+                        placeholder="VD: Máy ảnh Canon EOS R50 - Chiếc máy ảnh quốc dân..."
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>URL Slug (SEO)</label>
+                      <div className="slug-input-wrapper">
+                        <input 
+                          type="text" 
+                          value={productForm.slug} 
+                          onChange={e => setProductForm({...productForm, slug: e.target.value})}
+                          placeholder="canon-eos-r50"
+                        />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label>Link Banner Poster (16:9)</label>
+                      <input 
+                        type="text" 
+                        value={productForm.design_image_url}
+                        onChange={e => setProductForm({...productForm, design_image_url: e.target.value})}
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="editor-config-grid tech-specs-editor-grid">
+                    <div className="form-group">
+                      <label>Cảm biến</label>
+                      <input type="text" value={productForm.sensor} onChange={e => setProductForm({...productForm, sensor: e.target.value})} placeholder="Full-frame..." />
+                    </div>
+                    <div className="form-group">
+                      <label>Video</label>
+                      <input type="text" value={productForm.videoRes} onChange={e => setProductForm({...productForm, videoRes: e.target.value})} placeholder="4K60p..." />
+                    </div>
+                    <div className="form-group">
+                      <label>ISO</label>
+                      <input type="text" value={productForm.isoRange} onChange={e => setProductForm({...productForm, isoRange: e.target.value})} placeholder="100-51200..." />
+                    </div>
+                    <div className="form-group">
+                      <label>Hệ ngàm</label>
+                      <input type="text" value={productForm.mount} onChange={e => setProductForm({...productForm, mount: e.target.value})} placeholder="RF, E-mount..." />
+                    </div>
+                  </div>
+
+                  <div className="editor-config-grid gallery-editor-grid" style={{gridTemplateColumns: '1fr'}}>
+                    <div className="form-group full-width">
+                      <div className="gallery-header-admin">
+                        <span>ẢNH MÔ TẢ CHI TIẾT (GALLERY)</span>
+                        <button 
+                          type="button" 
+                          className="btn-add-gallery"
+                          onClick={() => {
+                            const currentGallery = Array.isArray(productForm.gallery_images) ? productForm.gallery_images : [];
+                            setProductForm({...productForm, gallery_images: [...currentGallery, '']});
+                          }}
+                        >
+                          <PlusCircle size={14} /> Thêm ảnh
+                        </button>
+                      </div>
+                      <div className="gallery-inputs-list">
+                        {(productForm.gallery_images || []).map((url, idx) => (
+                          <div key={idx} className="gallery-input-row">
+                            <input 
+                              type="text" 
+                              value={url} 
+                              placeholder={`Link ảnh mô tả ${idx + 1} (URL)`}
+                              onChange={(e) => {
+                                const newGallery = [...productForm.gallery_images];
+                                newGallery[idx] = e.target.value;
+                                setProductForm({...productForm, gallery_images: newGallery});
+                              }}
+                            />
+                            <button 
+                              type="button" 
+                              className="btn-remove-gallery"
+                              onClick={() => {
+                                const newGallery = productForm.gallery_images.filter((_, i) => i !== idx);
+                                setProductForm({...productForm, gallery_images: newGallery});
+                              }}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="editor-config-grid combo-editor-grid" style={{gridTemplateColumns: '1fr', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px dashed #eee'}}>
+                    <div className="form-group full-width">
+                      <div className="gallery-header-admin">
+                        <span>PHỤ KIỆN COMBO ĐI KÈM</span>
+                        <button 
+                          type="button" 
+                          className="btn-add-gallery"
+                          onClick={() => {
+                            const currentCombo = Array.isArray(productForm.combo_items) ? productForm.combo_items : [];
+                            setProductForm({...productForm, combo_items: [...currentCombo, { name: '', icon: '' }]});
+                          }}
+                        >
+                          <PlusCircle size={14} /> Thêm phụ kiện
+                        </button>
+                      </div>
+                      <div className="combo-inputs-list">
+                        {(productForm.combo_items || []).map((item, idx) => (
+                          <div key={idx} className="gallery-input-row" style={{marginBottom: '0.5rem'}}>
+                            <input 
+                              type="text" 
+                              style={{flex: 1}}
+                              value={item.name} 
+                              placeholder="Tên phụ kiện (VD: Túi đựng)"
+                              onChange={(e) => {
+                                const newCombo = [...productForm.combo_items];
+                                newCombo[idx] = { ...newCombo[idx], name: e.target.value };
+                                setProductForm({...productForm, combo_items: newCombo});
+                              }}
+                            />
+                            <input 
+                              type="text" 
+                              style={{flex: 2}}
+                              value={item.icon} 
+                              placeholder="Link Icon/Ảnh (URL)"
+                              onChange={(e) => {
+                                const newCombo = [...productForm.combo_items];
+                                newCombo[idx] = { ...newCombo[idx], icon: e.target.value };
+                                setProductForm({...productForm, combo_items: newCombo});
+                              }}
+                            />
+                            <button 
+                              type="button" 
+                              className="btn-remove-gallery"
+                              onClick={() => {
+                                const newCombo = productForm.combo_items.filter((_, i) => i !== idx);
+                                setProductForm({...productForm, combo_items: newCombo});
+                              }}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
+                        {(!productForm.combo_items || productForm.combo_items.length === 0) && (
+                          <p className="no-gallery-hint">Chưa có phụ kiện combo nào được thêm.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="editor-main-container">
+                    <label>Nội dung giới thiệu (Markdown)</label>
+                    <textarea 
+                      className="main-markdown-textarea"
+                      value={productForm.description}
+                      onChange={e => setProductForm({...productForm, description: e.target.value})}
+                      placeholder="Viết bài giới thiệu thiết bị tại đây..."
+                    />
+                  </div>
+                </div>
+
+                <div className="editor-right">
+                  <div className="preview-header">
+                    <Eye size={16} />
+                    <span>XEM TRƯỚC NỘI DUNG</span>
+                  </div>
+                  <div className="preview-content">
+                    {productForm.design_image_url && (
+                      <div className="preview-poster">
+                        <img src={productForm.design_image_url} alt="Poster" />
+                      </div>
+                    )}
+                    <h1 className="preview-title">{productForm.display_title || productForm.name || 'Tiêu đề sản phẩm'}</h1>
+                    <div className="preview-markdown-body">
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+                        {productForm.description || '_Chưa có nội dung mô tả._'}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
