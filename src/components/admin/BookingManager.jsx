@@ -7,7 +7,10 @@ import {
   FileText,
   Clock,
   RefreshCcw,
-  CheckCircle
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { supabase } from '../../utils/supabase';
@@ -33,6 +36,9 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState(null);
   const [deletePassword, setDeletePassword] = useState('');
+  
+  // Future Tab Date Navigation
+  const [selectedFutureDate, setSelectedFutureDate] = useState(new Date());
 
   // Filter Categories
   const [filterDevice, setFilterDevice] = useState('all');
@@ -129,7 +135,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     if (activeSubtab === 'renting') matchesTab = isActuallyRenting(b) || b.status === 'Renting';
     else if (activeSubtab === 'future') {
       const start = new Date(b.start_time);
-      matchesTab = (b.status === 'Pending' || b.status === 'Renting' || (b.status === 'Confirmed' && start > now));
+      const isSameDate = start.toDateString() === selectedFutureDate.toDateString();
+      matchesTab = (b.status === 'Pending' || b.status === 'Renting' || b.status === 'Confirmed') && isSameDate;
     }
     else if (activeSubtab === 'past') matchesTab = b.status === 'Returned';
     
@@ -510,6 +517,32 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     }
   };
 
+  const handlePrevDay = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const newDate = new Date(selectedFutureDate);
+    newDate.setDate(newDate.getDate() - 1);
+    if (newDate >= today) {
+      setSelectedFutureDate(newDate);
+    }
+  };
+
+  const handleNextDay = () => {
+    const newDate = new Date(selectedFutureDate);
+    newDate.setDate(newDate.getDate() + 1);
+    setSelectedFutureDate(newDate);
+  };
+
+  const formatDateLabel = (date) => {
+    const today = new Date();
+    if (date.toDateString() === today.toDateString()) return 'Hôm nay';
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    if (date.toDateString() === tomorrow.toDateString()) return 'Ngày mai';
+    
+    return new Intl.DateTimeFormat('vi-VN', { weekday: 'long' }).format(date);
+  };
+
   return (
     <div className="booking-manager animate-in">
       
@@ -669,7 +702,44 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
             </div>
           </div>
       )}
-      <h3 className="bookings-title">Danh sách đặt lịch sắp tới</h3>
+
+      {activeSubtab === 'future' && (
+        <div className="upcoming-date-navigator animate-in">
+          <button 
+            className="nav-btn" 
+            onClick={handlePrevDay}
+            disabled={selectedFutureDate.toDateString() === new Date().toDateString()}
+          >
+            <ChevronLeft size={24} />
+          </button>
+
+          <div className="nav-date-display">
+            <span className="nav-date-sub">{formatDateLabel(selectedFutureDate)}</span>
+            <span className="nav-date-main">
+              {new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(selectedFutureDate)}
+            </span>
+          </div>
+
+          <button className="nav-btn" onClick={handleNextDay}>
+            <ChevronRight size={24} />
+          </button>
+
+          {selectedFutureDate.toDateString() !== new Date().toDateString() && (
+            <button className="btn-today-reset" onClick={() => setSelectedFutureDate(new Date())}>
+              Về hôm nay
+            </button>
+          )}
+        </div>
+      )}
+
+      <h3 className="bookings-title">
+        {activeSubtab === 'future' 
+          ? `Lịch nhận máy ngày ${new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit' }).format(selectedFutureDate)}` 
+          : activeSubtab === 'renting' ? 'Danh sách máy đang thuê'
+          : activeSubtab === 'past' ? 'Lịch sử thuê máy'
+          : 'Danh sách hóa đơn'
+        }
+      </h3>
       <div className="manager-table-wrapper">
         {loading && <div style={{padding: '2rem', textAlign: 'center'}}>Đang tải danh sách...</div>}
         {error && <div style={{padding: '2rem', textAlign: 'center', color: 'red'}}>{error}</div>}

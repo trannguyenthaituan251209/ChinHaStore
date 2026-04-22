@@ -1088,16 +1088,17 @@ body {
 .filter-group label {
     font-size: 0.7rem;
     font-weight: 800;
-    text-transform: uppercase;
-    color: #888;
+    color: #000000;
     letter-spacing: 0.5px;
+    font-family: "ShopeeDisplayR";
 }
 
 .filter-group select {
     padding: 0.6rem;
     border: var(--color-admin-border);
     border-radius: 0;
-    font-family: inherit;
+    font-family: "ShopeeDisplayR";
+    color: #737373;
     font-size: 0.85rem;
     background-color: #FFF;
     outline: none;
@@ -1282,6 +1283,179 @@ body {
     background-color: #FFF5F5;
     color: #D32F2F;
     border: 1px solid #FFCDD2;
+}
+
+/* == MINI-ITEM V2 (Camera Catalog Redesign) == */
+.mini-item-v2 {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #EEE;
+    gap: 1.5rem;
+    transition: all 0.2s ease;
+    background-color: #FFF;
+}
+
+.mini-item-v2:hover {
+    background-color: #FAFAFA;
+}
+
+.mini-item-v2 .item-main-info {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    flex: 1;
+}
+
+.mini-item-v2 .item-thumbnail {
+    width: 60px;
+    height: 60px;
+    background-color: #F8F8F8;
+    border: 1px solid #EEE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.mini-item-v2 .item-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.mini-item-v2 .item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.mini-item-v2 .item-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mini-item-v2 .item-category {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.mini-item-v2 .item-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+}
+
+.mini-item-v2 .price-tag {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111;
+}
+
+.mini-item-v2 .list-quick-toggle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0 1rem;
+    border-left: 1px solid #EEE;
+    border-right: 1px solid #EEE;
+    min-width: 120px;
+}
+
+.mini-item-v2 .toggle-status-text {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: "ShopeeDisplayR";
+}
+
+.mini-item-v2 .toggle-status-text.on { color: #1cc2ba; }
+.mini-item-v2 .toggle-status-text.off { color: #ea1d1d; }
+
+/* SLIM SWITCH (For List) */
+.switch-slim {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 18px;
+}
+
+.switch-slim input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slim .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e0e0e0;
+    transition: .3s;
+    border-radius: 20px;
+}
+
+.switch-slim .slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+.switch-slim input:checked + .slider {
+    background-color: #1cc2ba;
+}
+
+.switch-slim input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.mini-item-v2 .item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .mini-item-v2 {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        padding: 1.2rem;
+    }
+    
+    .mini-item-v2 .item-stats {
+        margin-left: 0;
+        justify-content: space-between;
+    }
+    
+    .mini-item-v2 .list-quick-toggle {
+        flex-direction: row;
+        justify-content: space-between;
+        border: none;
+        padding: 0;
+        margin: 0.5rem 0;
+    }
 }
 
 .checkbox-label-vip:hover {
@@ -1885,8 +2059,7 @@ body {
 }
 
 .item-archived {
-    opacity: 0.45;
-    background-color: #FAFAFA !important;
+    background-color: #fff6f6 !important;
 }
 
 .item-archived strong small {
@@ -2686,4 +2859,125 @@ input:focus+.slider {
 
 input:checked+.slider:before {
     transform: translateX(20px);
+}
+
+/* == UPCOMING DATE NAVIGATOR == */
+.upcoming-date-navigator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: 1.5rem;
+    background-color: #FFF;
+    border: var(--color-admin-border);
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.nav-date-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 250px;
+}
+
+.nav-date-main {
+    font-size: 1.4rem;
+    font-weight: 900;
+    font-family: "ShopeeDisplayB";
+    color: #111;
+    text-transform: capitalize;
+}
+
+.nav-date-sub {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1cc2ba;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
+.nav-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1.5px solid #EEE;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #555;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background-color: #F8F8F8;
+    border-color: #CCC;
+    color: #000;
+    transform: translateY(-1px);
+}
+
+.nav-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.btn-today-reset {
+    position: absolute;
+    right: 1.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    background-color: #F0F4F8;
+    color: #5A6A85;
+    border: 1px solid #E2E8F0;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: "ShopeeDisplayB";
+}
+
+.btn-today-reset:hover {
+    background-color: #E2E8F0;
+    color: #111;
+}
+
+@media (max-width: 768px) {
+    .upcoming-date-navigator {
+        gap: 0.5rem;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 1rem 0.8rem;
+    }
+    
+    .nav-date-display {
+        min-width: unset;
+        flex: 1;
+    }
+
+    .nav-date-main {
+        font-size: 1.1rem;
+    }
+
+    .nav-date-sub {
+        font-size: 0.7rem;
+    }
+
+    .nav-btn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .btn-today-reset {
+        position: static;
+        width: auto;
+        margin-top: 0;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.65rem;
+    }
 }

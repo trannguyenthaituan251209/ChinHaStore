@@ -121,7 +121,19 @@ const DatabaseModifier = ({ showStatus }) => {
     try {
       await adminService.updateProductStatus(id, newStatus);
       fetchData();
-      showStatus('Đã thay đổi trạng thái thành công', 'success');
+      showStatus('Đã thay đổi trạng thái lưu trữ', 'success');
+    } catch (err) {
+      showStatus('Lỗi khi thay đổi trạng thái: ' + err.message, 'error');
+    }
+  };
+
+  const handleToggleStatus = async (id, currentStatus) => {
+    // Toggles between 'active' and 'disabled'
+    const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
+    try {
+      await adminService.updateProductStatus(id, newStatus);
+      fetchData();
+      showStatus(newStatus === 'active' ? 'Đã cho phép hiển thị trên web' : 'Đã dừng hiển thị trên web', 'success');
     } catch (err) {
       showStatus('Lỗi khi thay đổi trạng thái: ' + err.message, 'error');
     }
@@ -295,24 +307,42 @@ const DatabaseModifier = ({ showStatus }) => {
   };
 
   const ProductItem = ({ p }) => (
-    <div className={`mini-item ${p.status === 'archived' ? 'item-archived' : ''}`}>
-      <div className="mini-img-box">
-        <Package size={20} />
-        {p.image_url && <img src={p.image_url} alt="" />}
-      </div>
-      <div className="item-details" style={{flex: 1}}>
-        <strong>
-          {p.name} 
-          {p.status === 'archived' && <small>(Đã ẩn)</small>}
-          {p.status === 'disabled' && <span className="status-indicator disabled">Vô hiệu hóa</span>}
-        </strong>
-        <div className="item-meta">
-          <span>{new Intl.NumberFormat('vi-VN').format(p.price_1day)} VNĐ/Ngày</span>
-          <span className="qty-badge">Sẵn có: {p.quantity}</span>
+    <div className={`mini-item-v2 ${['archived', 'disabled'].includes(p.status) ? 'item-archived' : ''}`}>
+      <div className="item-main-info">
+        <div className="item-thumbnail">
+          {p.image_url ? (
+            <img src={p.image_url} alt={p.name} />
+          ) : (
+            <Package size={24} color="#CCC" />
+          )}
+        </div>
+        <div className="item-text">
+          <div className="item-category">{p.category}</div>
+          <h4 className="item-name">{p.name}</h4>
+          <div className="item-meta">
+            <span className="price-tag">{new Intl.NumberFormat('vi-VN').format(p.price_1day)} VNĐ</span>
+            <span className="qty-badge">QTY: {p.quantity}</span>
+          </div>
         </div>
       </div>
+
+      <div className="list-quick-toggle">
+        <span className={`toggle-status-text ${p.status === 'active' ? 'on' : 'off'}`}>
+          {p.status === 'active' ? 'Đang cho thuê' : 'Ngừng cho thuê'}
+        </span>
+        <label className="switch-slim">
+          <input 
+            type="checkbox" 
+            checked={p.status === 'active'} 
+            onChange={() => handleToggleStatus(p.id, p.status)}
+            disabled={p.status === 'archived'}
+          />
+          <span className="slider"></span>
+        </label>
+      </div>
+
       <div className="item-actions">
-        <button className="action-btn archive" onClick={() => handleToggleArchive(p.id, p.status)} title={p.status === 'archived' ? 'Khôi phục' : 'Lưu trữ'}>
+        <button className="action-btn archive" onClick={() => handleToggleArchive(p.id, p.status)} title={p.status === 'archived' ? 'Khôi phục' : 'Lưu trữ (Ẩn hoàn toàn)'}>
           <FileUp size={16} />
         </button>
         <button className="action-btn edit" onClick={() => handleEdit('camera', p)} title="Sửa"><Edit3 size={16} /></button>
@@ -625,7 +655,11 @@ const DatabaseModifier = ({ showStatus }) => {
                   </div>
 
                   <div className="form-group">
-                    <label className="toggle-switch-container" onClick={() => setProductForm({...productForm, status: productForm.status === 'active' ? 'disabled' : 'active'})}>
+                    <div className="toggle-switch-container" onClick={(e) => {
+                      if (e.target.tagName !== 'INPUT') {
+                        setProductForm({...productForm, status: productForm.status === 'active' ? 'disabled' : 'active'});
+                      }
+                    }}>
                       <div className="toggle-label-text">
                         <span className="main-label">Hiển thị trên Website</span>
                         <span className="sub-label">Cho phép khách hàng nhìn thấy và đặt thuê máy này</span>
@@ -634,11 +668,11 @@ const DatabaseModifier = ({ showStatus }) => {
                         <input 
                           type="checkbox" 
                           checked={productForm.status === 'active'}
-                          readOnly
+                          onChange={(e) => setProductForm({...productForm, status: e.target.checked ? 'active' : 'disabled'})}
                         />
                         <span className="slider"></span>
                       </div>
-                    </label>
+                    </div>
                   </div>
                 </div>
 
