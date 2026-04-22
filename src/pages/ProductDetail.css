@@ -296,7 +296,15 @@
 
     .thumbnail-list {
         flex-direction: row;
+        justify-content: center;
         overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+
+    .thumb-item {
+        width: 70px;
+        height: 70px;
+        flex-shrink: 0;
     }
 
     .product-hero-visual {
@@ -309,5 +317,65 @@
 
     .product-detail-main-title {
         font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-detail-page {
+        padding-top: 60px;
+    }
+
+    .product-detail-breadcrumb {
+        padding: 0 1rem;
+        margin: 1rem auto;
+        font-size: 0.8rem;
+    }
+
+    .product-detail-header {
+        padding: 0 1rem;
+    }
+
+    .product-detail-main-title {
+        font-size: 1.6rem;
+    }
+
+    .product-detail-hero-content {
+        padding: 0 1rem;
+        gap: 1.5rem;
+    }
+
+    .main-image-box {
+        height: 300px;
+    }
+
+    .combo-items-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+
+    .combo-icon {
+        width: 80px;
+        height: 80px;
+    }
+
+    .product-detail-body {
+        padding: 2rem 1rem;
+    }
+
+    .description-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .product-markdown-content {
+        font-size: 1rem;
+    }
+
+    .related-machines-section {
+        padding: 2rem 1rem;
+    }
+
+    .related-machines-section h2 {
+        font-size: 1.4rem;
+        margin-bottom: 2rem;
     }
 }
