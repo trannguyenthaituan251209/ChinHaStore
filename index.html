@@ -91,8 +91,37 @@
             "@type": "Offer",
             "url": "https://chinhastore.com/",
             "priceCurrency": "VND",
-            "price": "250000",
-            "availability": "https://schema.org/InStock"
+            "price": "200000",
+            "availability": "https://schema.org/InStock",
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "VND"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": "0",
+                  "maxValue": "1",
+                  "unitCode": "DAY"
+                }
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "VN"
+              }
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "VN",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnPeriod",
+              "merchantReturnDays": 1,
+              "returnMethod": "https://schema.org/ReturnInStore",
+              "returnFees": "https://schema.org/FreeReturn"
+            }
           },
           "aggregateRating": {
             "@type": "AggregateRating",
