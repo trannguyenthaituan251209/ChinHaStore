@@ -124,7 +124,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     const matchesSearch = 
       (b.customerName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
       (b.phone || "").includes(searchQuery) ||
-      (b.id?.toLowerCase() || "").includes(searchQuery.toLowerCase());
+      (b.booking_id?.toLowerCase() || "").includes(searchQuery.toLowerCase());
 
     // 2. Main Logic Subtabs
     let matchesTab = true;
@@ -776,7 +776,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                     <div className="time-block">
                       <span className="time-label">Trả:</span> {b.endDate}
                     </div>
-                    <div style={{fontSize: '0.7rem', color: '#999', marginTop: '4px'}}>Mã: {b.id}</div>
+                    <div style={{fontSize: '0.75rem', color: '#000', fontWeight: '900', marginTop: '4px', letterSpacing: '0.5px'}}>ID: {b.booking_id || b.id.slice(0,8)}</div>
                   </td>
                   <td><span style={{fontSize: '0.85rem', color: '#666', fontWeight: 600}}>{getTimeAgo(b.created_at)}</span></td>
                   <td><span className={`source-tag ${b.source.toLowerCase()}`}>{b.source}</span></td>
@@ -928,11 +928,10 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                 <h2>CHINHA STORE</h2>
                 <p>
                   {billType === 'type1' && 'HÓA ĐƠN THANH TOÁN GIỮ LỊCH'}
-                  {billType === 'type2' && 'PHIẾU THU TIỀN CỌC'}
                   {billType === 'type3' && 'HÓA ĐƠN THANH TOÁN CÒN LẠI'}
                   {billType === 'type4' && 'BIÊN LAI THANH TOÁN'}
                 </p>
-                <p style={{fontSize: '0.6rem', marginTop: '4px'}}>Mã hợp đồng: {selectedBooking.id.toUpperCase()}</p>
+                <p style={{fontSize: '0.7rem', fontWeight: 'bold', marginTop: '4px', color: '#000'}}>Mã hợp đồng: {selectedBooking.booking_id || selectedBooking.id.toUpperCase()}</p>
               </div>
               
               <hr className="bill-v2-divider" />
@@ -1019,7 +1018,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               {(billType === 'type1' || billType === 'type3') && (
                 <div className="bill-v2-qr-section" style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                   <img 
-                    src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${billType === 'type1' ? dAmount : remainingAmount}&addInfo=${selectedBooking.id.slice(0, 8)}${billType === 'type3' ? ' CON LAI' : ''}`} 
+                    src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${billType === 'type1' ? dAmount : remainingAmount}&addInfo=${selectedBooking.booking_id || selectedBooking.id.slice(0, 8)}${billType === 'type3' ? ' CON LAI' : ''}`} 
                     alt="QR Code" 
                     className="qr-img" 
                     crossOrigin="anonymous" 
@@ -1245,7 +1244,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       <p>Sản phẩm đã bận bởi các lịch sau:</p>
                       {conflicts.map(c => (
                         <div key={c.id} className="conflict-detail-item">
-                          <span>Mã #{c.id.slice(0,5)}: <strong>{c.customerName}</strong></span>
+                          <span>Mã #{c.booking_id || c.id.slice(0,5)}: <strong>{c.customerName}</strong></span>
                           <small>({new Date(c.start).toLocaleDateString('vi-VN')} - {new Date(c.end).toLocaleDateString('vi-VN')})</small>
                         </div>
                       ))}

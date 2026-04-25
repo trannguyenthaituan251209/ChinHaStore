@@ -103,6 +103,9 @@ export const adminService = {
    * Fetches all bookings with joined customer and product information.
    */
   async getAllBookings() {
+    // TRIGGER MIGRATION check (Silent background)
+    this.syncLegacyBookingIds().catch(console.error);
+
     const { data, error } = await supabase
       .from('bookings')
       .select(`
@@ -150,6 +153,7 @@ export const adminService = {
         deposit_type: b.deposit_type || 'standard',
         city: b.city || b.customers?.city || '',
         is_seen: b.is_seen,
+        booking_id: b.booking_id,
         created_at: b.created_at
       };
     });
@@ -212,11 +216,30 @@ export const adminService = {
         product_id: b.product_id,
         deposit_type: b.deposit_type || 'standard',
         city: b.city || b.customers?.city || '',
-        is_seen: b.is_seen
+        is_seen: b.is_seen,
+        booking_id: b.booking_id
       };
     });
 
     return { data: mappedData, count };
+  },
+
+  /**
+   * MIGRATION UTILITY: Assigns IDs to old bookings that don't have one yet.
+   */
+  async syncLegacyBookingIds() {
+    const { data: bookings, error } = await supabase
+      .from('bookings')
+      .select('id, start_time')
+      .is('booking_id', null)
+      .limit(50); // Process in small batches to be safe
+
+    if (error || !bookings || bookings.length === 0) return;
+
+    for (const b of bookings) {
+      const bid = this.generateBookingId(b.start_time);
+      await supabase.from('bookings').update({ booking_id: bid }).eq('id', b.id);
+    }
   },
 
   /**
@@ -296,6 +319,15 @@ export const adminService = {
    * Finds the first available physical unit for a product during a time range.
    */
   // --- UTILS ---
+  generateBookingId(dateStr) {
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const random = Math.floor(Math.random() * 900) + 100; // 3 digits
+    return `${day}${month}${year}${random}`;
+  },
+
   formatTimestamp(ts) {
     if (!ts) return null;
     if (ts.includes('+') || ts.includes('Z')) return ts;
@@ -404,6 +436,7 @@ export const adminService = {
       .from('bookings')
       .select(`
         id,
+        booking_id,
         start_time,
         end_time,
         customers (full_name)
@@ -422,6 +455,7 @@ export const adminService = {
 
     return data.map(b => ({
       id: b.id,
+      booking_id: b.booking_id,
       customerName: b.customers?.full_name || 'Khách lẻ',
       start: b.start_time,
       end: b.end_time
@@ -451,9 +485,12 @@ export const adminService = {
       throw new Error('Sản phẩm hiện đã hết máy sẵn sàng vào thời gian này. Vui lòng chọn thời gian khác hoặc sản phẩm khác.');
     }
 
+    const bookingId = this.generateBookingId(bookingData.start_time);
+
     const { data, error } = await supabase
       .from('bookings')
       .insert({
+        booking_id: bookingId,
         customer_id: customerId,
         product_id: bookingData.product_id,
         unit_id: unitId,
@@ -474,7 +511,13 @@ export const adminService = {
     // --- TRIGGER EMAIL NOTIFICATIONS ---
     // Fetch product name and image for placeholders
     const { data: product } = await supabase.from('products').select('name, image_url').eq('id', bookingData.product_id).single();
-    this.sendBookingEmails(bookingData, product, bookingData.email, bookingData.breakdown);
+    
+    const emailData = {
+      ...bookingData,
+      booking_id: bookingId
+    };
+
+    this.sendBookingEmails(emailData, product, bookingData.email, bookingData.breakdown);
 
     return data;
   },
@@ -995,8 +1038,8 @@ export const adminService = {
         admin_notice: {
           enabled: true,
           recipient: 'manhichin.chinhastore@gmail.com',
-          subject: '[NEW BOOKING] {{customer_name}} - {{product_name}}',
-          body: `CHINHASTORE - THÔNG BÁO ĐƠN HÀNG MỚI\n\nChào Mẫn Hi Chin,\n\nBạn có một đơn đặt thuê thiết bị mới từ Website:\n\nTHÔNG TIN KHÁCH HÀNG:\n- Tên: {{customer_name}}\n- SĐT: {{phone}}\n- Địa chỉ: {{location}}\n- Mạng xã hội: {{social}}\n\nTHÔNG TIN THIẾT BỊ:\n- Máy: {{product_name}}\n- Gói thuê: {{rental_package}}\n- Thời gian: {{start_date}} - {{end_date}}\n\nDỰ KIẾN DOANH THU:\n- Tổng thanh toán: {{total_price}} VNĐ\n\nVui lòng truy cập Admin Dashboard để xác nhận lịch cho khách.\n\nTrân trọng,\nChinHaStore Hệ Thống`
+          subject: '[ĐƠN MỚI #{{booking_id}}] {{customer_name}} - {{product_name}}',
+          body: `CHINHASTORE - THÔNG BÁO ĐƠN HÀNG MỚI\n\nMÃ ĐƠN HÀNG: #{{booking_id}}\n\nChào Mẫn Hi Chin,\n\nBạn có một đơn đặt thuê thiết bị mới từ Website:\n\nTHÔNG TIN KHÁCH HÀNG:\n- Tên: {{customer_name}}\n- SĐT: {{phone}}\n- Địa chỉ: {{location}}\n- Mạng xã hội: {{social}}\n\nTHÔNG TIN THIẾT BỊ:\n- Máy: {{product_name}}\n- Gói thuê: {{rental_package}}\n- Thời gian: {{start_date}} - {{end_date}}\n\nDỰ KIẾN DOANH THU:\n- Tổng thanh toán: {{total_price}} VNĐ\n\nVui lòng truy cập Admin Dashboard để xác nhận lịch cho khách.\n\nTrân trọng,\nChinHaStore Hệ Thống`
         },
         customer_invoice: {
           enabled: true,
