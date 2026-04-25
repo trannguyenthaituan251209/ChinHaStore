@@ -42,8 +42,8 @@ const Footer = () => {
         <div className="footer-bottom">
           <p>&copy; {new Date().getFullYear()} CHINHA STORE OFFICIAL. ALL RIGHTS RESERVED.</p>
           <div className="footer-legal">
-            <a href="/policy">Chính sách bảo mật</a>
-            <a href="/terms">Điều khoản dịch vụ</a>
+            <a href="/chinh-sach#privacy">Chính sách bảo mật</a>
+            <a href="/chinh-sach">Điều khoản & Quy định</a>
           </div>
         </div>
 

@@ -39,6 +39,7 @@ const BookingPage = () => {
   const [isCopyingAccount, setIsCopyingAccount] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showSuccessNotice, setShowSuccessNotice] = useState(false);
+  const [createdBookingId, setCreatedBookingId] = useState('');
 
   // New state for cross-device recovery
   const [remoteDraft, setRemoteDraft] = useState(null);
@@ -432,7 +433,7 @@ const BookingPage = () => {
     }
     setIsSubmitting(true);
     try {
-      await adminService.createBooking({
+      const created = await adminService.createBooking({
         customerName: cusName,
         phone: cusPhone,
         email: cusEmail,
@@ -449,6 +450,10 @@ const BookingPage = () => {
         source: 'Website',
         breakdown: result.breakdown
       });
+      
+      if (created && created.booking_id) {
+        setCreatedBookingId(created.booking_id);
+      }
       // Clear draft on success
       localStorage.removeItem('booking_draft');
       if (cusPhone) adminService.deleteBookingDraft(cusPhone);
@@ -923,7 +928,8 @@ const BookingPage = () => {
             <div className="booking-ticket" id="main-ticket-view">
               <div className="ticket-header">
                 <h1>PHIẾU THANH TOÁN GIỮ LỊCH</h1>
-                <p>Mã yêu cầu: #{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+                <p style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#000000' }}>Mã yêu cầu: #{createdBookingId || 'PROCESSING'}</p>
+                <p>Vui lòng cung cấp mã này nếu có thắc mắc cần giải đáp</p>
               </div>
 
               <div className="ticket-body">
@@ -1002,13 +1008,12 @@ const BookingPage = () => {
                     let dPerc = 100;
                     if (durationDays >= 2 && durationDays <= 5) dPerc = 50;
                     const dAmount = Math.round(priceNum * (dPerc / 100));
-                    const reqId = Math.random().toString(36).substr(2, 6).toUpperCase();
 
                     return (
                       <>
                         <div className="ticket-summary-left">
                           <img 
-                            src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${dAmount}&addInfo=${reqId}`} 
+                            src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${dAmount}&addInfo=${createdBookingId}`} 
                             alt="QR Code" 
                             className="ticket-summary-qr" 
                           />
@@ -1053,6 +1058,7 @@ const BookingPage = () => {
                 <div className="bill-v2-header">
                   <h2>CHINHA STORE</h2>
                   <p>HÓA ĐƠN THANH TOÁN GIỮ LỊCH</p>
+                  <p style={{fontSize: '0.7rem', fontWeight: 'bold', marginTop: '4px'}}>Mã hợp đồng: #{createdBookingId}</p>
                 </div>
                 <hr className="bill-v2-divider" />
                 <div className="bill-v2-product-section">
@@ -1099,7 +1105,7 @@ const BookingPage = () => {
                 </div>
                 <div className="bill-v2-qr-section">
                    <img 
-                      src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${Math.round((Number(result?.price?.replace(/\./g, '')) || 0) * ( (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) >= 2 && (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) <= 5 ? 0.5 : 1 ))}&addInfo=ORDER`} 
+                      src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${Math.round((Number(result?.price?.replace(/\./g, '')) || 0) * ( (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) >= 2 && (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) <= 5 ? 0.5 : 1 ))}&addInfo=${createdBookingId}`} 
                       alt="QR" 
                       style={{width: '120px', height: '120px', marginBottom: '10px'}}
                     />

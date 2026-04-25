@@ -12,6 +12,7 @@ import BlogPostDetail from './pages/BlogPostDetail';
 import ProductDetail from './pages/ProductDetail';
 import { adminService } from './services/adminService';
 import { analyticsService } from './services/analyticsService';
+import PolicyPage from './pages/PolicyPage';
 
 import './index.css';
 
@@ -196,6 +197,7 @@ function App() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostDetail />} />
         <Route path="/camera/:slug" element={<ProductDetail />} />
+        <Route path="/chinh-sach" element={<PolicyPage />} />
         
         {/* Protected Secret Route on public domain */}
         <Route 
