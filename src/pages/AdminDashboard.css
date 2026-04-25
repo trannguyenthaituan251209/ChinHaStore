@@ -822,18 +822,21 @@ body {
 }
 
 .modal-header {
-    background-color: var(--color-admin-accent);
+    background-color: #F5F5F5;
     padding: 1.5rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #111;
+    color: #000;
+    font-family: "ShopeeDisplayB", sans-serif;
+    border-bottom: 1px solid #E2E2E2;
 }
 
 .modal-header h3 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 700;
+    font-family: "ShopeeDisplayB", sans-serif;
 }
 
 .close-btn {
@@ -848,11 +851,14 @@ body {
     cursor: pointer;
     color: #000;
     font-weight: 700;
+    background: transparent;
+    border: none;
+    transition: all 0.2s;
 }
 
 .close-btn:hover {
-    background-color: #ffa3a3;
-    color: #000000;
+    background-color: #E2E2E2;
+    color: #000;
 }
 
 .modal-form {
@@ -892,10 +898,12 @@ body {
 .form-group input,
 .form-group select {
     padding: 0.8rem;
-    border: 1.5px solid #EEE;
-    border-radius: 8px;
-    font-family: inherit;
+    border: 1px solid #E2E2E2;
+    border-radius: 0;
+    font-family: "ShopeeDisplayR", sans-serif;
     font-size: 0.95rem;
+    color: #000;
+    background-color: #FFF;
 }
 
 .form-group input:focus {
@@ -998,17 +1006,18 @@ body {
 .form-group select {
     width: 100%;
     padding: 0.7rem;
-    border: 1.5px solid #EEE;
-    border-radius: 8px;
-    font-family: inherit;
+    border: 1px solid #E2E2E2;
+    border-radius: 0;
+    font-family: "ShopeeDisplayR", sans-serif;
     font-size: 0.9rem;
+    color: #000;
     transition: all 0.2s;
+    background-color: #FFF;
 }
 
 .form-group input:focus {
-    border-color: var(--color-admin-accent);
+    border-color: #000;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(235, 143, 61, 0.1);
 }
 
 .btn-cancel {
@@ -1034,6 +1043,9 @@ body {
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
+    font-family: "ShopeeDisplayB", sans-serif;
+    box-shadow: none;
+    background-image: none;
 }
 
 .btn-save:hover {

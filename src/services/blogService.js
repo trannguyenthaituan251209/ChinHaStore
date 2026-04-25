@@ -13,6 +13,14 @@ export const blogService = {
     return data;
   },
 
+  async incrementViews(id) {
+    // Basic increment logic
+    const { data: post } = await supabase.from('posts').select('views').eq('id', id).single();
+    if (post) {
+      await supabase.from('posts').update({ views: (post.views || 0) + 1 }).eq('id', id);
+    }
+  },
+
   // Fetch latest 3 posts for homepage
   async getLatestPosts(limit = 3) {
     const { data, error } = await supabase

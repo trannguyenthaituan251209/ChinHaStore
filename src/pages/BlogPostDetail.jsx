@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Calendar, User, ChevronLeft, Clock } from 'lucide-react';
+import { Calendar, User, ChevronLeft, Clock, Eye } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
@@ -19,6 +19,9 @@ const BlogPostDetail = () => {
       try {
         const data = await blogService.getPostBySlug(slug);
         setPost(data);
+        if (data && data.id) {
+          blogService.incrementViews(data.id);
+        }
       } catch (err) {
         console.error('Failed to fetch post:', err);
       } finally {
@@ -71,6 +74,7 @@ const BlogPostDetail = () => {
             <span><Calendar size={18} /> {formattedDate}</span>
             <span><User size={18} /> {post.author}</span>
             <span><Clock size={18} /> 5 phút đọc</span>
+            <span><Eye size={18} /> {post.views || 0} lượt xem</span>
           </div>
         </div>
       </div>

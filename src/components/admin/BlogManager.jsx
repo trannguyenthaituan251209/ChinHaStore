@@ -257,6 +257,7 @@ const BlogManager = ({ showStatus }) => {
               <tr>
                 <th>Bài viết</th>
                 <th>Trạng thái</th>
+                <th>Lượt xem</th>
                 <th>Ngày tạo</th>
                 <th>Hành động</th>
               </tr>
@@ -279,6 +280,11 @@ const BlogManager = ({ showStatus }) => {
                          {post.status === 'published' ? 'Công khai' : 'Bản nháp'}
                       </span>
                       {post.is_banner && <span className="status-badge banner">Banner</span>}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="view-count-cell">
+                      <Eye size={14} /> {post.views || 0}
                     </div>
                   </td>
                   <td>{new Date(post.created_at).toLocaleDateString('vi-VN')}</td>

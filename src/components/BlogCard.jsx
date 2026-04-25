@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, User } from 'lucide-react';
+import { Calendar, User, Eye } from 'lucide-react';
 import './BlogCard.css';
 
 const BlogCard = ({ post }) => {
@@ -26,6 +26,7 @@ const BlogCard = ({ post }) => {
         <div className="blog-card-meta">
           <span><Calendar size={14} /> {formattedDate}</span>
           <span><User size={14} /> ChinHaStore</span>
+          <span><Eye size={14} /> {post.views || 0}</span>
         </div>
         
         <h3 className="blog-card-title">{post.title}</h3>
