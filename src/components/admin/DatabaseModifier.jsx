@@ -290,10 +290,26 @@ const DatabaseModifier = ({ showStatus }) => {
     e.preventDefault();
     setIsSaving(true);
     try {
+      let finalForm = { ...productForm };
+      
+      // ONLY auto-generate slug for NEW products if it's empty
+      if (!currentItem && !finalForm.slug) {
+        finalForm.slug = finalForm.name
+          .toLowerCase()
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+          .replace(/[đĐ]/g, 'd')
+          .replace(/([^0-9a-z-\s])/g, '')
+          .replace(/(\s+)/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '') + '-' + Math.random().toString(36).substring(2, 5);
+      }
+
       if (currentItem) {
-        await adminService.updateProduct(currentItem.id, productForm);
+        // When updating, we use the form as-is. 
+        // If the user didn't change the slug, Postgres will allow it because it's the same ID.
+        await adminService.updateProduct(currentItem.id, finalForm);
       } else {
-        await adminService.createProduct(productForm);
+        await adminService.createProduct(finalForm);
       }
       setModalType(null);
       fetchData();
@@ -386,6 +402,9 @@ const DatabaseModifier = ({ showStatus }) => {
       </div>
 
       <div className="item-actions">
+        <button className="action-btn archive" onClick={() => handleToggleArchive(p.id, p.status)} title={p.status === 'archived' ? 'Khôi phục' : 'Lưu trữ (Ẩn hoàn toàn)'}>
+          <FileUp size={16} />
+        </button>
         <button className="action-btn desc" onClick={() => handleEditDescription(p)} title="Viết mô tả & specs"><FileText size={16} /></button>
         <button className="action-btn edit" onClick={() => handleEdit('camera', p)} title="Sửa nhanh"><Edit3 size={16} /></button>
         <button className="action-btn delete" onClick={() => handleDelete('camera', p.id)} title="Xóa vĩnh viễn"><Trash2 size={16} /></button>
