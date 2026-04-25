@@ -59,7 +59,7 @@ const BlogPostDetail = () => {
       <Helmet>
         <title>{post.title} | Blog ChinHaStore</title>
         <meta name="description" content={post.excerpt || post.title} />
-        <link rel="canonical" href={`https://chinhastore.online/blog/${post.slug}`} />
+        <link rel="canonical" href={`https://chinhastore.com/blog/${post.slug}`} />
       </Helmet>
 
       <div className="detail-hero">

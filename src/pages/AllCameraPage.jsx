@@ -96,7 +96,7 @@ const AllCameraPage = () => {
     <div className="all-camera-page animate-in">
       <Helmet>
         <title>Kho Máy Ảnh | Thuê Máy Ảnh Buôn Ma Thuột - ChinHaStore</title>
-        <link rel="canonical" href="https://chinhastore.online/all-camera" />
+        <link rel="canonical" href="https://chinhastore.com/all-camera" />
         <meta name="description" content="Khám phá kho máy ảnh tại Buôn Ma Thuột. Thuê Canon R50, Ricoh GR III, Fujifilm X100VI và nhiều dòng máy khác. Giá thuê tốt nhất BMT." />
         <meta name="keywords" content="thue may anh bmt, thuê Canon R50, thuê máy ảnh fujifilm bmt" />
         

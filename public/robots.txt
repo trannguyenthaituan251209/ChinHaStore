@@ -5,4 +5,4 @@ Disallow: /quanly-chinha-trungtam/
 
 Disallow: /api/
 
-Sitemap: https://chinhastore.online/sitemap.xml
+Sitemap: https://chinhastore.com/sitemap.xml

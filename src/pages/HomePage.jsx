@@ -14,7 +14,7 @@ const HomePage = () => {
     <div className="home-page">
       <Helmet>
         <title>Thuê Máy Ảnh Buôn Ma Thuột | ChinHaStore - Canon R50 & Fujifilm</title>
-        <link rel="canonical" href="https://chinhastore.online/" />
+        <link rel="canonical" href="https://chinhastore.com/" />
         <meta name="description" content="Dịch vụ cho thuê máy ảnh uy tín tại Buôn Ma Thuột (BMT). Thuê Canon R50, Fujifilm, Ricoh GR III. Hotline 0842204207. Hỗ trợ 24/7." />
         <meta name="keywords" content="thue may anh, thue may anh bmt, thuê máy ảnh, thuê Canon R50, thuê máy ảnh Buôn Ma Thuột" />
         
@@ -25,9 +25,9 @@ const HomePage = () => {
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
               "name": "ChinHaStore",
-              "image": "https://chinhastore.online/assets/image/hero_section.png",
-              "@id": "https://chinhastore.online",
-              "url": "https://chinhastore.online",
+              "image": "https://chinhastore.com/assets/image/hero_section.png",
+              "@id": "https://chinhastore.com",
+              "url": "https://chinhastore.com",
               "telephone": "0842204207",
               "priceRange": "$$",
               "address": {
