@@ -553,8 +553,8 @@ const BookingPage = () => {
       <Helmet>
         <title>Đặt Lịch Thuê Máy | Thuê Máy Ảnh Buôn Ma Thuột - ChinHaStore</title>
         <link rel="canonical" href="https://chinhastore.com/dat-lich" />
-        <meta name="description" content="Đặt lịch thuê máy ảnh nhanh chóng tại Buôn Ma Thuột. Canon R50, Fujifilm, Ricoh luôn sẵn sàng. LH: 0842204207." />
-        <meta name="keywords" content="đặt lịch thuê máy ảnh bmt, thuê canon r50 buôn ma thuột" />
+        <meta name="description" content="Đặt lịch thuê máy ảnh nhanh chóng tại Buôn Ma Thuột (BMT). Thuê Canon EOS R50, Fujifilm, Ricoh luôn sẵn sàng. Thủ tục đơn giản, hỗ trợ 24/7. LH: 0842204207." />
+        <meta name="keywords" content="đặt lịch thuê máy ảnh bmt, thuê canon r50 buôn ma thuột, thủ tục thuê máy ảnh bmt, thuê máy ảnh bmt online" />
       </Helmet>
       {/* Success Notification Bar */}
       {step === 3 && showSuccessNotice && (

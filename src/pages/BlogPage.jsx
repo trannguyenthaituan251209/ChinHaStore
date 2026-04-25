@@ -43,8 +43,9 @@ const BlogPage = () => {
   return (
     <div className="blog-page">
       <Helmet>
-        <title>Cẩm Nang Nhiếp Ảnh | Blog ChinHaStore</title>
-        <meta name="description" content="Khám phá các mẹo chụp ảnh, review máy ảnh và tin tức thuê máy tại Buôn Ma Thuột. Cập nhật xu hướng nhiếp ảnh mới nhất." />
+        <title>Cẩm Nang Nhiếp Ảnh | Blog ChinHaStore - BMT</title>
+        <meta name="description" content="Khám phá mẹo chụp ảnh, review máy ảnh và địa điểm check-in đẹp tại Buôn Ma Thuột (BMT). Cẩm nang nhiếp ảnh chuyên nghiệp cho cộng đồng Đắk Lắk." />
+        <meta name="keywords" content="kinh nghiệm chụp ảnh bmt, review máy ảnh bmt, địa điểm chụp ảnh buôn ma thuột, cẩm nang nhiếp ảnh bmt, thuê máy ảnh bmt blog" />
       </Helmet>
 
       <div className="catalog-header-bar">

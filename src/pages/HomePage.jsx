@@ -15,8 +15,8 @@ const HomePage = () => {
       <Helmet>
         <title>Thuê Máy Ảnh Buôn Ma Thuột | ChinHaStore - Canon R50 & Fujifilm</title>
         <link rel="canonical" href="https://chinhastore.com/" />
-        <meta name="description" content="Dịch vụ cho thuê máy ảnh uy tín tại Buôn Ma Thuột (BMT). Thuê Canon R50, Fujifilm, Ricoh GR III. Hotline 0842204207. Hỗ trợ 24/7." />
-        <meta name="keywords" content="thue may anh, thue may anh bmt, thuê máy ảnh, thuê Canon R50, thuê máy ảnh Buôn Ma Thuột" />
+        <meta name="description" content="Dịch vụ cho thuê máy ảnh chuyên nghiệp tại Buôn Ma Thuột (BMT). Thuê Canon EOS R50, Fujifilm, Ricoh GR IV. Hotline 0842204207. Hỗ trợ 24/7 tại Đắk Lắk." />
+        <meta name="keywords" content="thuê máy ảnh bmt, thuê máy ảnh buôn ma thuột, thuê canon r50 bmt, thuê fujifilm bmt, thuê máy ảnh đắk lắk, bảng giá thuê máy ảnh bmt" />
         
         {/* JSON-LD LocalBusiness Schema */}
         <script type="application/ld+json">

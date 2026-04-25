@@ -97,8 +97,8 @@ const AllCameraPage = () => {
       <Helmet>
         <title>Kho Máy Ảnh | Thuê Máy Ảnh Buôn Ma Thuột - ChinHaStore</title>
         <link rel="canonical" href="https://chinhastore.com/all-camera" />
-        <meta name="description" content="Khám phá kho máy ảnh tại Buôn Ma Thuột. Thuê Canon R50, Ricoh GR III, Fujifilm X100VI và nhiều dòng máy khác. Giá thuê tốt nhất BMT." />
-        <meta name="keywords" content="thue may anh bmt, thuê Canon R50, thuê máy ảnh fujifilm bmt" />
+        <meta name="description" content="Khám phá kho máy ảnh tại Buôn Ma Thuột (BMT). Thuê Canon EOS R50, Ricoh GR IV, Fujifilm X100VI và nhiều dòng máy hot khác. Bảng giá thuê máy ảnh tốt nhất BMT." />
+        <meta name="keywords" content="kho máy ảnh bmt, thuê canon r50 bmt, thuê fujifilm bmt, giá thuê máy ảnh buôn ma thuột, thuê máy ảnh fujifilm bmt" />
         
         {/* JSON-LD Product List Schema */}
         <script type="application/ld+json">
