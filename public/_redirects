@@ -1,1 +1,8 @@
-/* /index.html 200
+# Domain Migration: Redirect .online to .com
+https://chinhastore.online/*  https://chinhastore.com/:splat  301!
+https://www.chinhastore.online/*  https://chinhastore.com/:splat  301!
+http://chinhastore.online/*   https://chinhastore.com/:splat  301!
+http://www.chinhastore.online/*   https://chinhastore.com/:splat  301!
+
+# SPA Routing: Fallback to index.html
+/*    /index.html   200
