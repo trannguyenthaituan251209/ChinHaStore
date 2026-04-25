@@ -243,6 +243,76 @@ export const adminService = {
   },
 
   /**
+   * SERVER-SIDE SEARCH (High Performance O(log n))
+   * Queries the database directly using the booking_id index.
+   */
+  async searchBookingsById(idQuery, filters = {}) {
+    if (!idQuery) return [];
+    
+    let query = supabase
+      .from('bookings')
+      .select(`
+        *,
+        customers (full_name, phone, city),
+        products (name, image_url)
+      `)
+      .ilike('booking_id', `%${idQuery}%`);
+
+    // APPLY CONTEXTUAL FILTERS
+    if (filters.status) {
+      if (Array.isArray(filters.status)) {
+        query = query.in('status', filters.status);
+      } else {
+        query = query.eq('status', filters.status);
+      }
+    }
+
+    if (filters.startDate) {
+      query = query.gte('start_time', filters.startDate + 'T00:00:00')
+                   .lte('start_time', filters.startDate + 'T23:59:59');
+    }
+
+    const { data, error } = await query.limit(10);
+
+    if (error) throw error;
+
+    return data.map(b => ({
+      id: b.id,
+      customerName: b.customers?.full_name || 'Khách lẻ',
+      phone: b.customers?.phone || '',
+      productName: b.products?.name || 'Sản phẩm',
+      startDate: this.formatDate(b.start_time),
+      endDate: this.formatDate(b.end_time),
+      totalPrice: new Intl.NumberFormat('vi-VN').format(b.total_price),
+      source: b.source || 'Website',
+      status: b.status,
+      start_time: b.start_time,
+      end_time: b.end_time,
+      product_id: b.product_id,
+      productImage: b.products?.image_url,
+      deposit_type: b.deposit_type || 'standard',
+      city: b.city || b.customers?.city || '',
+      is_seen: b.is_seen,
+      booking_id: b.booking_id,
+      created_at: b.created_at
+    }));
+  },
+
+  formatDate(ts) {
+    if (!ts) return 'N/A';
+    const d = new Date(ts);
+    return d.toLocaleString('vi-VN', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Ho_Chi_Minh'
+    }).replace(' ', ' - ');
+  },
+
+  /**
    * Price calculation logic based on the store's rules.
    */
   calculatePrice(product, startTime, endTime) {

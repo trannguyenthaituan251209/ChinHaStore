@@ -36,6 +36,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState(null);
   const [deletePassword, setDeletePassword] = useState('');
+  const [serverSuggestions, setServerSuggestions] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   
   // Future Tab Date Navigation
   const [selectedFutureDate, setSelectedFutureDate] = useState(new Date());
@@ -44,6 +46,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [filterDevice, setFilterDevice] = useState('all');
   const [filterSource, setFilterSource] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   // Pagination for History (Large datasets)
   const [historyData, setHistoryData] = useState([]);
@@ -98,6 +101,38 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     };
   }, [activeSubtab, historyPage]);
 
+  // SERVER-SIDE SEARCH WITH DEBOUNCE
+  React.useEffect(() => {
+    if (!searchQuery) {
+      setServerSuggestions([]);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        // Build filters based on active tab
+        const searchFilters = {};
+        if (activeSubtab === 'renting') {
+          searchFilters.status = ['Renting', 'Confirmed']; // Active rentals
+        } else if (activeSubtab === 'future') {
+          searchFilters.startDate = selectedFutureDate.toISOString().split('T')[0];
+        } else if (activeSubtab === 'past') {
+          searchFilters.status = 'Returned';
+        }
+
+        const results = await adminService.searchBookingsById(searchQuery, searchFilters);
+        setServerSuggestions(results);
+      } catch (err) {
+        console.error('Search error:', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 400); // 400ms debounce
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
   // Specialized History Fetcher (Server-side)
   const fetchHistoryPage = async (page) => {
     try {
@@ -122,9 +157,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   // Filter logic
   const filteredData = data.filter(b => {
     const matchesSearch = 
-      (b.customerName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-      (b.phone || "").includes(searchQuery) ||
-      (b.booking_id?.toLowerCase() || "").includes(searchQuery.toLowerCase());
+      !searchQuery || (b.booking_id?.toLowerCase() || "").includes(searchQuery.toLowerCase());
 
     // 2. Main Logic Subtabs
     let matchesTab = true;
@@ -174,6 +207,9 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       return new Date(b.start_time) - new Date(a.start_time);
     });
 
+  // Use server search results if searching, otherwise use filtered local data
+  const effectiveData = searchQuery ? serverSuggestions : mainListData;
+
   const handleMarkAsSeen = async (id) => {
     try {
       await adminService.markBookingAsSeen(id);
@@ -183,7 +219,6 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       showStatus('Lỗi khi đánh dấu đã xem: ' + err.message, 'error');
     }
   };
-
   const resetFilters = () => {
     setFilterDevice('all');
     setFilterSource('all');
@@ -565,10 +600,66 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
             <Search size={18} className="search-icon" />
             <input 
               type="text" 
-              placeholder="Tìm theo Tên, SĐT, Mã đơn..." 
+              placeholder="Tìm theo Mã đơn (ID)..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+              style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}
             />
+            
+            {/* SUGGESTION DROPDOWN - Now powered by Server Search */}
+            {isSearchFocused && searchQuery && (
+              <div className="search-suggestions-dropdown custom-scrollbar" style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                backgroundColor: '#fff',
+                border: '1px solid #000',
+                zIndex: 1000,
+                maxHeight: '300px',
+                overflowY: 'auto',
+                marginTop: '5px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+              }}>
+                {isSearching ? (
+                  <div style={{ padding: '15px', textAlign: 'center', fontSize: '0.8rem', color: '#666' }}>Đang tìm...</div>
+                ) : (
+                  <>
+                    {serverSuggestions.map(b => (
+                      <div 
+                        key={b.id} 
+                        className="suggestion-item"
+                        onClick={() => {
+                          setSearchQuery(b.booking_id);
+                          setIsSearchFocused(false);
+                        }}
+                        style={{
+                          padding: '10px 15px',
+                          cursor: 'pointer',
+                          borderBottom: '1px solid #eee',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          transition: 'background 0.2s'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <span style={{ fontWeight: 900, fontSize: '0.9rem' }}>#{b.booking_id}</span>
+                        <span style={{ fontSize: '0.8rem', color: '#666' }}>{b.customerName}</span>
+                      </div>
+                    ))}
+                    {serverSuggestions.length === 0 && (
+                      <div style={{ padding: '15px', textAlign: 'center', fontSize: '0.8rem', color: '#999' }}>
+                        Không có mã ID khớp.
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="manager-toolbar-actions">
@@ -762,7 +853,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               </tr>
             </thead>
             <tbody>
-              {(activeSubtab === 'past' ? historyData : mainListData).map(b => (
+              {(searchQuery ? serverSuggestions : (activeSubtab === 'past' ? historyData : mainListData)).map(b => (
                 <tr key={b.id}>
                   <td>
                     <strong>{b.customerName}</strong>
