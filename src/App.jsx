@@ -11,6 +11,7 @@ import BlogPage from './pages/BlogPage';
 import BlogPostDetail from './pages/BlogPostDetail';
 import ProductDetail from './pages/ProductDetail';
 import { adminService } from './services/adminService';
+import { analyticsService } from './services/analyticsService';
 
 import './index.css';
 
@@ -131,7 +132,7 @@ function App() {
         
         // Record visit ONLY for non-admins (storefront visitors)
         if (!isAdminHost && !isSecretPath) {
-          adminService.recordVisit();
+          analyticsService.recordVisit();
         }
       } catch (err) {
         console.error('App init failed:', err);

@@ -65,27 +65,47 @@ const ReportCenter = ({ showStatus }) => {
     fetchStats();
   }, []);
 
-  const handleExportExcel = async () => {
+  const handleExportExcel = async (type = 'all') => {
     try {
-      const { data: bookings } = await adminService.getAllBookings(); // We use the mapper version
-      
-      const ws = XLSX.utils.json_to_sheet(bookings.map(b => ({
-        'ID': b.id,
+      showStatus('Đang chuẩn bị dữ liệu Excel...', 'info');
+      let dataToExport = [];
+      let fileName = '';
+
+      if (type === 'all') {
+        const bookings = await adminService.getAllBookings();
+        dataToExport = bookings;
+        fileName = `ChinHaStore_TatCaDoanhThu_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '-')}`;
+      } else {
+        // Export currently filtered range
+        dataToExport = dailyData.bookings.map(b => ({
+          ...b,
+          // Map dailyData.bookings fields to match the main export format if needed
+          status: 'Confirmed/Returned' // In this view, they are filtered active ones
+        }));
+        fileName = `ChinHaStore_BaoCao_${startDate}_den_${endDate}`;
+      }
+
+      if (dataToExport.length === 0) {
+        showStatus('Không có dữ liệu để xuất!', 'error');
+        return;
+      }
+
+      const ws = XLSX.utils.json_to_sheet(dataToExport.map(b => ({
+        'Ngày': b.date || b.startDate,
         'Khách hàng': b.customerName,
-        'SĐT': b.phone,
         'Sản phẩm': b.productName,
-        'Bắt đầu': b.startDate,
-        'Kết thúc': b.endDate,
-        'Tổng tiền': b.totalPrice,
-        'Nguồn': b.source,
-        'Trạng thái': b.status
+        'Tổng tiền (VNĐ)': b.totalPrice,
+        'SĐT': b.phone || 'N/A',
+        'Trạng thái': b.status || 'N/A',
+        'Nguồn': b.source || 'Hệ thống'
       })));
       
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Rental History");
-      XLSX.writeFile(wb, `ChinHaStore_Report_${new Date().toLocaleDateString('vi-VN')}.xlsx`);
-      showStatus('Đã xuất file Excel thành công', 'success');
+      XLSX.utils.book_append_sheet(wb, ws, "Báo cáo doanh thu");
+      XLSX.writeFile(wb, `${fileName}.xlsx`);
+      showStatus('Xuất file Excel thành công!', 'success');
     } catch (err) {
+      console.error(err);
       showStatus('Lỗi khi xuất file: ' + err.message, 'error');
     }
   };
@@ -132,9 +152,9 @@ const ReportCenter = ({ showStatus }) => {
           <h2 style={{ fontFamily: 'ShopeeDisplayB, sans-serif' }}>Báo Cáo & Thống Kê</h2>
           <p style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}>Dữ liệu tổng hợp từ hệ thống Supabase</p>
         </div>
-        <button className="btn-export-excel" onClick={handleExportExcel} style={{ fontFamily: 'ShopeeDisplayB, sans-serif' }}>
+        <button className="btn-export-excel" onClick={() => handleExportExcel('all')} style={{ fontFamily: 'ShopeeDisplayB, sans-serif' }}>
           <FileSpreadsheet size={18} />
-          <span>XUẤT EXCEL</span>
+          <span>XUẤT TOÀN BỘ DOANH THU</span>
         </button>
       </div>
 
@@ -285,32 +305,57 @@ const ReportCenter = ({ showStatus }) => {
                 </div>
               </div>
 
-              {/* Total Revenue Summary */}
-              <div style={{ 
-                border: '1px solid #111', 
-                padding: '1.5rem 2.5rem',
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center'
-              }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                   <strong style={{ fontFamily: 'ShopeeDisplayB, sans-serif', fontSize: '0.9rem', textTransform: 'uppercase' }}>TỔNG DOANH THU THEO KỲ</strong>
-                   <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-                      {new Date(startDate).toLocaleDateString('vi-VN')} - {new Date(endDate).toLocaleDateString('vi-VN')}
-                   </span>
-                </div>
-                <div className="report-total-num" style={{ 
-                  textAlign: 'right', 
-                  fontSize: '4.2rem', 
-                  fontFamily: 'ShopeeDisplayB, sans-serif', 
-                  color: '#7AD321',
-                  lineHeight: 1,
-                  marginTop: '0.5rem'
+              {/* Total Revenue Summary & Export */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ 
+                  border: '1px solid #111', 
+                  padding: '1.5rem 2.5rem',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  flex: 1
                 }}>
-                  {isDailyLoading ? '...' : new Intl.NumberFormat('vi-VN').format(dailyData.totalRevenue)}
-                  <span style={{ fontSize: '1.8rem', marginLeft: '5px' }}>VND</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                     <strong style={{ fontFamily: 'ShopeeDisplayB, sans-serif', fontSize: '0.9rem', textTransform: 'uppercase' }}>TỔNG DOANH THU THEO KỲ</strong>
+                     <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>
+                        {new Date(startDate).toLocaleDateString('vi-VN')} - {new Date(endDate).toLocaleDateString('vi-VN')}
+                     </span>
+                  </div>
+                  <div className="report-total-num" style={{ 
+                    textAlign: 'right', 
+                    fontSize: '4.2rem', 
+                    fontFamily: 'ShopeeDisplayB, sans-serif', 
+                    color: '#7AD321',
+                    lineHeight: 1,
+                    marginTop: '0.5rem'
+                  }}>
+                    {isDailyLoading ? '...' : new Intl.NumberFormat('vi-VN').format(dailyData.totalRevenue)}
+                    <span style={{ fontSize: '1.8rem', marginLeft: '5px' }}>VND</span>
+                  </div>
                 </div>
+
+                <button 
+                  className="btn-export-range-action" 
+                  onClick={() => handleExportExcel('range')}
+                  style={{
+                    backgroundColor: '#1cc2ba',
+                    color: '#FFF',
+                    border: 'none',
+                    padding: '1.2rem',
+                    fontFamily: 'ShopeeDisplayB, sans-serif',
+                    fontSize: '1rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 4px 0 #159a94'
+                  }}
+                >
+                  <FileSpreadsheet size={22} /> XUẤT EXCEL CHO KỲ BÁO CÁO NÀY
+                </button>
               </div>
             </div>
 

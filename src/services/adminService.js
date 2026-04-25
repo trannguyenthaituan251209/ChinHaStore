@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabase';
+import { analyticsService } from './analyticsService';
 import emailjs from '@emailjs/browser';
 
 /**
@@ -66,9 +67,7 @@ export const adminService = {
       .lt('start_time', nextWeek.toISOString());
 
     // 7. Today Visits logic
-    const todayStr = today.toISOString().split('T')[0];
-    const { data: vData } = await supabase.from('daily_stats').select('visits').eq('date', todayStr).maybeSingle();
-    const tVisits = vData?.visits || 0;
+    const tVisits = await analyticsService.getTodayVisits();
 
     // 8. Weekly Customers (Last 7 days)
     const last7Str = new Date(today.getTime() - 6 * 86400000).toISOString();
