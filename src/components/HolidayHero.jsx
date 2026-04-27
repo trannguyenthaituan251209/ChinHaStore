@@ -18,7 +18,7 @@ const HolidayHero = () => {
     });
 
     const posters = {
-        hero: 'https://imghosting.in/host/8c72m6',
+        hero: 'https://imghosting.in/host/s8w6ja',
         heroMobile: 'https://imghosting.in/host/xxrvhy',
         main: 'https://imghosting.in/host/u3qx25',
         sub1: 'https://imghosting.in/host/wvnixs',
