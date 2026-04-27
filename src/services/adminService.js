@@ -775,11 +775,13 @@ export const adminService = {
 
     if (fetchErr) throw fetchErr;
 
-    // 2. Update product info
+    // 2. Update product info - EXCLUDE slug and id to prevent unique constraint violations
+    const { slug, id: _id, ...cleanData } = productData;
+    
     const { error } = await supabase
       .from('products')
       .update({
-        ...productData,
+        ...cleanData,
         quantity: parseInt(quantity),
         video_res: videoRes,
         iso_range: isoRange,
