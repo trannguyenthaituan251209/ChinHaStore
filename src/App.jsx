@@ -126,22 +126,30 @@ function App() {
 
   // SESSION HARDENING: Check for session & record analytics visit
   useEffect(() => {
+    let isMounted = true;
     const initApp = async () => {
       try {
-        const user = await adminService.getUser();
-        setAdminUser(user);
-        
-        // Record visit ONLY for non-admins (storefront visitors)
-        if (!isAdminHost && !isSecretPath) {
-          analyticsService.recordVisit();
+        // Use getSession for faster, lock-resilient initial check
+        const { data: { session } } = await adminService.getSession();
+        if (isMounted) {
+          setAdminUser(session?.user || null);
+          
+          // Record visit ONLY for non-admins (storefront visitors)
+          if (!isAdminHost && !isSecretPath) {
+            analyticsService.recordVisit();
+          }
         }
       } catch (err) {
-        console.error('App init failed:', err);
+        // Silence lock errors or network hiccups during init
+        if (err.name !== 'NavigatorLockAcquireTimeoutError') {
+          console.warn('App init non-critical update:', err.message);
+        }
       } finally {
-        setAuthLoading(false);
+        if (isMounted) setAuthLoading(false);
       }
     };
     initApp();
+    return () => { isMounted = false; };
   }, [isAdminHost, isSecretPath]);
 
   const handleLoginSuccess = async () => {

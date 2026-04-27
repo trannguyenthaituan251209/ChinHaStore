@@ -9,21 +9,21 @@ export const analyticsService = {
     const today = new Date().toISOString().split('T')[0];
 
     try {
-      // Try to increment for today
-      const { data, error } = await supabase.rpc('increment_daily_visit', { target_date: today });
+      // Try to increment for today via RPC
+      const { error: rpcError } = await supabase.rpc('increment_daily_visit', { target_date: today });
 
-      // If RPC fails (not created yet), fallback to JS logic
-      if (error) {
+      // If RPC fails (404 or others), try fallback but catch silently
+      if (rpcError) {
         const { data: current } = await supabase
           .from('site_analytics')
           .select('visit_count')
           .eq('date', today)
-          .single();
+          .maybeSingle();
 
         if (current) {
           await supabase
             .from('site_analytics')
-            .update({ visit_count: current.visit_count + 1 })
+            .update({ visit_count: (current.visit_count || 0) + 1 })
             .eq('date', today);
         } else {
           // First visit of the day
@@ -35,7 +35,7 @@ export const analyticsService = {
       
       sessionStorage.setItem('site_visited_today', 'true');
     } catch (err) {
-      console.error('Analytics error:', err);
+      // Silently fail for analytics to keep console clean
     }
   },
 

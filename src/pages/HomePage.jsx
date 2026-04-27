@@ -1,7 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import HeroSection from '../components/HeroSection';
-import PromotionBanner from '../components/PromotionBanner';
+import HolidayHero from '../components/HolidayHero';
 import FeaturedProducts from '../components/FeaturedProducts';
 import NeedsRecommendation from '../components/NeedsRecommendation';
 import HowItWorks from '../components/HowItWorks';
@@ -17,7 +16,7 @@ const HomePage = () => {
         <link rel="canonical" href="https://chinhastore.com/" />
         <meta name="description" content="Dịch vụ cho thuê máy ảnh chuyên nghiệp tại Buôn Ma Thuột (BMT). Thuê Canon EOS R50, Fujifilm, Ricoh GR IV. Hotline 0842204207. Hỗ trợ 24/7 tại Đắk Lắk." />
         <meta name="keywords" content="thuê máy ảnh bmt, thuê máy ảnh buôn ma thuột, thuê canon r50 bmt, thuê fujifilm bmt, thuê máy ảnh đắk lắk, bảng giá thuê máy ảnh bmt" />
-        
+
         {/* JSON-LD LocalBusiness Schema */}
         <script type="application/ld+json">
           {`
@@ -65,8 +64,7 @@ const HomePage = () => {
           `}
         </script>
       </Helmet>
-      <HeroSection />
-      <PromotionBanner />
+      <HolidayHero />
       <FeaturedProducts />
       <NeedsRecommendation />
       <HowItWorks />

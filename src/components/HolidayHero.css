@@ -1,0 +1,315 @@
+.holiday-hero {
+    padding: 2rem 0 4rem;
+    background-color: #fff;
+    overflow: hidden;
+    text-align: center;
+    font-family: 'ShopeeDisplayR', sans-serif;
+}
+
+/* HERO INFOGRAPHIC */
+.hero-infographic {
+    width: 100%;
+    margin-bottom: 3rem;
+    border-radius: 8px;
+    overflow: hidden;
+    display: block;
+}
+
+.hero-poster-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+/* POSTER LAYOUT (1-2) */
+.poster-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 15px;
+    margin-bottom: 3rem;
+}
+
+.poster-main {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 500px;
+    display: block;
+    border: 1px solid #eee;
+}
+
+.poster-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.poster-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+.holiday-tag {
+    background: linear-gradient(90deg, #E63946, #F4A261);
+    color: white;
+    padding: 6px 15px;
+    font-size: 0.8rem;
+    font-family: 'ShopeeDisplayB', sans-serif;
+    font-weight: normal;
+    letter-spacing: 1px;
+    border-radius: 2px;
+}
+
+.poster-subs {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.poster-sub-item {
+    flex: 1;
+    border-radius: 4px;
+    overflow: hidden;
+    height: calc(250px - 7.5px);
+    display: block;
+    border: 1px solid #eee;
+}
+
+.poster-sub-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* TOP RENTALS WRAPPER - STACKED LAYOUT */
+.top-rentals-wrapper {
+    display: flex;
+    flex-direction: column; /* Stacked: Banner on top */
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: left;
+}
+
+.rentals-banner {
+    width: 100%;
+    height: auto;
+    min-height: 150px;
+    max-height: 400px;
+    position: relative;
+    overflow: hidden;
+    background-color: #FF0055;
+}
+
+.banner-img-main {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.rentals-products {
+    padding: 2rem;
+    background: linear-gradient(180deg, #FF66C4 0%, #FFDE59 100%);
+}
+
+.products-grid-holiday {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+/* HOLIDAY PRODUCT CARD */
+.holiday-product-card {
+    background: white;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+}
+
+.holiday-product-card:hover {
+    border-color: #FF4D00;
+}
+
+.card-image-bleed {
+    width: 100%;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-image-bleed img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.badge-promo {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #FF0055;
+    color: white;
+    font-size: 0.7rem;
+    font-family: 'ShopeeDisplayB', sans-serif;
+    padding: 3px 8px;
+    border-radius: 2px;
+    z-index: 2;
+}
+
+.card-info-holiday {
+    padding: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-meta-top {
+    margin-bottom: 8px;
+}
+
+.rental-count {
+    font-size: 0.7rem;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'ShopeeDisplayM', sans-serif;
+}
+
+.holiday-product-name {
+    font-family: 'ShopeeDisplayB', sans-serif;
+    font-size: 0.95rem;
+    font-weight: normal;
+    margin: 0 0 10px 0;
+    color: #1a1a1a;
+    line-height: 1.3;
+    height: 2.6rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.holiday-price-row {
+    margin-top: auto;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.price-label {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.price-value {
+    font-family: 'ShopeeDisplayEB', sans-serif;
+    font-size: 1.1rem;
+    font-weight: normal;
+    color: #FF4D00;
+}
+
+.holiday-card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-holiday-book {
+    flex: 2;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    padding: 8px 0;
+    font-size: 0.75rem;
+    font-family: 'ShopeeDisplayB', sans-serif;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-holiday-book:hover {
+    background: #FF4D00;
+}
+
+.btn-holiday-detail {
+    flex: 1;
+    background: #f0f0f0;
+    color: #333;
+    border: none;
+    padding: 8px 0;
+    font-size: 0.75rem;
+    font-family: 'ShopeeDisplayM', sans-serif;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-holiday-detail:hover {
+    background: #e0e0e0;
+}
+
+/* ANIMATIONS (Re-enabled for infographic) */
+.animate-up { animation: fadeInUp 1s ease-out; }
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 1200px) {
+    .products-grid-holiday {
+        gap: 15px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .products-grid-holiday {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .rentals-banner {
+        height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .poster-layout {
+        grid-template-columns: 1fr;
+    }
+    .poster-main {
+        height: 350px;
+    }
+    .rentals-products {
+        padding: 1.5rem;
+    }
+    .hero-infographic {
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .rentals-banner {
+        height: 150px;
+    }
+    .products-grid-holiday {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .rentals-products {
+        padding: 1rem;
+    }
+    .holiday-product-name {
+        font-size: 0.85rem;
+        height: 2.4rem;
+    }
+    .price-value {
+        font-size: 1rem;
+    }
+}

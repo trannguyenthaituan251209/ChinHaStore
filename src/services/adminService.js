@@ -103,9 +103,6 @@ export const adminService = {
    * Fetches all bookings with joined customer and product information.
    */
   async getAllBookings() {
-    // TRIGGER MIGRATION check (Silent background)
-    this.syncLegacyBookingIds().catch(console.error);
-
     const { data, error } = await supabase
       .from('bookings')
       .select(`
@@ -157,6 +154,62 @@ export const adminService = {
         created_at: b.created_at
       };
     });
+  },
+
+  /**
+   * Fetches the top 4 products based on the number of bookings in the last 3 months.
+   */
+  async getTopRentals() {
+    try {
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      const threeMonthsAgoISO = threeMonthsAgo.toISOString();
+
+      const { data: bookings, error: bErr } = await supabase
+        .from('bookings')
+        .select('product_id')
+        .gte('created_at', threeMonthsAgoISO)
+        .not('status', 'eq', 'Cancelled');
+
+      if (bErr) throw bErr;
+
+      // Count occurrences of each product_id
+      const counts = (bookings || []).reduce((acc, curr) => {
+        acc[curr.product_id] = (acc[curr.product_id] || 0) + 1;
+        return acc;
+      }, {});
+
+      // Sort product_ids by count descending
+      const sortedProductIds = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 4);
+
+      if (sortedProductIds.length === 0) {
+        // Fallback: just get any 4 active products
+        const allProducts = await this.getAllProducts();
+        return allProducts.slice(0, 4).map(p => ({ ...p, rentalCount: 0 }));
+      }
+
+      // Fetch full product details for these IDs
+      const { data: products, error: pErr } = await supabase
+        .from('products')
+        .select('*')
+        .in('id', sortedProductIds);
+
+      if (pErr) throw pErr;
+
+      // Return mapped products with their rental counts
+      return products.map(p => ({
+        ...p,
+        rentalCount: counts[p.id] || 0,
+        price1Day: p.price_1day,
+        image: p.image_url,
+        slug: p.slug
+      })).sort((a, b) => b.rentalCount - a.rentalCount);
+    } catch (err) {
+      console.error('Error fetching top rentals:', err);
+      // Absolute fallback
+      const all = await this.getAllProducts();
+      return all.slice(0, 4);
+    }
   },
 
   /**
@@ -222,94 +275,6 @@ export const adminService = {
     });
 
     return { data: mappedData, count };
-  },
-
-  /**
-   * MIGRATION UTILITY: Assigns IDs to old bookings that don't have one yet.
-   */
-  async syncLegacyBookingIds() {
-    const { data: bookings, error } = await supabase
-      .from('bookings')
-      .select('id, start_time')
-      .is('booking_id', null)
-      .limit(50); // Process in small batches to be safe
-
-    if (error || !bookings || bookings.length === 0) return;
-
-    for (const b of bookings) {
-      const bid = this.generateBookingId(b.start_time);
-      await supabase.from('bookings').update({ booking_id: bid }).eq('id', b.id);
-    }
-  },
-
-  /**
-   * SERVER-SIDE SEARCH (High Performance O(log n))
-   * Queries the database directly using the booking_id index.
-   */
-  async searchBookingsById(idQuery, filters = {}) {
-    if (!idQuery) return [];
-    
-    let query = supabase
-      .from('bookings')
-      .select(`
-        *,
-        customers (full_name, phone, city),
-        products (name, image_url)
-      `)
-      .ilike('booking_id', `%${idQuery}%`);
-
-    // APPLY CONTEXTUAL FILTERS
-    if (filters.status) {
-      if (Array.isArray(filters.status)) {
-        query = query.in('status', filters.status);
-      } else {
-        query = query.eq('status', filters.status);
-      }
-    }
-
-    if (filters.startDate) {
-      query = query.gte('start_time', filters.startDate + 'T00:00:00')
-                   .lte('start_time', filters.startDate + 'T23:59:59');
-    }
-
-    const { data, error } = await query.limit(10);
-
-    if (error) throw error;
-
-    return data.map(b => ({
-      id: b.id,
-      customerName: b.customers?.full_name || 'Khách lẻ',
-      phone: b.customers?.phone || '',
-      productName: b.products?.name || 'Sản phẩm',
-      startDate: this.formatDate(b.start_time),
-      endDate: this.formatDate(b.end_time),
-      totalPrice: new Intl.NumberFormat('vi-VN').format(b.total_price),
-      source: b.source || 'Website',
-      status: b.status,
-      start_time: b.start_time,
-      end_time: b.end_time,
-      product_id: b.product_id,
-      productImage: b.products?.image_url,
-      deposit_type: b.deposit_type || 'standard',
-      city: b.city || b.customers?.city || '',
-      is_seen: b.is_seen,
-      booking_id: b.booking_id,
-      created_at: b.created_at
-    }));
-  },
-
-  formatDate(ts) {
-    if (!ts) return 'N/A';
-    const d = new Date(ts);
-    return d.toLocaleString('vi-VN', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: false,
-      timeZone: 'Asia/Ho_Chi_Minh'
-    }).replace(' ', ' - ');
   },
 
   /**
@@ -581,7 +546,7 @@ export const adminService = {
     // --- TRIGGER EMAIL NOTIFICATIONS ---
     // Fetch product name and image for placeholders
     const { data: product } = await supabase.from('products').select('name, image_url').eq('id', bookingData.product_id).single();
-    
+
     const emailData = {
       ...bookingData,
       booking_id: bookingId
@@ -1086,6 +1051,13 @@ export const adminService = {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) return null;
     return user;
+  },
+
+  /**
+   * Quick Session Check: Retrieve session from local storage/cache
+   */
+  async getSession() {
+    return await supabase.auth.getSession();
   },
 
   // --- EMAIL NOTIFICATION & SETTINGS ---

@@ -51,6 +51,7 @@ const BlogManager = ({ showStatus }) => {
       excerpt: '',
       thumbnail_url: '',
       is_banner: false,
+      banner_slot: '',
       status: 'published'
     });
     setIsEditing(true);
@@ -233,16 +234,34 @@ const BlogManager = ({ showStatus }) => {
                 />
               </div>
 
-              <div className="field-group checkbox-group">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={currentPost.is_banner}
-                    onChange={(e) => setCurrentPost({ ...currentPost, is_banner: e.target.checked })}
-                  />
-                  <span>Đánh dấu là Banner (1366x768px)</span>
-                </label>
-              </div>
+      <div className="field-group checkbox-group">
+        <label className="checkbox-label">
+          <input 
+            type="checkbox" 
+            checked={currentPost.is_banner}
+            onChange={(e) => setCurrentPost({ ...currentPost, is_banner: e.target.checked })}
+          />
+          <span>Đánh dấu là Banner (Trang chủ)</span>
+        </label>
+      </div>
+
+      {currentPost.is_banner && (
+        <div className="field-group animate-in">
+          <label>Vị trí đặt Banner</label>
+          <select 
+            className="banner-slot-select"
+            value={currentPost.banner_slot || ''}
+            onChange={(e) => setCurrentPost({ ...currentPost, banner_slot: e.target.value })}
+            required={currentPost.is_banner}
+          >
+            <option value="">-- Chọn vị trí --</option>
+            <option value="hero">Hero Infographic (Trên cùng)</option>
+            <option value="main">Main Banner (Poster lớn giữa)</option>
+            <option value="sub1">Sub Banner 1 (Phải - Trên)</option>
+            <option value="sub2">Sub Banner 2 (Phải - Dưới)</option>
+          </select>
+        </div>
+      )}
 
               <button type="submit" className="btn-save-post">
                 <Save size={18} /> {currentPost.id ? 'Cập Nhật Bài Viết' : 'Xuất Bản Ngay'}

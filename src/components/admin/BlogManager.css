@@ -261,7 +261,23 @@
     height: 20px !important;
     cursor: pointer;
 }
+.banner-slot-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    background-color: white;
+    cursor: pointer;
+}
 
+.banner-slot-select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 77, 0, 0.1);
+}
 .actions-cell {
     display: flex;
     gap: 0.5rem;
