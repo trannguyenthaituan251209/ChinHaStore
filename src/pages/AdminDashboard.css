@@ -588,6 +588,129 @@ body {
         max-width: 100vw;
     }
 
+}
+
+/* == MANAGER TOOLBAR & SEARCH == */
+.manager-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1.5rem;
+}
+
+.manager-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: #FFF;
+    padding: 0.6rem 1rem;
+    width: 100%;
+    max-width: 450px;
+    transition: all 0.2s ease;
+}
+
+.manager-search-box:focus-within {
+    border-color: #000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.manager-search-box .search-icon {
+    color: #999;
+    margin-right: 0.8rem;
+}
+
+.manager-search-box input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 0.95rem;
+    color: #111;
+}
+
+/* Suggestion Dropdown */
+.search-suggestions-dropdown {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background: #FFF;
+    border: var(--color-admin-border);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid #F5F5F5;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background-color: #FAFAFA;
+}
+
+.suggestion-item.hot {
+    border-left: 3px solid var(--color-admin-accent);
+}
+
+.suggestion-img {
+    width: 45px;
+    height: 45px;
+    object-fit: cover;
+    background-color: #EEE;
+}
+
+.suggestion-info {
+    flex: 1;
+}
+
+.suggestion-info h5 {
+    margin: 0;
+    font-size: 0.4rem;
+    font-weight: 700;
+}
+
+.suggestion-info p {
+    margin: 3px 0 0;
+    font-size: 0.4rem;
+    color: #888;
+}
+
+.suggestion-meta {
+    text-align: right;
+}
+
+.suggestion-price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-admin-accent);
+}
+
+.suggestion-status {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
     .admin-welcome-banner h1 {
         font-size: 1.8rem;
         text-align: center;
@@ -596,6 +719,16 @@ body {
     .admin-welcome-banner p {
         text-align: center;
     }
+
+    .manager-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .manager-search-box {
+        max-width: none;
+    }
+}
 
     /* Strict Toolbar Stacking & Centering (Admin Only) */
     .admin-layout .manager-toolbar,

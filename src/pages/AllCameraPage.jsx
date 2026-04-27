@@ -55,7 +55,7 @@ const AllCameraPage = () => {
 
     // Search
     if (searchTerm) {
-      result = result.filter(p => 
+      result = result.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.category?.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -99,7 +99,7 @@ const AllCameraPage = () => {
         <link rel="canonical" href="https://chinhastore.com/all-camera" />
         <meta name="description" content="Khám phá kho máy ảnh tại Buôn Ma Thuột (BMT). Thuê Canon EOS R50, Ricoh GR IV, Fujifilm X100VI và nhiều dòng máy hot khác. Bảng giá thuê máy ảnh tốt nhất BMT." />
         <meta name="keywords" content="kho máy ảnh bmt, thuê canon r50 bmt, thuê fujifilm bmt, giá thuê máy ảnh buôn ma thuột, thuê máy ảnh fujifilm bmt" />
-        
+
         {/* JSON-LD Product List Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
@@ -146,9 +146,9 @@ const AllCameraPage = () => {
           <div className="sidebar-section">
             <h3><Search size={16} /> TÌM KIẾM</h3>
             <div className="search-box-vip">
-              <input 
-                type="text" 
-                placeholder="Tìm tên máy, dòng máy..." 
+              <input
+                type="text"
+                placeholder="Tìm tên máy, dòng máy..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -159,8 +159,8 @@ const AllCameraPage = () => {
             <h3><Filter size={16} /> PHÂN LOẠI</h3>
             <div className="filter-list">
               {categories.map(cat => (
-                <button 
-                  key={cat} 
+                <button
+                  key={cat}
                   className={selectedCategory === cat ? 'active' : ''}
                   onClick={() => setSelectedCategory(cat)}
                 >
@@ -174,8 +174,8 @@ const AllCameraPage = () => {
             <h3>THƯƠNG HIỆU</h3>
             <div className="filter-list">
               {brands.map(brand => (
-                <button 
-                  key={brand} 
+                <button
+                  key={brand}
                   className={selectedBrand === brand ? 'active' : ''}
                   onClick={() => setSelectedBrand(brand)}
                 >
@@ -207,9 +207,9 @@ const AllCameraPage = () => {
           {filteredProducts.length > 0 ? (
             <div className="catalog-grid">
               {filteredProducts.map(product => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
+                <ProductCard
+                  key={product.id}
+                  product={product}
                   monthlyCount={stats.counts[product.id] || 0}
                   isHot={stats.hotProductId === product.id}
                 />
@@ -218,7 +218,7 @@ const AllCameraPage = () => {
           ) : (
             <div className="empty-results">
               <p>Không tìm thấy thiết bị phù hợp với lựa chọn của bạn.</p>
-              <button onClick={() => {setSearchTerm(''); setSelectedCategory('All'); setSelectedBrand('All');}}>
+              <button onClick={() => { setSearchTerm(''); setSelectedCategory('All'); setSelectedBrand('All'); }}>
                 Xóa tất cả bộ lọc
               </button>
             </div>

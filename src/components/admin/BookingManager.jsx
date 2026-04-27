@@ -111,15 +111,10 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     const delayDebounceFn = setTimeout(async () => {
       setIsSearching(true);
       try {
-        // Build filters based on active tab
+        // When searching by ID/Text, we ignore subtab filters to allow Global Search
         const searchFilters = {};
-        if (activeSubtab === 'renting') {
-          searchFilters.status = ['Renting', 'Confirmed']; // Active rentals
-        } else if (activeSubtab === 'future') {
-          searchFilters.startDate = selectedFutureDate.toISOString().split('T')[0];
-        } else if (activeSubtab === 'past') {
-          searchFilters.status = 'Returned';
-        }
+        // Only apply filters if the query is very short or empty (not the case here since we check searchQuery)
+        // But for better UX, if they type an ID, they want to find it anywhere.
 
         const results = await adminService.searchBookingsById(searchQuery, searchFilters);
         setServerSuggestions(results);

@@ -278,6 +278,78 @@ export const adminService = {
   },
 
   /**
+   * Authoritative server-side search for bookings.
+   * Supports searching by Booking ID, Customer Name, or Phone.
+   */
+  async searchBookingsById(query, filters = {}) {
+    if (!query) return [];
+
+    let supabaseQuery = supabase
+      .from('bookings')
+      .select(`
+        *,
+        customers (full_name, phone, city),
+        products (name)
+      `);
+
+    const cleanQuery = query.trim().toLowerCase();
+
+    // 1. Logic: If numeric -> search booking_id AND phone. If text -> search name.
+    if (/^\d+$/.test(cleanQuery)) {
+      // Robust Search: Try exact match first for performance/reliability, 
+      // then partial match for user convenience.
+      supabaseQuery = supabaseQuery.or(`booking_id.eq.${cleanQuery},booking_id.ilike.%${cleanQuery}%`);
+    } else {
+      // Search by Customer Name
+      supabaseQuery = supabaseQuery.filter('customers.full_name', 'ilike', `%${cleanQuery}%`);
+    }
+
+    // 2. Apply optional filters (Only if provided)
+    if (filters.status) {
+      if (Array.isArray(filters.status)) {
+        supabaseQuery = supabaseQuery.in('status', filters.status);
+      } else {
+        supabaseQuery = supabaseQuery.eq('status', filters.status);
+      }
+    }
+
+    if (filters.startDate) {
+      supabaseQuery = supabaseQuery.gte('start_time', `${filters.startDate}T00:00:00`);
+    }
+
+    const { data, error } = await supabaseQuery.limit(20);
+    if (error) throw error;
+
+    const formatDate = (d) => d ? new Date(d).toLocaleString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour12: false,
+      timeZone: 'Asia/Ho_Chi_Minh'
+    }).replace(' ', ' - ') : 'N/A';
+
+    return data.map(b => ({
+      id: b.id,
+      booking_id: b.booking_id,
+      customerName: b.customers?.full_name || 'Khách lẻ',
+      phone: b.customers?.phone || '',
+      productName: b.products?.name || 'Sản phẩm',
+      productImage: b.products?.image_url || null,
+      startDate: formatDate(b.start_time),
+      endDate: formatDate(b.end_time),
+      start_time: b.start_time, // Keep raw for editing
+      end_time: b.end_time,
+      status: b.status,
+      totalPrice: new Intl.NumberFormat('vi-VN').format(b.total_price),
+      city: b.city || b.customers?.city || '',
+      source: b.source || 'Website',
+      deposit_type: b.deposit_type || 'standard'
+    }));
+  },
+
+  /**
    * Price calculation logic based on the store's rules.
    */
   calculatePrice(product, startTime, endTime) {
@@ -775,13 +847,11 @@ export const adminService = {
 
     if (fetchErr) throw fetchErr;
 
-    // 2. Update product info - EXCLUDE slug and id to prevent unique constraint violations
-    const { slug, id: _id, ...cleanData } = productData;
-    
+    // 2. Update product info
     const { error } = await supabase
       .from('products')
       .update({
-        ...cleanData,
+        ...productData,
         quantity: parseInt(quantity),
         video_res: videoRes,
         iso_range: isoRange,
