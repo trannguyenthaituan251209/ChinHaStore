@@ -701,7 +701,7 @@ export const adminService = {
       .from('bookings')
       .update({ status, is_seen: true })
       .eq('id', id);
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
   },
 
   /**
@@ -712,7 +712,7 @@ export const adminService = {
       .from('bookings')
       .update({ is_seen: true })
       .eq('id', id);
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
   },
 
   /**

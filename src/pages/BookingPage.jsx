@@ -40,6 +40,68 @@ const BookingPage = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showSuccessNotice, setShowSuccessNotice] = useState(false);
   const [createdBookingId, setCreatedBookingId] = useState('');
+  const [isPolicyAccepted, setIsPolicyAccepted] = useState(false);
+
+  // Address Autocomplete states
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+
+  const [selProvCode, setSelProvCode] = useState('');
+  const [selDistCode, setSelDistCode] = useState('');
+  const [selWardCode, setSelWardCode] = useState('');
+  
+  const [provName, setProvName] = useState('');
+  const [distName, setDistName] = useState('');
+  const [wardName, setWardName] = useState('');
+
+  useEffect(() => {
+    fetch('https://provinces.open-api.vn/api/p/')
+      .then(res => res.json())
+      .then(data => setProvinces(data))
+      .catch(err => console.error('Failed to fetch provinces', err));
+  }, []);
+
+  const handleProvinceChange = (e) => {
+    const code = e.target.value;
+    setSelProvCode(code);
+    setProvName(e.target.options[e.target.selectedIndex].text);
+    setSelDistCode('');
+    setDistName('');
+    setSelWardCode('');
+    setWardName('');
+    setDistricts([]);
+    setWards([]);
+    
+    if (code) {
+      fetch(`https://provinces.open-api.vn/api/p/${code}?depth=2`)
+        .then(res => res.json())
+        .then(data => setDistricts(data.districts || []))
+        .catch(err => console.error('Failed to fetch districts', err));
+    }
+  };
+
+  const handleDistrictChange = (e) => {
+    const code = e.target.value;
+    setSelDistCode(code);
+    setDistName(e.target.options[e.target.selectedIndex].text);
+    setSelWardCode('');
+    setWardName('');
+    setWards([]);
+
+    if (code) {
+      fetch(`https://provinces.open-api.vn/api/d/${code}?depth=2`)
+        .then(res => res.json())
+        .then(data => setWards(data.wards || []))
+        .catch(err => console.error('Failed to fetch wards', err));
+    }
+  };
+
+  const handleWardChange = (e) => {
+    const code = e.target.value;
+    setSelWardCode(code);
+    setWardName(e.target.options[e.target.selectedIndex].text);
+  };
 
   // New state for cross-device recovery
   const [remoteDraft, setRemoteDraft] = useState(null);
@@ -439,7 +501,9 @@ const BookingPage = () => {
         email: cusEmail,
         city: receiveMethod === 'store' 
           ? 'Nhận tại cửa hàng (23 Lê Thánh Tông)' 
-          : (cusAddress ? `${cusAddress}, ${cusCity}` : cusCity),
+          : (wardName && distName && provName 
+              ? `${cusAddress ? cusAddress + ', ' : ''}${wardName}, ${distName}, ${provName}` 
+              : (cusAddress ? `${cusAddress}, ${cusCity}` : cusCity)),
         social: cusSocial,
         product_id: selectedCamera,
         start_time: startDate + 'T' + (rentalType==='SHIFT'?(shiftType==='A'?'07:00:00':'14:00:00'):(rentalType==='DAY'?'07:30:00':'19:00:00')), 
@@ -780,9 +844,23 @@ const BookingPage = () => {
                   ) : (
                     <div className="form-group">
                       <label>ĐỊA CHỈ NHẬN MÁY</label>
+                      <div className="address-dropdowns" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginBottom: '0.8rem' }}>
+                        <select className="address-select" value={selProvCode} onChange={handleProvinceChange}>
+                          <option value="">Chọn Tỉnh/Thành</option>
+                          {provinces.map(p => <option key={p.code} value={p.code}>{p.name}</option>)}
+                        </select>
+                        <select className="address-select" value={selDistCode} onChange={handleDistrictChange} disabled={!selProvCode}>
+                          <option value="">Chọn Quận/Huyện</option>
+                          {districts.map(d => <option key={d.code} value={d.code}>{d.name}</option>)}
+                        </select>
+                        <select className="address-select" value={selWardCode} onChange={handleWardChange} disabled={!selDistCode}>
+                          <option value="">Chọn Phường/Xã</option>
+                          {wards.map(w => <option key={w.code} value={w.code}>{w.name}</option>)}
+                        </select>
+                      </div>
                       <input 
                         type="text" 
-                        placeholder="Số nhà, Tên đường, Phường/Xã..." 
+                        placeholder="Số nhà, Tên đường (địa chỉ chi tiết)..." 
                         value={cusAddress} 
                         onChange={(e) => setCusAddress(e.target.value)} 
                       />
@@ -866,13 +944,25 @@ const BookingPage = () => {
                       BƯỚC TIẾP THEO
                     </button>
                   ) : (
-                    <button 
-                      className="btn-confirm-booking" 
-                      disabled={isSubmitting} 
-                      onClick={handleFinalSubmit}
-                    >
-                      {isSubmitting ? 'ĐANG GỬI...' : 'XÁC NHẬN ĐẶT LỊCH'}
-                    </button>
+                    <div className="policy-acceptance-container">
+                      <label className="policy-checkbox-label">
+                        <input 
+                          type="checkbox" 
+                          checked={isPolicyAccepted} 
+                          onChange={(e) => setIsPolicyAccepted(e.target.checked)} 
+                        />
+                        <span>
+                          Bằng việc bấm thuê bạn đồng ý và chấp nhận <a href="/chinh-sach" target="_blank" rel="noreferrer">Chính sách và điều khoản</a> của ChinHaStore
+                        </span>
+                      </label>
+                      <button 
+                        className={`btn-confirm-booking ${!isPolicyAccepted ? 'disabled' : ''}`} 
+                        disabled={isSubmitting || !isPolicyAccepted} 
+                        onClick={handleFinalSubmit}
+                      >
+                        {isSubmitting ? 'ĐANG GỬI...' : 'XÁC NHẬN ĐẶT LỊCH'}
+                      </button>
+                    </div>
                   )}
                 </div>
               ) : (
@@ -1084,7 +1174,7 @@ const BookingPage = () => {
                 <div className="bill-v2-customer-section">
                   <p>Khách hàng: {cusName.toUpperCase()}</p>
                   <p>SĐT: {cusPhone}</p>
-                  <p>Nhận máy: {receiveMethod === 'store' ? 'Tại cửa hàng (23 Lê Thánh Tông)' : `Giao tận nơi (${cusAddress}, ${cusCity})`}</p>
+                  <p>Nhận máy: {receiveMethod === 'store' ? 'Tại cửa hàng (23 Lê Thánh Tông)' : `Giao tận nơi (${(wardName && distName && provName ? `${cusAddress ? cusAddress + ', ' : ''}${wardName}, ${distName}, ${provName}` : (cusAddress ? `${cusAddress}, ${cusCity}` : cusCity))})`}</p>
                   <p>Hình thức cọc: {cusDepositType === 'standard' ? 'Cơ bản' : 'Tài sản (CCCD + Tài sản tương đương)'}</p>
                 </div>
                 <hr className="bill-v2-divider" />

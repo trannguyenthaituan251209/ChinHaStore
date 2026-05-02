@@ -46,6 +46,7 @@ const Navbar = () => {
           <li><Link to="/" onClick={() => setIsMobileMenuOpen(false)}>TRANG CHỦ</Link></li>
           <li><Link to="/all-camera" onClick={() => setIsMobileMenuOpen(false)}>KHO MÁY</Link></li>
           <li><Link to="/dat-lich" onClick={() => setIsMobileMenuOpen(false)}>ĐẶT THUÊ</Link></li>
+          <li><Link to="/chinh-sach" onClick={() => setIsMobileMenuOpen(false)}>CHÍNH SÁCH</Link></li>
         </ul>
 
         {/* Live Status Indicator */}
