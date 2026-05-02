@@ -292,8 +292,8 @@ const DatabaseModifier = ({ showStatus }) => {
     try {
       let finalForm = { ...productForm };
       
-      // ONLY auto-generate slug for NEW products if it's empty
-      if (!currentItem && !finalForm.slug) {
+      // Auto-generate slug if it's empty (for BOTH new and existing products)
+      if (!finalForm.slug || finalForm.slug.trim() === '') {
         finalForm.slug = finalForm.name
           .toLowerCase()
           .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -315,7 +315,11 @@ const DatabaseModifier = ({ showStatus }) => {
       fetchData();
       showStatus('Đã lưu dữ liệu sản phẩm', 'success');
     } catch (err) {
-      showStatus('Lỗi khi lưu sản phẩm: ' + err.message, 'error');
+      if (err.message && err.message.includes('products_slug_key')) {
+        showStatus('Lỗi: Đường dẫn URL (Slug) này đã tồn tại ở một sản phẩm khác. Vui lòng đổi URL khác!', 'error');
+      } else {
+        showStatus('Lỗi khi lưu sản phẩm: ' + err.message, 'error');
+      }
     } finally {
       setIsSaving(false);
     }
