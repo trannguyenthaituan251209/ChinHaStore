@@ -16,14 +16,14 @@ const HolidayHero = () => {
         sub1: '/blog', 
         sub2: '/blog' 
     });
-
-    const posters = {
+    
+    const [posters, setPosters] = useState({
         hero: 'https://imghosting.in/host/s8w6ja',
         heroMobile: 'https://imghosting.in/host/xxrvhy',
         main: 'https://imghosting.in/host/u3qx25',
         sub1: 'https://imghosting.in/host/wvnixs',
         sub2: 'https://imghosting.in/host/vpxfuq'
-    };
+    });
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -42,13 +42,22 @@ const HolidayHero = () => {
                 
                 // Map banners by slot assignment
                 if (banners && banners.length > 0) {
-                    const posterLinks = { hero: '/blog', main: '/blog', sub1: '/blog', sub2: '/blog' };
-                    banners.forEach(b => {
-                        if (b.banner_slot) {
+                    const posterLinks = { main: '/blog', sub1: '/blog', sub2: '/blog' };
+                    // Keep a copy of default posters to fall back to if needed, but update if dynamically assigned
+                    const updatedPosters = { ...posters };
+                    
+                    // Reverse the array so newer banners (which are first) overwrite older ones
+                    [...banners].reverse().forEach(b => {
+                        if (b.banner_slot && posterLinks.hasOwnProperty(b.banner_slot)) {
                             posterLinks[b.banner_slot] = `/blog/${b.slug}`;
+                            // Update the image if it has one
+                            if (b.thumbnail_url) {
+                                updatedPosters[b.banner_slot] = b.thumbnail_url;
+                            }
                         }
                     });
                     setLinks(posterLinks);
+                    setPosters(updatedPosters);
                 }
             } catch (err) {
                 console.error('Failed to fetch holiday data:', err);

@@ -70,6 +70,21 @@ export const blogService = {
     return data;
   },
 
+  // Admin: Clear banner slot to avoid conflicts
+  async clearBannerSlot(slot, excludeId = null) {
+    let query = supabase
+      .from('posts')
+      .update({ banner_slot: null })
+      .eq('banner_slot', slot);
+      
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+    
+    const { error } = await query;
+    if (error) throw error;
+  },
+
   // Admin: Create new post
   async createPost(postData) {
     const { data, error } = await supabase

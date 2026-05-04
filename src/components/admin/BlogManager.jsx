@@ -77,11 +77,22 @@ const BlogManager = ({ showStatus }) => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      if (currentPost.id) {
-        await blogService.updatePost(currentPost.id, currentPost);
+      // 1. Clean up banner slot if it's not a banner
+      let postToSave = { ...currentPost };
+      if (!postToSave.is_banner) {
+        postToSave.banner_slot = null;
+      }
+
+      // 2. Clear conflicts: If this post takes a slot, remove that slot from other posts
+      if (postToSave.is_banner && postToSave.banner_slot) {
+        await blogService.clearBannerSlot(postToSave.banner_slot, postToSave.id);
+      }
+
+      if (postToSave.id) {
+        await blogService.updatePost(postToSave.id, postToSave);
         showStatus('Cập nhật bài viết thành công!');
       } else {
-        await blogService.createPost(currentPost);
+        await blogService.createPost(postToSave);
         showStatus('Đã đăng bài viết mới!');
       }
       setIsEditing(false);
@@ -255,7 +266,6 @@ const BlogManager = ({ showStatus }) => {
             required={currentPost.is_banner}
           >
             <option value="">-- Chọn vị trí --</option>
-            <option value="hero">Hero Infographic (Trên cùng)</option>
             <option value="main">Main Banner (Poster lớn giữa)</option>
             <option value="sub1">Sub Banner 1 (Phải - Trên)</option>
             <option value="sub2">Sub Banner 2 (Phải - Dưới)</option>
