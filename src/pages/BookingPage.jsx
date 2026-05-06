@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import adminService from '../services/adminService';
 import ProductCard from '../components/ProductCard';
 import html2canvas from 'html2canvas';
+import { Turnstile } from '@marsidev/react-turnstile';
 import './BookingPage.css';
 
 const BookingPage = () => {
@@ -41,6 +42,7 @@ const BookingPage = () => {
   const [showSuccessNotice, setShowSuccessNotice] = useState(false);
   const [createdBookingId, setCreatedBookingId] = useState('');
   const [isPolicyAccepted, setIsPolicyAccepted] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState('');
 
   // Address Autocomplete states
   const [provinces, setProvinces] = useState([]);
@@ -493,9 +495,14 @@ const BookingPage = () => {
       alert('Vui lòng điền đầy đủ Họ tên và Số điện thoại');
       return;
     }
+    if (!captchaToken) {
+      alert('Vui lòng xác thực bạn không phải là robot');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const created = await adminService.createBooking({
+      const created = await adminService.createSecureBooking(captchaToken, {
         customerName: cusName,
         phone: cusPhone,
         email: cusEmail,
@@ -955,9 +962,19 @@ const BookingPage = () => {
                           Bằng việc bấm thuê bạn đồng ý và chấp nhận <a href="/chinh-sach" target="_blank" rel="noreferrer">Chính sách và điều khoản</a> của ChinHaStore
                         </span>
                       </label>
+                      
+                      <div className="captcha-wrapper" style={{ margin: '15px 0', display: 'flex', justifyContent: 'center' }}>
+                        <Turnstile 
+                          siteKey="0x4AAAAAADKQ-kplunorEsim" 
+                          onSuccess={(token) => setCaptchaToken(token)}
+                          onError={() => setCaptchaToken('')}
+                          onExpire={() => setCaptchaToken('')}
+                        />
+                      </div>
+
                       <button 
-                        className={`btn-confirm-booking ${!isPolicyAccepted ? 'disabled' : ''}`} 
-                        disabled={isSubmitting || !isPolicyAccepted} 
+                        className={`btn-confirm-booking ${(!isPolicyAccepted || !captchaToken) ? 'disabled' : ''}`} 
+                        disabled={isSubmitting || !isPolicyAccepted || !captchaToken} 
                         onClick={handleFinalSubmit}
                       >
                         {isSubmitting ? 'ĐANG GỬI...' : 'XÁC NHẬN ĐẶT LỊCH'}

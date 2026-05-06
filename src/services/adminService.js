@@ -570,6 +570,24 @@ export const adminService = {
   },
 
   /**
+   * Create a new secure booking (Validates Captcha first).
+   */
+  async createSecureBooking(captchaToken, bookingData) {
+    // 1. Verify captcha token via Edge Function
+    const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-turnstile', {
+      body: { token: captchaToken }
+    });
+
+    if (verifyError || !verifyData?.success) {
+      console.error('Captcha Verification Failed:', verifyError || verifyData);
+      throw new Error('Xác thực chống Spam thất bại. Vui lòng thử lại hoặc tải lại trang.');
+    }
+
+    // 2. Token is valid, proceed with normal booking creation
+    return this.createBooking(bookingData);
+  },
+
+  /**
    * Create a new booking.
    */
   async createBooking(bookingData) {
