@@ -13,6 +13,7 @@ import ProductDetail from './pages/ProductDetail';
 import { adminService } from './services/adminService';
 import { analyticsService } from './services/analyticsService';
 import PolicyPage from './pages/PolicyPage';
+import AppLock from './components/admin/AppLock';
 
 import './index.css';
 
@@ -185,11 +186,13 @@ function App() {
 
     return (
       <div className="app admin-mode">
-        <Routes>
-          <Route path="/" element={<AdminDashboard onLogout={handleLogout} />} />
-          <Route path={`${SECRET_ADMIN_PATH}/*`} element={<AdminDashboard onLogout={handleLogout} />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <AppLock>
+          <Routes>
+            <Route path="/" element={<AdminDashboard onLogout={handleLogout} />} />
+            <Route path={`${SECRET_ADMIN_PATH}/*`} element={<AdminDashboard onLogout={handleLogout} />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AppLock>
       </div>
     );
   }
@@ -212,7 +215,9 @@ function App() {
           path={`${SECRET_ADMIN_PATH}/*`} 
           element={
             adminUser ? (
-              <AdminDashboard onLogout={handleLogout} />
+              <AppLock>
+                <AdminDashboard onLogout={handleLogout} />
+              </AppLock>
             ) : (
               <AdminLogin onLoginSuccess={handleLoginSuccess} />
             )

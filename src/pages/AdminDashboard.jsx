@@ -13,7 +13,9 @@ import {
   CheckCircle,
   AlertCircle,
   X,
-  BookOpen
+  BookOpen,
+  ShieldCheck,
+  Fingerprint
 } from 'lucide-react';
 import BookingManager from '../components/admin/BookingManager';
 import DatabaseModifier from '../components/admin/DatabaseModifier';
@@ -35,6 +37,73 @@ const AdminDashboard = ({ onLogout }) => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Security Passkey Modal
+  const [showSecurityModal, setShowSecurityModal] = useState(false);
+
+  React.useEffect(() => {
+    const handleOpenSecurity = () => setShowSecurityModal(true);
+    window.addEventListener('open-security-settings', handleOpenSecurity);
+    return () => window.removeEventListener('open-security-settings', handleOpenSecurity);
+  }, []);
+
+  const handleRegisterPasskey = async () => {
+    try {
+      if (!window.PublicKeyCredential) {
+        showStatus('Trình duyệt hoặc thiết bị của bạn không hỗ trợ Sinh trắc học (Passkeys).', 'error');
+        return;
+      }
+      
+      const userId = new Uint8Array(16);
+      window.crypto.getRandomValues(userId);
+
+      const challenge = new Uint8Array(32);
+      window.crypto.getRandomValues(challenge);
+
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          challenge: challenge,
+          rp: { name: 'ChinHaStore Admin' },
+          user: {
+            id: userId,
+            name: 'admin@chinhastore.vn',
+            displayName: 'Mẫn Hi Chin'
+          },
+          pubKeyCredParams: [
+            { type: 'public-key', alg: -7 },
+            { type: 'public-key', alg: -257 }
+          ],
+          authenticatorSelection: {
+            userVerification: 'required'
+          },
+          timeout: 60000,
+          attestation: 'none'
+        }
+      });
+
+      if (credential) {
+        const idArray = new Uint8Array(credential.rawId);
+        let base64Id = '';
+        for (let i = 0; i < idArray.byteLength; i++) {
+          base64Id += String.fromCharCode(idArray[i]);
+        }
+        localStorage.setItem('admin_passkey_id', window.btoa(base64Id));
+        showStatus('Đăng ký Sinh trắc học thành công! Ứng dụng sẽ khóa sau 5 phút không hoạt động.', 'success');
+        setShowSecurityModal(false);
+        // Refresh component to clear the top banner
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error('Lỗi khi đăng ký Passkey:', err);
+      showStatus('Đăng ký thất bại hoặc bạn đã hủy yêu cầu.', 'error');
+    }
+  };
+
+  const removePasskey = () => {
+    localStorage.removeItem('admin_passkey_id');
+    showStatus('Đã tắt khóa Sinh trắc học.', 'success');
+    setShowSecurityModal(false);
+  };
 
   // Global Status Modal Handle
   const [statusModal, setStatusModal] = useState({ isOpen: false, type: 'success', message: '' });
@@ -234,6 +303,10 @@ const AdminDashboard = ({ onLogout }) => {
         </nav>
 
         <div className="sidebar-footer">
+          <button className="nav-item security-btn" onClick={() => setShowSecurityModal(true)} style={{ color: '#10b981' }}>
+            <ShieldCheck size={20} />
+            <span>Bảo mật</span>
+          </button>
           <button className="nav-item logout" onClick={onLogout}>
             <LogOut size={20} />
             <span>Đăng xuất</span>
@@ -243,6 +316,15 @@ const AdminDashboard = ({ onLogout }) => {
 
       {/* Main Content */}
       <div className="admin-main">
+        {!localStorage.getItem('admin_passkey_id') && (
+          <div className="passkey-banner">
+            <ShieldCheck size={18} />
+            <span>Để tăng cường bảo mật, hãy bật tính năng <strong>Khóa Sinh trắc học (FaceID/TouchID)</strong>.</span>
+            <button onClick={() => setShowSecurityModal(true)}>
+              Cài đặt ngay
+            </button>
+          </div>
+        )}
         <header className="admin-header">
           <div className="header-search">
             <Search size={18} />
@@ -315,11 +397,41 @@ const AdminDashboard = ({ onLogout }) => {
             </div>
 
             <div className="admin-profile">
-              <div className="avatar"><User size={20} /></div>
-              <span className="user-name">Mẫn Hi Chin</span>
+              <div className="admin-avatar">
+                <User size={20} />
+              </div>
             </div>
           </div>
         </header>
+
+        {showSecurityModal && (
+          <div className="modal-overlay" onClick={() => setShowSecurityModal(false)}>
+            <div className="modal-container security-modal-container" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Cài Đặt Bảo Mật Sinh Trắc Học</h3>
+                <button className="close-btn" onClick={() => setShowSecurityModal(false)}><X size={20}/></button>
+              </div>
+              <div className="modal-body" style={{ padding: '20px', textAlign: 'center' }}>
+                <Fingerprint size={48} style={{ color: '#10b981', margin: '0 auto 20px' }} />
+                <p style={{ marginBottom: '20px', lineHeight: '1.6', color: '#475569' }}>
+                  Thiết lập đăng nhập bằng <strong>FaceID, TouchID hoặc Windows Hello</strong>. 
+                  Sau khi kích hoạt, hệ thống sẽ tự động khóa màn hình nếu bạn không hoạt động trong 5 phút để chống kẻ gian xâm nhập.
+                </p>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                  {localStorage.getItem('admin_passkey_id') ? (
+                    <button onClick={removePasskey} className="action-btn delete-btn" style={{ background: '#ef4444' }}>
+                      Tắt Sinh Trắc Học
+                    </button>
+                  ) : (
+                    <button onClick={handleRegisterPasskey} className="action-btn confirm-btn" style={{ background: '#10b981', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                      Bật Sinh Trắc Học Ngay
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <main className="admin-content">
           {activeTab === 'dashboard' && renderDashboard()}
