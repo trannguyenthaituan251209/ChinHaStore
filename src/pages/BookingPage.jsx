@@ -972,7 +972,7 @@ const BookingPage = () => {
                       </label>
                       
                       <div className="captcha-wrapper" style={{ margin: '15px 0', display: 'flex', justifyContent: 'center', minHeight: '65px' }}>
-                        {step === 2 && !showLocalPrompt && !showRemotePrompt && (
+                        {step === 2 && !showLocalPrompt && !showRemotePrompt && isPolicyAccepted && (
                           <Turnstile 
                             ref={turnstileRef}
                             siteKey="0x4AAAAAADKQ-kplunorEsim" 
