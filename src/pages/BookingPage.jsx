@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import adminService from '../services/adminService';
@@ -43,6 +43,9 @@ const BookingPage = () => {
   const [createdBookingId, setCreatedBookingId] = useState('');
   const [isPolicyAccepted, setIsPolicyAccepted] = useState(false);
   const [captchaToken, setCaptchaToken] = useState('');
+  const turnstileRef = useRef(null);
+
+
 
   // Address Autocomplete states
   const [provinces, setProvinces] = useState([]);
@@ -533,6 +536,11 @@ const BookingPage = () => {
       setShowSuccessNotice(true);
     } catch (error) {
       alert('Lỗi: ' + error.message);
+      // Reset captcha if verification failed so user can try again
+      setCaptchaToken('');
+      if (turnstileRef.current) {
+        turnstileRef.current.reset();
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -963,13 +971,24 @@ const BookingPage = () => {
                         </span>
                       </label>
                       
-                      <div className="captcha-wrapper" style={{ margin: '15px 0', display: 'flex', justifyContent: 'center' }}>
-                        <Turnstile 
-                          siteKey="0x4AAAAAADKQ-kplunorEsim" 
-                          onSuccess={(token) => setCaptchaToken(token)}
-                          onError={() => setCaptchaToken('')}
-                          onExpire={() => setCaptchaToken('')}
-                        />
+                      <div className="captcha-wrapper" style={{ margin: '15px 0', display: 'flex', justifyContent: 'center', minHeight: '65px' }}>
+                        {step === 2 && !showLocalPrompt && !showRemotePrompt && (
+                          <Turnstile 
+                            ref={turnstileRef}
+                            siteKey="0x4AAAAAADKQ-kplunorEsim" 
+                            onSuccess={(token) => setCaptchaToken(token)}
+                            onError={(err) => {
+                              console.error('Turnstile Error:', err);
+                              setCaptchaToken('');
+                            }}
+                            onExpire={() => {
+                              console.warn('Turnstile Expired, resetting...');
+                              setCaptchaToken('');
+                            }}
+                            retry="auto"
+                            refreshExpired="auto"
+                          />
+                        )}
                       </div>
 
                       <button 
