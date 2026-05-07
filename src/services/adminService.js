@@ -1114,15 +1114,26 @@ export const adminService = {
    * Verification step before high-risk actions (e.g. Deletion).
    */
   async verifyPassword(password) {
-    const { data: { user }, error: uErr } = await supabase.auth.getUser();
-    if (uErr || !user) throw new Error('Không thể xác minh phiên làm việc.');
+    let email = localStorage.getItem('admin_email');
+    
+    // Fallback if not in localStorage for some reason
+    if (!email) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) email = user.email;
+    }
 
+    if (!email) throw new Error('Không tìm thấy thông tin phiên (Vui lòng Đăng xuất và đăng nhập lại).');
+
+    // This signIn acts as a session restorer! Even if the old session expired, this creates a new valid one.
     const { error: pErr } = await supabase.auth.signInWithPassword({
-      email: user.email,
+      email,
       password,
     });
 
     if (pErr) throw new Error('Mật khẩu quản trị không chính xác.');
+    
+    // Reset inactivity timer since they just verified
+    localStorage.setItem('admin_last_active', Date.now().toString());
     return true;
   },
 
