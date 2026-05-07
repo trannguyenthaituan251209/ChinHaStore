@@ -16,6 +16,8 @@ const AdminLogin = ({ onLoginSuccess }) => {
 
     try {
       await adminService.signIn(email, password);
+      // Reset inactivity timer on fresh login to prevent AppLock from immediately kicking out
+      localStorage.setItem('admin_last_active', Date.now().toString());
       onLoginSuccess();
     } catch (err) {
       console.error('Login error:', err);
