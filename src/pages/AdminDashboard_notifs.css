@@ -1,0 +1,109 @@
+/* ====== NOTIFICATION DROPDOWN REPAIR ====== */
+.notification-wrapper {
+    position: relative;
+}
+
+.notification-dropdown {
+    position: absolute;
+    top: 130%;
+    right: -10px; /* Aligned slightly right for mobile edge padding */
+    width: 320px;
+    max-width: 90vw; /* Prevent overflow on small screens */
+    background-color: #FFFFFF;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .notification-dropdown {
+        right: 0;
+    }
+}
+
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    background: #f8fafc;
+    border-radius: 12px 12px 0 0;
+}
+
+.notif-header h4 {
+    margin: 0;
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.notif-header button {
+    background: none;
+    border: none;
+    color: #3b82f6;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.notif-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.no-notif {
+    padding: 20px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+    margin: 0;
+}
+
+.notif-item {
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.notif-item:hover {
+    background-color: #f8fafc;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
+.notif-content strong {
+    display: block;
+    font-size: 13px;
+    color: #1e293b;
+    margin-bottom: 3px;
+}
+
+.notif-content p {
+    margin: 0 0 5px;
+    font-size: 12px;
+    color: #475569;
+}
+
+.notif-content small {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.unread-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    border: 2px solid white;
+}

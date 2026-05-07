@@ -24,6 +24,7 @@ import BlogManager from '../components/admin/BlogManager';
 import { adminService } from '../services/adminService';
 import { supabase } from '../utils/supabase';
 import './AdminDashboard.css';
+import './AdminDashboard_notifs.css';
 
 const AdminDashboard = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'manager', 'modify', 'report'
@@ -107,6 +108,7 @@ const AdminDashboard = ({ onLogout }) => {
 
   // Global Status Modal Handle
   const [statusModal, setStatusModal] = useState({ isOpen: false, type: 'success', message: '' });
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const showStatus = (message, type = 'success') => {
     setStatusModal({ isOpen: true, type, message });
   };
@@ -165,7 +167,7 @@ const AdminDashboard = ({ onLogout }) => {
           const notification = {
             id: Date.now(),
             title: 'Đơn hàng mới!',
-            message: `${newBooking.customer_name} vừa đặt lịch.`,
+            message: `Mã đơn #${newBooking.booking_id} vừa được tạo.`,
             time: new Date().toLocaleTimeString('vi-VN'),
             bookingId: newBooking.id
           };
@@ -396,10 +398,44 @@ const AdminDashboard = ({ onLogout }) => {
               )}
             </div>
 
-            <div className="admin-profile">
-              <div className="admin-avatar">
+            <div className="admin-profile" style={{ position: 'relative' }}>
+              <div className="admin-avatar" onClick={() => setShowProfileMenu(!showProfileMenu)} style={{ cursor: 'pointer' }}>
                 <User size={20} />
               </div>
+              
+              {showProfileMenu && (
+                <div className="profile-dropdown animate-in" style={{
+                  position: 'absolute',
+                  top: '120%',
+                  right: '0',
+                  background: '#fff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                  width: '200px',
+                  zIndex: 100,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <div className="profile-header" style={{ padding: '15px', borderBottom: '1px solid #f1f5f9', background: '#f8fafc' }}>
+                    <strong style={{ display: 'block', color: '#0f172a', fontSize: '14px' }}>Mẫn Hi Chin</strong>
+                    <small style={{ color: '#64748b', fontSize: '12px' }}>Quản trị viên</small>
+                  </div>
+                  <button 
+                    onClick={() => { setShowProfileMenu(false); setShowSecurityModal(true); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 15px', background: 'none', border: 'none', borderBottom: '1px solid #f1f5f9', width: '100%', textAlign: 'left', cursor: 'pointer', color: '#334155', fontSize: '14px', fontWeight: '500' }}
+                  >
+                    <ShieldCheck size={16} /> Bảo mật
+                  </button>
+                  <button 
+                    onClick={onLogout}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 15px', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', color: '#ef4444', fontSize: '14px', fontWeight: '500' }}
+                  >
+                    <LogOut size={16} /> Đăng xuất
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { adminService } from '../services/adminService';
-import { Lock, Mail, ArrowRight, Loader2 } from 'lucide-react';
-import './AdminDashboard.css';
+import { Lock, Key, Mail, AlertCircle, Loader2 } from 'lucide-react';
+import '../components/admin/AppLock.css';
 
 const AdminLogin = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
@@ -19,66 +19,60 @@ const AdminLogin = ({ onLoginSuccess }) => {
       onLoginSuccess();
     } catch (err) {
       console.error('Login error:', err);
-      setError('Thông tin đăng nhập không chính xác hoặc không có quyền truy cập.');
+      setError('Email hoặc mật khẩu không chính xác.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="admin-login-page animate-in">
-      <div className="login-container">
-        <div className="login-header">
-          <div className="login-logo">
-            ChinHa<span>Store</span>
-          </div>
-          <h1>Quản Trị Viên</h1>
-          <p>Hệ thống quản lý authoritative dành riêng cho Mẫn Hi Chin.</p>
+    <div className="app-lock-screen animate-in">
+      <div className="app-lock-container">
+        <div className="lock-icon-wrapper">
+          <Lock size={48} className="lock-icon" />
         </div>
-
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="input-group-vip">
-            <label><Mail size={16} /> Email</label>
+        <h2>Xác Thực Quản Trị</h2>
+        <p>Vui lòng nhập thông tin để thiết lập phiên làm việc mới với máy chủ.</p>
+        
+        <form onSubmit={handleSubmit} className="fallback-form">
+          <div className="input-with-icon">
+            <Mail size={18} />
             <input 
               type="email" 
-              placeholder="admin@chinhastore.vn" 
+              placeholder="Nhập Email Admin..." 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoFocus
             />
           </div>
 
-          <div className="input-group-vip">
-            <label><Lock size={16} /> Mật khẩu</label>
+          <div className="input-with-icon">
+            <Key size={18} />
             <input 
               type="password" 
-              placeholder="••••••••" 
+              placeholder="Nhập Mật khẩu..." 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
-
-          {error && <div className="login-error">{error}</div>}
-
-          <button type="submit" className="login-submit-btn" disabled={loading}>
+          
+          {error && (
+            <div className="lock-error">
+              <AlertCircle size={14}/> {error}
+            </div>
+          )}
+          
+          <button type="submit" className="pwd-btn" disabled={loading || !password || !email}>
             {loading ? (
-              <>
-                <Loader2 size={20} className="spinner" />
-                <span>Đang xác minh...</span>
-              </>
-            ) : (
-              <>
-                <span>Xác nhận danh tính</span>
-                <ArrowRight size={20} />
-              </>
-            )}
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <Loader2 size={16} className="spinner" />
+                Đang kết nối...
+              </span>
+            ) : 'Đăng nhập Hệ thống'}
           </button>
         </form>
-
-        <div className="login-footer">
-          <p>© 2026 ChinHaStore. Bảo mật bởi Supabase Identity.</p>
-        </div>
       </div>
     </div>
   );
