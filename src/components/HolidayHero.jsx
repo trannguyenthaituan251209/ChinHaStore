@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { adminService } from '../services/adminService';
 import { blogService } from '../services/blogService';
 import { TrendingUp } from 'lucide-react';
+import PromoOsmo from './PromoOsmo';
 import './HolidayHero.css';
 
 const HolidayHero = () => {
@@ -97,6 +98,8 @@ const HolidayHero = () => {
                         </Link>
                     </div>
                 </div>
+
+                <PromoOsmo />
 
                 {/* BOTTOM SECTION: TOP RENTALS */}
                 <div className="top-rentals-wrapper">

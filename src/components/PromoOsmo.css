@@ -1,0 +1,91 @@
+.promo-osmo-wrapper {
+  margin: 20px 0 40px 0; /* Cách trên 20px, cách dưới 40px cho gọn gàng */
+  width: 100%;
+}
+
+.promo-osmo-relative {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* Ảnh nền tĩnh - Tự động định hình chiều cao container để tránh móp méo */
+.promo-osmo-bg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Khu vực nút bấm ĐẶT THUÊ */
+.promo-osmo-btn-overlay {
+  position: absolute;
+  /* Thông số tính toán chuẩn xác từ file 1366x768 */
+  left: 15.8%; 
+  top: 84.6%;
+  width: 18.3%;
+  height: 7.8%;
+  background-color: rgba(255, 255, 255, 0); 
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.3s ease;
+  border-radius: 50px; 
+}
+
+.promo-osmo-btn-overlay:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Khung Video Container bên phải */
+.promo-osmo-video-container {
+  position: absolute;
+  /* Đặt tự do bên phải, cân giữa tuyệt đối theo chiều dọc */
+  right: 7.5%; /* Cách lề phải 7.5% */
+  top: 50%;
+  transform: translateY(-50%); /* Tự động canh giữa lơ lửng */
+  width: 42%; /* Độ lớn của video container */
+  z-index: 5;
+  border-radius: 12px;
+  box-shadow: 0 10px 70px rgba(194, 145, 10, 0.5); /* Tạo bóng đổ màu vàng/cam để video nổi bật trên nền poster */
+}
+
+/* Thẻ video thực tế bên trong container */
+.promo-osmo-video {
+  width: 100%;
+  height: auto; /* Tự động giữ nguyên tỷ lệ gốc của video (16:9), KHÔNG CROP */
+  border-radius: 12px;
+  display: block; /* Khắc phục khoảng trắng thừa dưới chân video */
+  pointer-events: none; /* Không cho tua, bấm linh tinh vào video */
+}
+
+/* Nút Tắt/Mở âm thanh góc dưới phải video */
+.promo-osmo-mute-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.promo-osmo-mute-btn:hover {
+  background-color: rgba(255, 193, 7, 0.9); /* Màu vàng khi hover */
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .promo-osmo-wrapper {
+    margin: 20px auto;
+  }
+}
