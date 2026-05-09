@@ -18,23 +18,38 @@
   height: auto;
 }
 
-/* Khu vực nút bấm ĐẶT THUÊ */
+/* Ẩn ảnh mobile trên màn hình máy tính (mặc định) */
+.promo-osmo-mobile {
+  display: none;
+}
+
+/* Khu vực nút bấm ĐẶT THUÊ (Bây giờ là nút thật) */
 .promo-osmo-btn-overlay {
   position: absolute;
-  /* Thông số tính toán chuẩn xác từ file 1366x768 */
-  left: 15.8%; 
-  top: 84.6%;
-  width: 18.3%;
-  height: 7.8%;
-  background-color: rgba(255, 255, 255, 0); 
+  /* Đặt nút ở khu vực dưới cùng bên trái (ngay dưới chữ 2 chế độ chống rung) */
+  left: 25%; 
+  top: 87%;
+  transform: translateX(-50%); /* Canh giữa nút tại tọa độ X=28% */
+  width: 220px;
+  height: 50px;
+  background-color: #dfa906; /* Màu vàng nổi bật */
+  color: #ffffff;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
   cursor: pointer;
   z-index: 10;
-  transition: background-color 0.3s ease;
-  border-radius: 50px; 
+  transition: all 0.3s ease;
+  text-decoration: none;
 }
 
 .promo-osmo-btn-overlay:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: #ffca2c;
+  transform: translateX(-50%) scale(1.05); /* Phóng to nhẹ khi hover */
 }
 
 /* Khung Video Container bên phải */
@@ -84,8 +99,62 @@
   transform: scale(1.1);
 }
 
+
+
+/* ==================================
+   MOBILE RESPONSIVE (MAX-WIDTH 768px)
+   ================================== */
 @media (max-width: 768px) {
   .promo-osmo-wrapper {
-    margin: 20px auto;
+    margin: 10px 0 20px 0;
+  }
+
+  /* Chuyển đổi hiển thị ảnh Desktop/Mobile */
+  .promo-osmo-desktop {
+    display: none;
+  }
+  .promo-osmo-mobile {
+    display: block;
+  }
+
+  /* Tọa độ Video trên Mobile (Tính toán khớp với ảnh dọc 1080x1920) */
+  .promo-osmo-video-container {
+    right: auto;
+    left: 50%;
+    /* Video nằm trọn trong khoảng trống giữa nút 'Trải nghiệm' và Camera */
+    top: 42.5%;
+    transform: translate(-50%, -50%);
+    width: 90%; 
+    border: none;
+  }
+
+  /* Biến nút bấm thành một nút THẬT trên Mobile (Vì ảnh Mobile thiếu nút Đặt Thuê) */
+  .promo-osmo-btn-overlay {
+    left: 50%;
+    top: 92%; /* Đặt nút nằm hẳn ở dưới cùng poster */
+    transform: translateX(-50%); /* Cân giữa hoàn hảo */
+    width: 65%;
+    height: 48px;
+    background-color: #ffc107; /* Màu vàng ChinHaStore */
+    color: #000;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+    text-decoration: none;
+  }
+
+  .promo-osmo-btn-text {
+    display: block; /* Hiện chữ "ĐẶT THUÊ NGAY" trên Mobile */
+  }
+
+  .promo-osmo-mute-btn {
+    bottom: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
   }
 }

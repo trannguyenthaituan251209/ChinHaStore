@@ -18,9 +18,16 @@ const PromoOsmo = () => {
   return (
     <div className="promo-osmo-wrapper">
       <div className="promo-osmo-relative">
-        <img src="/assets/image/promo_osmo.png" alt="Khuyến mãi DJI Osmo" className="promo-osmo-bg" />
+        {/* Ảnh Desktop */}
+        <img src="/assets/image/promo_osmo.png" alt="Khuyến mãi DJI Osmo Desktop" className="promo-osmo-bg promo-osmo-desktop" />
+        
+        {/* Ảnh Mobile */}
+        <img src="/assets/image/promo_osmo_mobile.png" alt="Khuyến mãi DJI Osmo Mobile" className="promo-osmo-bg promo-osmo-mobile" />
 
-        <Link to="/dat-lich" className="promo-osmo-btn-overlay" title="Đặt thuê DJI Osmo ngay"></Link>
+        {/* Vùng click ĐẶT THUÊ (Desktop là ẩn, Mobile là nút thật) */}
+        <Link to="/dat-lich?id=da2a261e-7ca4-4501-b421-781039df7613" className="promo-osmo-btn-overlay" title="Đặt thuê DJI Osmo ngay">
+          <span className="promo-osmo-btn-text">ĐẶT THUÊ NGAY</span>
+        </Link>
 
         {/* Bọc video và nút bấm vào một container */}
         <div className="promo-osmo-video-container">
