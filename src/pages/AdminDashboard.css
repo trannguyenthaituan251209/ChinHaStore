@@ -3307,3 +3307,139 @@ input:checked+.slider:before {
 .editor-main-container { min-height: 400px; margin-top: 2rem; } .main-markdown-textarea { min-height: 300px; }
 
 .full-editor-modal { overflow-y: auto !important; display: block !important; } .full-editor-layout { display: grid !important; height: auto !important; overflow: visible !important; } .editor-left, .editor-right { overflow: visible !important; height: auto !important; } .full-editor-form { display: block !important; overflow: visible !important; }
+
+/* =======================================
+   MINIMALIST INTERACTIVE CALENDAR
+   ======================================= */
+.admin-minicalendar {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 2rem auto;
+  border: 1px solid #000;
+  background: #fff;
+  padding: 1rem;
+  font-family: 'ShopeeDisplayR', sans-serif;
+}
+
+.minicalendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #000;
+}
+
+.minicalendar-header button {
+  background: none;
+  border: 1px solid #000;
+  padding: 0.3rem 0.6rem;
+  font-family: 'ShopeeDisplayR', sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #000;
+  font-weight: bold;
+}
+.minicalendar-header button:hover {
+  background-color: #e29e0a;
+  color: #fff;
+}
+
+.minicalendar-title {
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.1rem;
+  color: #000;
+}
+
+.minicalendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: #000; /* Creates 1px solid black borders between cells */
+  border: 1px solid #000;
+}
+
+.minicalendar-dayname {
+  background: #fff;
+  text-align: center;
+  padding: 0.5rem 0;
+  font-weight: bold;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #000;
+  color: #000;
+}
+
+.minicalendar-cell {
+  background: #fff;
+  min-height: 70px;
+  padding: 0.3rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.minicalendar-cell.empty {
+  background: #f9f9f9;
+  cursor: default;
+}
+
+.minicalendar-cell.selected {
+  background: #0ee8f8;
+  color: #fff;
+}
+.minicalendar-cell.today{
+  background: #cfcfcf;
+  
+}
+.minicalendar-cell.today .minicalendar-date {
+  text-decoration: underline;
+  font-weight: 900;
+}
+
+.minicalendar-date {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.minicalendar-badge {
+  background: #ffc107;
+  color: #000;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 2px 4px;
+  border: 1px solid #000;
+  white-space: nowrap;
+}
+
+.minicalendar-cell.selected .minicalendar-badge {
+  background: #fff;
+  border-color: #000;
+}
+
+@media (max-width: 768px) {
+  .admin-minicalendar {
+    padding: 0.5rem;
+  }
+  .minicalendar-cell {
+    min-height: 55px;
+    padding: 0.1rem;
+  }
+  .minicalendar-date {
+    font-size: 0.8rem;
+  }
+  .minicalendar-badge {
+    font-size: 0.55rem;
+    padding: 1px 2px;
+  }
+  .minicalendar-title {
+    font-size: 0.9rem;
+  }
+  .minicalendar-header button {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+}

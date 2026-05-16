@@ -17,6 +17,74 @@ import { supabase } from '../../utils/supabase';
 import html2canvas from 'html2canvas';
 import '../../pages/AdminDashboard.css';
 
+const InteractiveCalendar = ({ data, selectedDate, onSelectDate }) => {
+  const [viewDate, setViewDate] = useState(new Date(selectedDate));
+  
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = new Date(year, month, 1).getDay(); 
+  const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1; // Mon = 0
+  
+  const days = [];
+  for (let i = 0; i < startOffset; i++) {
+    days.push(null);
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    days.push(new Date(year, month, i));
+  }
+  
+  const getBookingCount = (date) => {
+    if (!date) return 0;
+    return data.filter(b => {
+      if (b.status === 'Returned' || b.status === 'Cancelled') return false;
+      const start = new Date(b.start_time);
+      return start.toDateString() === date.toDateString();
+    }).length;
+  };
+
+  const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+
+  return (
+    <div className="admin-minicalendar animate-in">
+      <div className="minicalendar-header">
+        <button onClick={() => setViewDate(new Date(year, month - 1, 1))}>TRƯỚC</button>
+        <div className="minicalendar-title">{monthNames[month]} {year}</div>
+        <button onClick={() => setViewDate(new Date(year, month + 1, 1))}>SAU</button>
+      </div>
+      <div className="minicalendar-grid">
+        <div className="minicalendar-dayname">T2</div>
+        <div className="minicalendar-dayname">T3</div>
+        <div className="minicalendar-dayname">T4</div>
+        <div className="minicalendar-dayname">T5</div>
+        <div className="minicalendar-dayname">T6</div>
+        <div className="minicalendar-dayname">T7</div>
+        <div className="minicalendar-dayname">CN</div>
+        
+        {days.map((date, index) => {
+          if (!date) return <div key={`empty-${index}`} className="minicalendar-cell empty"></div>;
+          
+          const isSelected = date.toDateString() === selectedDate.toDateString();
+          const isToday = date.toDateString() === new Date().toDateString();
+          const count = getBookingCount(date);
+          
+          return (
+            <div 
+              key={date.getDate()} 
+              className={`minicalendar-cell ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
+              onClick={() => onSelectDate(date)}
+            >
+              <div className="minicalendar-date">{date.getDate()}</div>
+              {count > 0 && <div className="minicalendar-badge">{count} đơn</div>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [activeSubtab, setActiveSubtab] = useState('renting'); // 'renting', 'future', 'past', 'bills'
   const [data, setData] = useState([]);
@@ -793,32 +861,11 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       )}
 
       {activeSubtab === 'future' && (
-        <div className="upcoming-date-navigator animate-in">
-          <button 
-            className="nav-btn" 
-            onClick={handlePrevDay}
-            disabled={selectedFutureDate.toDateString() === new Date().toDateString()}
-          >
-            <ChevronLeft size={24} />
-          </button>
-
-          <div className="nav-date-display">
-            <span className="nav-date-sub">{formatDateLabel(selectedFutureDate)}</span>
-            <span className="nav-date-main">
-              {new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(selectedFutureDate)}
-            </span>
-          </div>
-
-          <button className="nav-btn" onClick={handleNextDay}>
-            <ChevronRight size={24} />
-          </button>
-
-          {selectedFutureDate.toDateString() !== new Date().toDateString() && (
-            <button className="btn-today-reset" onClick={() => setSelectedFutureDate(new Date())}>
-              Về hôm nay
-            </button>
-          )}
-        </div>
+        <InteractiveCalendar 
+          data={data} 
+          selectedDate={selectedFutureDate} 
+          onSelectDate={setSelectedFutureDate} 
+        />
       )}
 
       <h3 className="bookings-title">
