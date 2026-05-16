@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  Search, 
-  PlusCircle, 
-  Edit3, 
-  Trash2, 
+import {
+  Search,
+  PlusCircle,
+  Edit3,
+  Trash2,
   FileText,
   Clock,
   RefreshCcw,
@@ -17,74 +17,6 @@ import { supabase } from '../../utils/supabase';
 import html2canvas from 'html2canvas';
 import '../../pages/AdminDashboard.css';
 
-const InteractiveCalendar = ({ data, selectedDate, onSelectDate }) => {
-  const [viewDate, setViewDate] = useState(new Date(selectedDate));
-  
-  const year = viewDate.getFullYear();
-  const month = viewDate.getMonth();
-  
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = new Date(year, month, 1).getDay(); 
-  const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1; // Mon = 0
-  
-  const days = [];
-  for (let i = 0; i < startOffset; i++) {
-    days.push(null);
-  }
-  for (let i = 1; i <= daysInMonth; i++) {
-    days.push(new Date(year, month, i));
-  }
-  
-  const getBookingCount = (date) => {
-    if (!date) return 0;
-    return data.filter(b => {
-      if (b.status === 'Returned' || b.status === 'Cancelled') return false;
-      const start = new Date(b.start_time);
-      return start.toDateString() === date.toDateString();
-    }).length;
-  };
-
-  const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
-
-  return (
-    <div className="admin-minicalendar animate-in">
-      <div className="minicalendar-header">
-        <button onClick={() => setViewDate(new Date(year, month - 1, 1))}>TRƯỚC</button>
-        <div className="minicalendar-title">{monthNames[month]} {year}</div>
-        <button onClick={() => setViewDate(new Date(year, month + 1, 1))}>SAU</button>
-      </div>
-      <div className="minicalendar-grid">
-        <div className="minicalendar-dayname">T2</div>
-        <div className="minicalendar-dayname">T3</div>
-        <div className="minicalendar-dayname">T4</div>
-        <div className="minicalendar-dayname">T5</div>
-        <div className="minicalendar-dayname">T6</div>
-        <div className="minicalendar-dayname">T7</div>
-        <div className="minicalendar-dayname">CN</div>
-        
-        {days.map((date, index) => {
-          if (!date) return <div key={`empty-${index}`} className="minicalendar-cell empty"></div>;
-          
-          const isSelected = date.toDateString() === selectedDate.toDateString();
-          const isToday = date.toDateString() === new Date().toDateString();
-          const count = getBookingCount(date);
-          
-          return (
-            <div 
-              key={date.getDate()} 
-              className={`minicalendar-cell ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
-              onClick={() => onSelectDate(date)}
-            >
-              <div className="minicalendar-date">{date.getDate()}</div>
-              {count > 0 && <div className="minicalendar-badge">{count} đơn</div>}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
 const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [activeSubtab, setActiveSubtab] = useState('renting'); // 'renting', 'future', 'past', 'bills'
   const [data, setData] = useState([]);
@@ -95,7 +27,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [depositProperty, setDepositProperty] = useState('CĂN CƯỚC CÔNG DÂN');
   const [discountAmount, setDiscountAmount] = useState('0');
   const [selectedBooking, setSelectedBooking] = useState(null);
-  const [customLineItems, setCustomLineItems] = useState([]);
+  const [billType, setBillType] = useState('type1'); // 'type1', 'type2', 'type3', 'type4'
   const [productList, setProductList] = useState([]);
   const [conflictError, setConflictError] = useState(null);
   const [conflicts, setConflicts] = useState([]);
@@ -106,7 +38,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [deletePassword, setDeletePassword] = useState('');
   const [serverSuggestions, setServerSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   // Future Tab Date Navigation
   const [selectedFutureDate, setSelectedFutureDate] = useState(new Date());
 
@@ -134,7 +66,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       ]);
       setData(bookings || []);
       setProductList(productsData || []);
-      
+
       // Default product for form
       if (productsData && productsData.length > 0) {
         setFormData(prev => ({ ...prev, product_id: productsData[0].id }));
@@ -151,7 +83,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     adminService.autoSyncStatuses();
 
     reloadBookings();
-    
+
     // Real-time synchronization
     const channel = supabase
       .channel('booking_manager_realtime')
@@ -219,7 +151,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
 
   // Filter logic
   const filteredData = data.filter(b => {
-    const matchesSearch = 
+    const matchesSearch =
       !searchQuery || (b.booking_id?.toLowerCase() || "").includes(searchQuery.toLowerCase());
 
     // 2. Main Logic Subtabs
@@ -238,7 +170,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       matchesTab = (b.status === 'Pending' || b.status === 'Renting' || b.status === 'Confirmed') && isSameDate;
     }
     else if (activeSubtab === 'past') matchesTab = b.status === 'Returned';
-    
+
     // 3. New Advanced Categories (Device, Source, Status)
     const matchesDevice = filterDevice === 'all' || b.product_id === filterDevice;
     const matchesSource = filterSource === 'all' || b.source === filterSource;
@@ -248,7 +180,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   });
 
   const pendingWebsiteBookings = data.filter(b => b.source === 'Website' && !b.is_seen && b.status === 'Pending');
-  
+
   // The main table should only show acknowledged bookings, non-website bookings, or already processed bookings
   const mainListData = filteredData
     .filter(b => b.is_seen || b.source !== 'Website' || b.status !== 'Pending')
@@ -260,12 +192,12 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
         if (s === 'Confirmed') return 2;
         return 3;
       };
-      
+
       const weightA = getWeight(a.status);
       const weightB = getWeight(b.status);
-      
+
       if (weightA !== weightB) return weightA - weightB;
-      
+
       // Secondary sort: Recent first (start_time descending)
       return new Date(b.start_time) - new Date(a.start_time);
     });
@@ -304,7 +236,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const handleBillView = (booking) => {
     setSelectedBooking(booking);
     setDiscountAmount('0');
-    
+
     // Auto-map deposit based on customer choice or admin override
     const mapping = {
       'standard': 'CCCD + 3.000.000 VNĐ',
@@ -312,44 +244,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       'student': 'CCCD + 500k-1M + VNEID IMAGE'
     };
     setDepositProperty(mapping[booking.deposit_type] || 'CĂN CƯỚC CÔNG DÂN');
-    
-    // Auto-generate line items based on product price and days
-    let defaultPrice = 0;
-    let label = 'Giá thuê';
-    
-    if (productList.length > 0) {
-      const product = productList.find(p => p.id === booking.product_id);
-      if (product && booking.start_time && booking.end_time) {
-        const start = new Date(booking.start_time);
-        const end = new Date(booking.end_time);
-        const diffMs = end - start;
-        const diffHrs = diffMs / (1000 * 60 * 60);
-        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-        
-        if (diffHrs <= 6) {
-          defaultPrice = Number(product.price6h?.toString().replace(/\./g, '')) || 0;
-          label = 'Gói 6 giờ';
-        } else if (diffDays === 1) {
-          defaultPrice = Number(product.price1Day?.toString().replace(/\./g, '')) || 0;
-          label = 'Giá thuê 1 ngày';
-        } else if (diffDays === 2) {
-          defaultPrice = Number(product.price2Days?.toString().replace(/\./g, '')) || 0;
-          label = 'Giá thuê 2 ngày';
-        } else if (diffDays >= 3) {
-          defaultPrice = Number(product.price3Days?.toString().replace(/\./g, '')) || 0;
-          label = `Giá thuê ${diffDays} ngày`;
-          if (diffDays > 3) {
-            const pExtra = Number(product.price4DaysPlus?.toString().replace(/\./g, '')) || 0;
-            defaultPrice = defaultPrice + (pExtra * (diffDays - 3));
-          }
-        }
-      }
-    }
-    
-    setCustomLineItems([
-      { id: Date.now().toString(), label: label, value: defaultPrice, type: 'addition' }
-    ]);
-    
+    setBillType('type1'); // Reset to type 1 when opening
     setIsBillOpen(true);
   };
 
@@ -359,10 +254,10 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
 
     try {
       showStatus('Bắt đầu chuẩn bị hóa đơn...', 'success');
-      
+
       const originalImgs = [];
       const imgElements = invoiceElement.querySelectorAll('.bill-v2-product-image img');
-      
+
       // 100% Local Base64 Placeholder SVG to ensure zero-CORS failure
       const localPlaceholder = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNGNUY1RjUiLz48dGV4dCB4PSI2MCIgeT0iNjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iI0FBQSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Q0hJTkhBIFNUT1JFPC90ZXh0Pjwvc3ZnPg==";
 
@@ -374,11 +269,11 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
             // Attempt 1: High-Performance Image CDN Proxy (weserv.nl)
             try {
               const controller1 = new AbortController();
-              const timeout1 = setTimeout(() => controller1.abort(), 12000); 
-              
+              const timeout1 = setTimeout(() => controller1.abort(), 12000);
+
               const cleanUrl = img.src.replace(/^https?:\/\//, '');
               const proxy1 = `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&output=jpg&q=80`;
-              
+
               const response1 = await fetch(proxy1, { signal: controller1.signal });
               if (response1.ok) {
                 const blob = await response1.blob();
@@ -425,22 +320,17 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
 
       showStatus('Đang Render hóa đơn 1:1...', 'success');
       const canvas = await html2canvas(invoiceElement, {
-        scale: 3, 
+        scale: 3,
         backgroundColor: '#ffffff',
         useCORS: true,
         allowTaint: true,
         logging: false,
-        windowWidth: 1000,
         onclone: (clonedDoc) => {
-          const el = clonedDoc.querySelector('#invoice-capture-area');
+          const el = clonedDoc.querySelector('.bill-invoice-v2');
           if (el) {
             el.style.width = '450px';
             el.style.maxWidth = 'none';
-            el.style.margin = '0';
-            el.style.position = 'absolute';
-            el.style.left = '0';
-            el.style.top = '0';
-            
+
             // Critical Fix: Sync the Base64 swap to the clone
             const clonedImgs = el.querySelectorAll('.bill-v2-product-image img');
             originalImgs.forEach((orig, idx) => {
@@ -462,7 +352,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       showStatus('Tải xuống thành công!', 'success');
     } catch (err) {
       console.error('Download failure:', err);
@@ -483,7 +373,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       customerName: booking.customerName,
       phone: booking.phone,
       product_id: booking.product_id,
-      start_time: toLocalISO(booking.start_time), 
+      start_time: toLocalISO(booking.start_time),
       end_time: toLocalISO(booking.end_time),
       total_price: booking.totalPrice?.replace(/\./g, '') || '0',
       status: booking.status,
@@ -507,7 +397,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       await adminService.deleteBooking(bookingToDelete.id);
       setIsDeleteModalOpen(false);
       showStatus('Đã xóa đơn đặt lịch vĩnh viễn', 'success');
-      
+
       // Await reloads to ensure UI is consistent before finishing submit state
       if (activeSubtab === 'past') {
         await fetchHistoryPage(historyPage);
@@ -537,7 +427,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
         }
       }
     };
-    
+
     if (isBillOpen || isModalOpen || isDeleteModalOpen) {
       window.addEventListener('keydown', handleKeyDown);
     }
@@ -562,7 +452,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     const checkLiveLogic = async () => {
       if (formData.product_id && formData.start_time && formData.end_time && productList.length > 0) {
         const product = productList.find(p => p.id === formData.product_id);
-        
+
         // 1. Calculate Price
         if (product) {
           const calculated = adminService.calculatePrice(product, formData.start_time, formData.end_time);
@@ -573,12 +463,12 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
         setIsChecking(true);
         try {
           const availableUnitId = await adminService.findAvailableUnit(
-            formData.product_id, 
-            formData.start_time, 
+            formData.product_id,
+            formData.start_time,
             formData.end_time,
             formData.id || null
           );
-          
+
           if (!availableUnitId) {
             setConflictError('Thời gian bạn thêm không khả dụng');
             // Fetch detailed conflicts to help the admin
@@ -682,13 +572,13 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
     if (date.toDateString() === tomorrow.toDateString()) return 'Ngày mai';
-    
+
     return new Intl.DateTimeFormat('vi-VN', { weekday: 'long' }).format(date);
   };
 
   return (
     <div className="booking-manager animate-in">
-      
+
       <div className="manager-toolbar">
         <div className="manager-toolbar-top">
           <div className="manager-subtabs">
@@ -703,16 +593,16 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
 
           <div className="manager-search-box">
             <Search size={18} className="search-icon" />
-            <input 
-              type="text" 
-              placeholder="Tìm theo Mã đơn (ID)..." 
+            <input
+              type="text"
+              placeholder="Tìm theo Mã đơn (ID)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
               style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}
             />
-            
+
             {/* SUGGESTION DROPDOWN - Now powered by Server Search */}
             {isSearchFocused && searchQuery && (
               <div className="search-suggestions-dropdown custom-scrollbar" style={{
@@ -733,8 +623,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                 ) : (
                   <>
                     {serverSuggestions.map(b => (
-                      <div 
-                        key={b.id} 
+                      <div
+                        key={b.id}
                         className="suggestion-item"
                         onClick={() => {
                           setSearchQuery(b.booking_id);
@@ -766,11 +656,10 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               </div>
             )}
           </div>
-          </div>
 
           <div className="manager-toolbar-actions">
-            <button 
-              className={`icon-btn refresh-btn ${loading || isHistoryLoading ? 'syncing' : ''}`} 
+            <button
+              className={`icon-btn refresh-btn ${loading || isHistoryLoading ? 'syncing' : ''}`}
               title="Làm mới dữ liệu"
               onClick={() => {
                 if (activeSubtab === 'past') fetchHistoryPage(historyPage);
@@ -779,30 +668,30 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
             >
               <RefreshCcw size={18} />
             </button>
-            
-            <button className="btn-add-manual" onClick={() => { 
+
+            <button className="btn-add-manual" onClick={() => {
               const pad = (n) => n.toString().padStart(2, '0');
               const d1 = new Date();
               const d2 = new Date(); d2.setDate(d1.getDate() + 1);
-              const startStr = `${d1.getFullYear()}-${pad(d1.getMonth()+1)}-${pad(d1.getDate())}T07:00`;
-              const endStr = `${d2.getFullYear()}-${pad(d2.getMonth()+1)}-${pad(d2.getDate())}T07:00`;
-              
+              const startStr = `${d1.getFullYear()}-${pad(d1.getMonth() + 1)}-${pad(d1.getDate())}T07:00`;
+              const endStr = `${d2.getFullYear()}-${pad(d2.getMonth() + 1)}-${pad(d2.getDate())}T07:00`;
+
               // If start_time is in the past, default to "Returned" (Đã trả máy)
               const isPast = d1 < new Date();
               const defaultStatus = isPast ? 'Returned' : 'Pending';
 
-              setFormData({ 
-                customerName: '', 
-                phone: '', 
-                product_id: productList[0]?.id || '', 
-                start_time: startStr, 
-                end_time: endStr, 
-                total_price: '0', 
+              setFormData({
+                customerName: '',
+                phone: '',
+                product_id: productList[0]?.id || '',
+                start_time: startStr,
+                end_time: endStr,
+                total_price: '0',
                 status: defaultStatus,
                 deposit_type: 'standard',
                 city: ''
-              }); 
-              setIsModalOpen(true); 
+              });
+              setIsModalOpen(true);
             }}>
               <PlusCircle size={18} />
               Thêm đặt lịch
@@ -845,84 +734,105 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
             <button className="btn-clear-filters" onClick={resetFilters}>Xóa lọc</button>
           )}
         </div>
-      
+      </div>
 
       {activeSubtab === 'future' && pendingWebsiteBookings.length > 0 && (
         <div className="new-bookings-section animate-in">
-            <h3 className="new-bookings-title">Booking mới trong hôm nay</h3>
-            <div className="manager-table-wrapper" style={{border: 'none', background: 'transparent'}}>
-              <table className="manager-table">
-                <thead>
-                  <tr>
-                    <th>Khách hàng</th>
-                    <th>Thiết bị</th>
-                    <th>Thời gian</th>
-                    <th>Tạo lúc</th>
-                    <th>Nguồn</th>
-                    <th>Trạng thái</th>
-                    <th>Thành tiền</th>
-                    <th>Thao tác</th>
+          <h3 className="new-bookings-title">Booking mới trong hôm nay</h3>
+          <div className="manager-table-wrapper" style={{ border: 'none', background: 'transparent' }}>
+            <table className="manager-table">
+              <thead>
+                <tr>
+                  <th>Khách hàng</th>
+                  <th>Thiết bị</th>
+                  <th>Thời gian</th>
+                  <th>Tạo lúc</th>
+                  <th>Nguồn</th>
+                  <th>Trạng thái</th>
+                  <th>Thành tiền</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingWebsiteBookings.map(b => (
+                  <tr key={b.id} className="new-booking-row">
+                    <td>
+                      <strong>{b.customerName}</strong>
+                      <div style={{ fontSize: '0.7rem', color: '#888' }}>{b.phone}</div>
+                    </td>
+                    <td>{b.productName}</td>
+                    <td>
+                      <div className="time-block">
+                        <span className="time-label">Nhận:</span> {b.startDate}
+                      </div>
+                      <div className="time-block">
+                        <span className="time-label">Trả:</span> {b.endDate}
+                      </div>
+                    </td>
+                    <td><span style={{ fontSize: '0.85rem', color: '#666', fontWeight: 600 }}>{getTimeAgo(b.created_at)}</span></td>
+                    <td><span className={`source-tag ${b.source.toLowerCase()}`}>{b.source}</span></td>
+                    <td>
+                      <span className="status-text pending">
+                        Chờ xác nhận
+                      </span>
+                    </td>
+                    <td><strong>{b.totalPrice} VNĐ</strong></td>
+                    <td>
+                      <button className="action-btn tick" onClick={() => handleMarkAsSeen(b.id)} title="Đánh dấu đã xem">
+                        <CheckCircle size={18} style={{ color: '#28a745' }} />
+                      </button>
+                      <button className="action-btn edit" onClick={() => handleEdit(b)} title="Sửa"><Edit3 size={16} /></button>
+                      <button className="action-btn delete" onClick={() => handleDelete(b)} title="Xóa"><Trash2 size={16} /></button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {pendingWebsiteBookings.map(b => (
-                    <tr key={b.id} className="new-booking-row">
-                      <td>
-                        <strong>{b.customerName}</strong>
-                        <div style={{fontSize: '0.7rem', color: '#888'}}>{b.phone}</div>
-                      </td>
-                      <td>{b.productName}</td>
-                      <td>
-                        <div className="time-block">
-                          <span className="time-label">Nhận:</span> {b.startDate}
-                        </div>
-                        <div className="time-block">
-                          <span className="time-label">Trả:</span> {b.endDate}
-                        </div>
-                      </td>
-                      <td><span style={{fontSize: '0.85rem', color: '#666', fontWeight: 600}}>{getTimeAgo(b.created_at)}</span></td>
-                      <td><span className={`source-tag ${b.source.toLowerCase()}`}>{b.source}</span></td>
-                      <td>
-                        <span className="status-text pending">
-                          Chờ xác nhận
-                        </span>
-                      </td>
-                      <td><strong>{b.totalPrice} VNĐ</strong></td>
-                      <td>
-                        <button className="action-btn tick" onClick={() => handleMarkAsSeen(b.id)} title="Đánh dấu đã xem">
-                          <CheckCircle size={18} style={{color: '#28a745'}} />
-                        </button>
-                        <button className="action-btn edit" onClick={() => handleEdit(b)} title="Sửa"><Edit3 size={16} /></button>
-                        <button className="action-btn delete" onClick={() => handleDelete(b)} title="Xóa"><Trash2 size={16} /></button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
+        </div>
       )}
 
       {activeSubtab === 'future' && (
-        <InteractiveCalendar 
-          data={data} 
-          selectedDate={selectedFutureDate} 
-          onSelectDate={setSelectedFutureDate} 
-        />
+        <div className="upcoming-date-navigator animate-in">
+          <button
+            className="nav-btn"
+            onClick={handlePrevDay}
+            disabled={selectedFutureDate.toDateString() === new Date().toDateString()}
+          >
+            <ChevronLeft size={24} />
+          </button>
+
+          <div className="nav-date-display">
+            <span className="nav-date-sub">{formatDateLabel(selectedFutureDate)}</span>
+            <span className="nav-date-main">
+              {new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(selectedFutureDate)}
+            </span>
+          </div>
+
+          <button className="nav-btn" onClick={handleNextDay}>
+            <ChevronRight size={24} />
+          </button>
+
+          {selectedFutureDate.toDateString() !== new Date().toDateString() && (
+            <button className="btn-today-reset" onClick={() => setSelectedFutureDate(new Date())}>
+              Về hôm nay
+            </button>
+          )}
+        </div>
       )}
 
       <h3 className="bookings-title">
-        {activeSubtab === 'future' 
-          ? `Lịch nhận máy ngày ${new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit' }).format(selectedFutureDate)}` 
+        {activeSubtab === 'future'
+          ? `Lịch nhận máy ngày ${new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit' }).format(selectedFutureDate)}`
           : activeSubtab === 'renting' ? 'Danh sách máy đang thuê'
-          : activeSubtab === 'past' ? 'Lịch sử thuê máy'
-          : 'Danh sách hóa đơn'
+            : activeSubtab === 'past' ? 'Lịch sử thuê máy'
+              : 'Danh sách hóa đơn'
         }
       </h3>
       <div className="manager-table-wrapper">
-        {loading && <div style={{padding: '2rem', textAlign: 'center'}}>Đang tải danh sách...</div>}
-        {error && <div style={{padding: '2rem', textAlign: 'center', color: 'red'}}>{error}</div>}
-        
+        {loading && <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải danh sách...</div>}
+        {error && <div style={{ padding: '2rem', textAlign: 'center', color: 'red' }}>{error}</div>}
+
         {!loading && !error && (
           <table className="manager-table">
             <thead>
@@ -942,7 +852,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                 <tr key={b.id}>
                   <td>
                     <strong>{b.customerName}</strong>
-                    <div style={{fontSize: '0.7rem', color: '#888'}}>{b.phone}</div>
+                    <div style={{ fontSize: '0.7rem', color: '#888' }}>{b.phone}</div>
                   </td>
                   <td>{b.productName}</td>
                   <td>
@@ -952,16 +862,16 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                     <div className="time-block">
                       <span className="time-label">Trả:</span> {b.endDate}
                     </div>
-                    <div style={{fontSize: '0.75rem', color: '#000', fontWeight: '900', marginTop: '4px', letterSpacing: '0.5px'}}>ID: {b.booking_id || b.id.slice(0,8)}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#000', fontWeight: '900', marginTop: '4px', letterSpacing: '0.5px' }}>ID: {b.booking_id || b.id.slice(0, 8)}</div>
                   </td>
-                  <td><span style={{fontSize: '0.85rem', color: '#666', fontWeight: 600}}>{getTimeAgo(b.created_at)}</span></td>
+                  <td><span style={{ fontSize: '0.85rem', color: '#666', fontWeight: 600 }}>{getTimeAgo(b.created_at)}</span></td>
                   <td><span className={`source-tag ${b.source.toLowerCase()}`}>{b.source}</span></td>
                   <td>
                     <span className={`status-text ${b.status.toLowerCase()}`}>
                       {b.status === 'Pending' ? 'Chờ xác nhận' :
-                       b.status === 'Confirmed' ? 'Đã chốt lịch' :
-                       b.status === 'Renting' ? 'Đang thuê' :
-                       b.status === 'Returned' ? 'Đã hoàn thành' : b.status}
+                        b.status === 'Confirmed' ? 'Đã chốt lịch' :
+                          b.status === 'Renting' ? 'Đang thuê' :
+                            b.status === 'Returned' ? 'Đã hoàn thành' : b.status}
                     </span>
                   </td>
                   <td><strong>{b.totalPrice} VNĐ</strong></td>
@@ -979,7 +889,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               ))}
               {(activeSubtab === 'past' ? historyData : filteredData).length === 0 && (
                 <tr>
-                  <td colSpan="8" style={{textAlign: 'center', padding: '3rem', color: '#BBB'}}>Không tìm thấy kết quả phù hợp.</td>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '3rem', color: '#BBB' }}>Không tìm thấy kết quả phù hợp.</td>
                 </tr>
               )}
             </tbody>
@@ -989,8 +899,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
         {/* Specialized History Pagination Controller */}
         {activeSubtab === 'past' && historyCount > PAGE_SIZE && (
           <div className="table-pagination animate-in">
-            <button 
-              className="page-btn" 
+            <button
+              className="page-btn"
               disabled={historyPage === 0 || isHistoryLoading}
               onClick={() => setHistoryPage(p => p - 1)}
             >
@@ -1000,8 +910,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               Trang <strong>{historyPage + 1}</strong> / {Math.ceil(historyCount / PAGE_SIZE)}
               <small>({historyCount} mục)</small>
             </span>
-            <button 
-              className="page-btn" 
+            <button
+              className="page-btn"
               disabled={(historyPage + 1) * PAGE_SIZE >= historyCount || isHistoryLoading}
               onClick={() => setHistoryPage(p => p + 1)}
             >
@@ -1014,169 +924,195 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       {/* Bill Modal */}
       {isBillOpen && selectedBooking && (
         (() => {
-          // Khôi phục logic hiển thị modal Dual-Panel
-          const discountNum = Number(discountAmount.replace(/\D/g, '')) || 0;
-          const totalLineItems = customLineItems.reduce((acc, curr) => {
-            const val = Number(curr.value) || 0;
-            return curr.type === 'discount' ? acc - val : acc + val;
-          }, 0);
-          const finalTotalNum = totalLineItems - discountNum;
-          const displayTotalWithSecurity = finalTotalNum + (Number(depositProperty.replace(/\D/g, '')) || 0);
-              
+          let subTotalNum = 0;
+          let finalTotalNum = 0;
+          let breakdown = [];
+
+          if (selectedBooking) {
+            subTotalNum = Number(selectedBooking.totalPrice?.replace(/\D/g, '')) || 0;
+            const discountNum = Number(discountAmount.replace(/\D/g, '')) || 0;
+            finalTotalNum = subTotalNum - discountNum;
+
+            // Generate breakdown
+            const product = productList.find(p => p.id === selectedBooking.product_id);
+            if (product && selectedBooking.start_time && selectedBooking.end_time) {
+              const start = new Date(selectedBooking.start_time);
+              const end = new Date(selectedBooking.end_time);
+              const diffMs = end - start;
+              const diffHrs = diffMs / (1000 * 60 * 60);
+              const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+              const fmt = (num) => new Intl.NumberFormat('vi-VN').format(num);
+
+              const p6h = Number(product.price6h?.toString().replace(/\./g, '')) || 0;
+              const p1d = Number(product.price1Day?.toString().replace(/\./g, '')) || 0;
+              const p2d = Number(product.price2Days?.toString().replace(/\./g, '')) || 0;
+              const p3d = Number(product.price3Days?.toString().replace(/\./g, '')) || 0;
+              const pExtra = Number(product.price4DaysPlus?.toString().replace(/\./g, '')) || 0;
+
+              if (diffHrs <= 6) {
+                breakdown.push({ label: 'Gói 6 giờ', value: `${fmt(p6h)} VNĐ` });
+              } else if (diffDays === 1) {
+                breakdown.push({ label: 'Giá thuê 1 ngày', value: `${fmt(p1d)} VNĐ` });
+              } else if (diffDays === 2) {
+                breakdown.push({ label: 'Giá thuê 2 ngày', value: `${fmt(p2d)} VNĐ` });
+              } else if (diffDays === 3) {
+                breakdown.push({ label: 'Giá thuê 3 ngày', value: `${fmt(p3d)} VNĐ` });
+              } else if (diffDays >= 4) {
+                breakdown.push({ label: 'Giá thuê 3 ngày', value: `${fmt(p3d)} VNĐ` });
+                for (let i = 4; i <= diffDays; i++) {
+                  breakdown.push({ label: `Ngày phát sinh ${i}`, value: `${fmt(pExtra)} VNĐ` });
+                }
+              }
+            }
+          }
+          // Calculate deposit logic: 1 day or >5 days = 100%, 2-5 days = 50%
+          const startDT = new Date(selectedBooking.start_time);
+          const endDT = new Date(selectedBooking.end_time);
+          const dDays = Math.ceil((endDT - startDT) / (1000 * 60 * 60 * 24)) || 1;
+
+          let dPercent = 100;
+          if (dDays >= 2 && dDays <= 5) dPercent = 50;
+
+          const dAmount = Math.round(finalTotalNum * (dPercent / 100));
+          const dAmountStr = new Intl.NumberFormat('vi-VN').format(dAmount);
+
+          // Extract numeric security deposit from depositProperty string (e.g., "CCCD + 3.000.000 VNĐ")
+          const securityDepositNum = Number(depositProperty.replace(/\D/g, '')) || 0;
+          const displayTotalWithSecurity = finalTotalNum + securityDepositNum;
+          const finalTotalStr = new Intl.NumberFormat('vi-VN').format(displayTotalWithSecurity);
+          const remainingAmount = displayTotalWithSecurity - dAmount;
+
           return (
             <div className="admin-modal-overlay">
-              <div className="admin-modal animate-in" style={{maxWidth: '1200px', width: '95%', display: 'flex', flexDirection: 'column', height: '90vh'}}>
+              <div className="admin-modal animate-in" style={{ maxWidth: '500px', width: '95%' }}>
                 <header className="modal-header">
-                  <h3>Tùy biến Hóa Đơn</h3>
+                  <h3>Xuất hóa đơn</h3>
                   <button className="close-btn" onClick={() => setIsBillOpen(false)}>×</button>
                 </header>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', flex: 1, overflow: 'auto' }}>
-                  {/* LEFT PANEL: MODIFIER */}
-                  <div style={{ flex: '1 1 350px', minWidth: '300px', maxWidth: '100%', resize: 'horizontal', padding: '1.5rem', borderRight: '1px solid #ddd', borderBottom: '1px solid #ddd', overflow: 'auto', backgroundColor: '#fafafa' }}>
-                    <h4 style={{ marginBottom: '15px', fontSize: '0.9rem', fontWeight: 'bold' }}>THÀNH PHẦN GIÁ (KÉO XUỐNG ĐỂ XEM HẾT)</h4>
-                    {customLineItems.map(item => (
-                      <div key={item.id} style={{ display: 'flex', gap: '5px', marginBottom: '10px', alignItems: 'center' }}>
-                        <button 
-                          onClick={() => setCustomLineItems(prev => prev.map(p => p.id === item.id ? {...p, type: p.type === 'discount' ? 'addition' : 'discount'} : p))}
-                          style={{ 
-                            flexShrink: 0, padding: '8px', 
-                            background: item.type === 'discount' ? '#ff4d4f' : '#2ecc71', 
-                            color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold', width: '35px' 
-                          }}
-                        >
-                          {item.type === 'discount' ? '-' : '+'}
-                        </button>
-                        <input 
-                          style={{ flex: 2, minWidth: 0, padding: '8px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem' }}
-                          value={item.label}
-                          placeholder="Tên phí/giảm..."
-                          onChange={(e) => setCustomLineItems(prev => prev.map(p => p.id === item.id ? {...p, label: e.target.value} : p))}
-                        />
-                        <input 
-                          type="number"
-                          style={{ flex: 1.5, minWidth: 0, padding: '8px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem' }}
-                          value={item.value}
-                          placeholder="Số tiền..."
-                          onChange={(e) => setCustomLineItems(prev => prev.map(p => p.id === item.id ? {...p, value: Number(e.target.value)} : p))}
-                        />
-                        <button 
-                          onClick={() => setCustomLineItems(prev => prev.filter(p => p.id !== item.id))}
-                          style={{ flexShrink: 0, padding: '8px 12px', background: '#eee', color: '#666', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-                          title="Xóa"
-                        >×</button>
-                      </div>
-                    ))}
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                      <button 
-                        onClick={() => setCustomLineItems(prev => [...prev, { id: Date.now().toString(), label: 'Phí phát sinh', value: 0, type: 'addition' }])}
-                        style={{ flex: 1, padding: '10px', background: '#000', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-                      >
-                        + Thêm phí
-                      </button>
-                      <button 
-                        onClick={() => setCustomLineItems(prev => [...prev, { id: Date.now().toString(), label: 'Giảm giá', value: 0, type: 'discount' }])}
-                        style={{ flex: 1, padding: '10px', background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-                      >
-                        + Thêm giảm giá
-                      </button>
-                    </div>
+                <div style={{ overflowY: 'auto', padding: '1.5rem', flex: 1, backgroundColor: '#f5f5f5' }}>
+                  <div className="bill-type-selector" style={{ display: 'flex', gap: '5px', marginBottom: '15px', overflowX: 'auto', paddingBottom: '5px' }}>
+                    <button className={`type-tab ${billType === 'type1' ? 'active' : ''}`} onClick={() => setBillType('type1')}>HĐ cọc</button>
+                    <button className={`type-tab ${billType === 'type2' ? 'active' : ''}`} onClick={() => setBillType('type2')}>P.Thu cọc</button>
+                    <button className={`type-tab ${billType === 'type3' ? 'active' : ''}`} onClick={() => setBillType('type3')}>HĐ Còn lại</button>
+                    <button className={`type-tab ${billType === 'type4' ? 'active' : ''}`} onClick={() => setBillType('type4')}>P.Thu cuối</button>
+                  </div>
 
-                    <h4 style={{ marginTop: '25px', marginBottom: '15px', fontSize: '0.9rem', fontWeight: 'bold' }}>THÔNG TIN KHÁC</h4>
-                    <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-                      <div>
-                        <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TÀI SẢN CỌC:</label>
-                        <input type="text" value={depositProperty} onChange={e => setDepositProperty(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px'}} />
-                      </div>
-                      <div>
-                        <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>GIẢM GIÁ TỔNG (VNĐ):</label>
-                        <input type="number" value={discountAmount} onChange={e => setDiscountAmount(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px'}} />
-                      </div>
+                  <div style={{ display: 'flex', gap: '1rem', paddingBottom: '1rem' }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px' }}>TÀI SẢN CỌC:</label>
+                      <input type="text" value={depositProperty} onChange={e => setDepositProperty(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px' }}>GIẢM GIÁ (VNĐ):</label>
+                      <input type="text" value={discountAmount} onChange={e => setDiscountAmount(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
                     </div>
                   </div>
 
-                  {/* RIGHT PANEL: INVOICE PREVIEW */}
-                  <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', backgroundColor: '#e2e8f0' }}>
-                    <div className="bill-invoice-v2" id="invoice-capture-area" style={{ margin: '0 auto' }}>
-                      <div className="bill-v2-header">
-                        <h2>CHINHA STORE</h2>
-                        <p>HÓA ĐƠN DỊCH VỤ THUÊ THIẾT BỊ</p>
-                        <p style={{fontSize: '0.7rem', fontWeight: 'bold', marginTop: '4px', color: '#000'}}>Mã hợp đồng: {selectedBooking.booking_id || selectedBooking.id.toUpperCase()}</p>
+                  <div className="bill-invoice-v2" id="invoice-capture-area">
+                    <div className="bill-v2-header">
+                      <h2>CHINHA STORE</h2>
+                      <p>
+                        {billType === 'type1' && 'HÓA ĐƠN THANH TOÁN GIỮ LỊCH'}
+                        {billType === 'type3' && 'HÓA ĐƠN THANH TOÁN CÒN LẠI'}
+                        {billType === 'type4' && 'BIÊN LAI THANH TOÁN'}
+                      </p>
+                      <p style={{ fontSize: '0.7rem', fontWeight: 'bold', marginTop: '4px', color: '#000' }}>Mã hợp đồng: {selectedBooking.booking_id || selectedBooking.id.toUpperCase()}</p>
+                    </div>
+
+                    <hr className="bill-v2-divider" />
+
+                    <div className="bill-v2-product-section">
+                      <div className="bill-v2-product-image">
+                        {selectedBooking.productImage ? (
+                          <img src={selectedBooking.productImage} alt="Product" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <div className="image-placeholder">ẢNH SẢN PHẨM</div>
+                        )}
                       </div>
-                      
-                      <hr className="bill-v2-divider" />
-                      
-                      <div className="bill-v2-product-section">
-                        <div className="bill-v2-product-image">
-                          {selectedBooking.productImage ? (
-                            <img src={selectedBooking.productImage} alt="Product" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-                          ) : (
-                            <div className="image-placeholder">ẢNH SẢN PHẨM</div>
-                          )}
-                        </div>
-                        <div className="bill-v2-product-info">
-                          <h4 className="camera-name">TÊN MÁY ẢNH: {selectedBooking.productName.toUpperCase()}</h4>
-                          <div className="bill-v2-dates">
-                            <div className="date-box">
-                              <span>NGÀY NHẬN</span>
-                              <strong>{selectedBooking.startDate}</strong>
-                            </div>
-                            <div className="date-box">
-                              <span>NGÀY TRẢ</span>
-                              <strong>{selectedBooking.endDate}</strong>
-                            </div>
+                      <div className="bill-v2-product-info">
+                        <h4 className="camera-name">TÊN MÁY ẢNH: {selectedBooking.productName.toUpperCase()}</h4>
+                        <div className="bill-v2-dates">
+                          <div className="date-box border-purple">
+                            <span>NGÀY NHẬN</span>
+                            <strong>{selectedBooking.startDate}</strong>
+                          </div>
+                          <div className="date-box border-red">
+                            <span>NGÀY TRẢ</span>
+                            <strong>{selectedBooking.endDate}</strong>
                           </div>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="bill-v2-customer-section">
-                        <p>Tên khách hàng: {selectedBooking.customerName.toUpperCase()}</p>
-                        <p>Số điện thoại: {selectedBooking.phone}</p>
-                        <p>Nhận máy tại: {selectedBooking.city || 'TẠI CỬA HÀNG (22 LÊ THÁNH TÔNG)'}</p>
-                        <p>Tài sản cọc: {depositProperty.toUpperCase()}</p>
-                        <p>Nền tảng đặt lịch: {selectedBooking.rentalType === 'Manual' ? 'Đặt trực tiếp' : 'Qua Website'}</p>
-                      </div>
-                      
-                      <hr className="bill-v2-divider" />
-                      
-                      <div className="bill-v2-details-section">
-                        <p className="details-title">CHI TIẾT THANH TOÁN</p>
-                        {customLineItems.map((item, idx) => (
-                          <div key={idx} className="bill-v2-toc-item" style={{ color: item.type === 'discount' ? '#ff4d4f' : 'inherit' }}>
-                            <span className="bill-v2-toc-label">{item.label}</span>
-                            <div className="bill-v2-toc-dots" style={{ borderBottomColor: item.type === 'discount' ? '#ff4d4f' : '#ddd' }}></div>
-                            <span className="bill-v2-toc-value">
-                              {item.type === 'discount' ? '-' : ''}{new Intl.NumberFormat('vi-VN').format(item.value)} VNĐ
+                    <div className="bill-v2-customer-section">
+                      <p>Tên khách hàng: {selectedBooking.customerName.toUpperCase()}</p>
+                      <p>Số điện thoại: {selectedBooking.phone}</p>
+                      <p>Nhận máy tại: {selectedBooking.city || 'TẠI CỬA HÀNG (22 LÊ THÁNH TÔNG)'}</p>
+                      <p>Tài sản cọc: {depositProperty.toUpperCase()}</p>
+                      <p>Nền tảng đặt lịch : {selectedBooking.rentalType === 'Manual' ? 'Đặt trực tiếp' : 'Qua Website'}</p>
+                    </div>
+
+                    <hr className="bill-v2-divider" />
+
+                    <div className="bill-v2-details-section">
+                      <p className="details-title">CHI TIẾT</p>
+                      {breakdown.map((item, idx) => (
+                        <div key={idx} className="bill-v2-toc-item">
+                          <span className="bill-v2-toc-label">{item.label}</span>
+                          <div className="bill-v2-toc-dots"></div>
+                          <span className="bill-v2-toc-value">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <hr className="bill-v2-divider" />
+
+                    <div className="bill-v2-total-section">
+                      <div className="total-row"><span>TỔNG CHI PHÍ:</span> <span>{selectedBooking.totalPrice} VNĐ</span></div>
+                      <div className="total-row"><span>GIẢM GIÁ:</span> <span>{new Intl.NumberFormat('vi-VN').format(Number(discountAmount.replace(/\D/g, '')) || 0)} VNĐ</span></div>
+
+                      {(billType === 'type1' || billType === 'type2') ? (
+                        <>
+                          <div className="total-row main-total" style={{ borderTop: '2px dashed #000', paddingTop: '10px', marginTop: '10px' }}>
+                            <span>{billType === 'type1' ? 'TIỀN CỌC CẦN THANH TOÁN' : 'SỐ TIỀN ĐÃ CỌC'} ({dPercent}%):</span>
+                            <span style={{ color: '#f60' }}>{dAmountStr} VNĐ</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="total-row"><span>ĐÃ THANH TOÁN GIỮ LỊCH:</span> <span>{dAmountStr} VNĐ</span></div>
+                          {securityDepositNum > 0 && (
+                            <div className="total-row"><span>TIỀN CỌC CHÂN MÁY/TÀI SẢN:</span> <span>{new Intl.NumberFormat('vi-VN').format(securityDepositNum)} VNĐ</span></div>
+                          )}
+                          <div className="total-row main-total" style={{ borderTop: '2px dashed #000', paddingTop: '10px', marginTop: '10px' }}>
+                            <span>{billType === 'type3' ? 'SỐ TIỀN CẦN THANH TOÁN CÒN LẠI' : 'SỐ TIỀN ĐÃ TẤT TOÁN'}:</span>
+                            <span style={{ color: '#f60' }}>
+                              {billType === 'type3' ? new Intl.NumberFormat('vi-VN').format(remainingAmount) : finalTotalStr} VNĐ
                             </span>
                           </div>
-                        ))}
-                      </div>
-
-                      <hr className="bill-v2-divider" />
-                      
-                      <div className="bill-v2-total-section">
-                        <div className="total-row"><span>TẠM TÍNH:</span> <span>{new Intl.NumberFormat('vi-VN').format(totalLineItems)} VNĐ</span></div>
-                        <div className="total-row"><span>GIẢM GIÁ:</span> <span>{new Intl.NumberFormat('vi-VN').format(discountNum)} VNĐ</span></div>
-                        
-                        <div className="total-row main-total" style={{borderTop: '2px solid #000', paddingTop: '10px', marginTop: '10px'}}>
-                          <span>TỔNG CỘNG:</span> 
-                          <span>{new Intl.NumberFormat('vi-VN').format(finalTotalNum)} VNĐ</span>
-                        </div>
-                      </div>
-                      
-                      {finalTotalNum > 0 && (
-                        <div className="bill-v2-qr-section" style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                          <img 
-                            src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${finalTotalNum}&addInfo=${selectedBooking.booking_id || selectedBooking.id.slice(0, 8)}`} 
-                            alt="QR Code" 
-                            className="qr-img" 
-                            crossOrigin="anonymous" 
-                          />
-                          <p>SEABANK</p>
-                          <p>MAN HI CHIN</p>
-                        </div>
+                        </>
                       )}
+                      <p style={{ fontSize: '0.65rem', color: '#666', textAlign: 'right', marginTop: '5px' }}>
+                        {billType === 'type1' && '* Thanh toán cọc để xác nhận giữ lịch.'}
+                        {billType === 'type2' && '* Đã nhận được tiền cọc giữ thiết bị.'}
+                        {billType === 'type3' && '* Thanh toán phần còn lại khi nhận máy.'}
+                        {billType === 'type4' && '* Đã hoàn tất mọi nghĩa vụ thanh toán.'}
+                      </p>
                     </div>
+
+                    {(billType === 'type1' || billType === 'type3') && (
+                      <div className="bill-v2-qr-section" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <img
+                          src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${billType === 'type1' ? dAmount : remainingAmount}&addInfo=${selectedBooking.booking_id || selectedBooking.id.slice(0, 8)}${billType === 'type3' ? ' CON LAI' : ''}`}
+                          alt="QR Code"
+                          className="qr-img"
+                          crossOrigin="anonymous"
+                        />
+                        <p>SEABANK</p>
+                        <p>MAN HI CHIN</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1199,15 +1135,15 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               <h3 style={{ color: '#4b3c3cff' }}> XÁC NHẬN XÓA VĨNH VIỄN</h3>
               <button className="close-btn" onClick={() => setIsDeleteModalOpen(false)}>×</button>
             </header>
-            
+
             <div className="modal-body" style={{ padding: '1.5rem' }}>
               <p style={{ marginBottom: '1rem', fontSize: '0.95rem', lineHeight: '1.5' }}>
                 Hành động này sẽ <strong>xóa vĩnh viễn</strong> dữ liệu đặt lịch sau khỏi hệ thống. Thao tác này không thể hoàn tác.
               </p>
-              
-              <div className="delete-event-details" style={{ 
-                backgroundColor: '#eb9173ff', 
-                border: '1px solid #f9f9f9ff', 
+
+              <div className="delete-event-details" style={{
+                backgroundColor: '#eb9173ff',
+                border: '1px solid #f9f9f9ff',
                 padding: '1rem',
                 marginBottom: '1.5rem'
               }}>
@@ -1221,8 +1157,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px', fontSize: '0.85rem' }}>
                   NHẬP MẬT KHẨU QUẢN TRỊ ĐỂ XÁC NHẬN:
                 </label>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   className="login-input"
                   style={{ width: '100%', borderColor: '#fca5a5' }}
                   placeholder="Nhập mật khẩu của bạn..."
@@ -1236,15 +1172,15 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
             </div>
 
             <footer className="modal-footer" style={{ borderTop: '1px solid #fee2e2', padding: '1rem', display: 'flex', gap: '1rem' }}>
-              <button 
-                className="btn-cancel" 
+              <button
+                className="btn-cancel"
                 style={{ flex: 1, backgroundColor: '#f3f4f6', color: '#4b5563' }}
                 onClick={() => setIsDeleteModalOpen(false)}
               >
                 Hủy bỏ
               </button>
-              <button 
-                className="btn-save" 
+              <button
+                className="btn-save"
                 style={{ flex: 1, backgroundColor: '#ef4444' }}
                 disabled={!deletePassword || isSubmitting}
                 onClick={confirmDeletion}
@@ -1268,37 +1204,37 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               <div className="form-row">
                 <div className="form-group half">
                   <label>Tên khách hàng</label>
-                  <input 
-                    type="text" 
-                    value={formData.customerName} 
-                    onChange={e => setFormData({...formData, customerName: e.target.value})}
-                    required 
+                  <input
+                    type="text"
+                    value={formData.customerName}
+                    onChange={e => setFormData({ ...formData, customerName: e.target.value })}
+                    required
                   />
                 </div>
                 <div className="form-group half">
                   <label>Số điện thoại</label>
-                  <input 
-                    type="text" 
-                    value={formData.phone} 
-                    onChange={e => setFormData({...formData, phone: e.target.value})}
-                    required 
+                  <input
+                    type="text"
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    required
                   />
                 </div>
               </div>
               <div className="form-group">
                 <label>Địa chỉ nhận / trả máy</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="VD: 123 Lê Thánh Tông, Buôn Ma Thuột..."
-                  value={formData.city} 
-                  onChange={e => setFormData({...formData, city: e.target.value})}
+                  value={formData.city}
+                  onChange={e => setFormData({ ...formData, city: e.target.value })}
                 />
               </div>
               <div className="form-group">
                 <label>Thiết bị</label>
-                <select 
+                <select
                   value={formData.product_id}
-                  onChange={e => setFormData({...formData, product_id: e.target.value})}
+                  onChange={e => setFormData({ ...formData, product_id: e.target.value })}
                 >
                   {productList.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
@@ -1306,59 +1242,59 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               <div className="form-row">
                 <div className="form-group half">
                   <label>Bắt đầu (Date & Time)</label>
-                  <input 
-                    type="datetime-local" 
+                  <input
+                    type="datetime-local"
                     value={formData.start_time}
                     onChange={e => {
                       const newStart = e.target.value;
                       let newEnd = formData.end_time;
                       let newStatus = formData.status;
-                      
+
                       if (newStart) {
                         const d = new Date(newStart);
                         const now = new Date();
-                        
+
                         // Auto-Status Logic
                         if (d < now) {
                           newStatus = 'Returned';
                         }
-                        
+
                         d.setDate(d.getDate() + 1);
                         const pad = (n) => n.toString().padStart(2, '0');
-                        newEnd = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-                        setFormData({...formData, start_time: newStart, end_time: newEnd, status: newStatus});
+                        newEnd = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                        setFormData({ ...formData, start_time: newStart, end_time: newEnd, status: newStatus });
                       } else {
-                        setFormData({...formData, start_time: newStart});
+                        setFormData({ ...formData, start_time: newStart });
                       }
                     }}
-                    required 
+                    required
                   />
                 </div>
                 <div className="form-group half">
                   <label>Kết thúc (Date & Time)</label>
-                  <input 
-                    type="datetime-local" 
+                  <input
+                    type="datetime-local"
                     value={formData.end_time}
-                    onChange={e => setFormData({...formData, end_time: e.target.value})}
-                    required 
+                    onChange={e => setFormData({ ...formData, end_time: e.target.value })}
+                    required
                   />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group half">
                   <label>Thành tiền (VND)</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={formData.total_price}
-                    onChange={e => setFormData({...formData, total_price: e.target.value})}
-                    required 
+                    onChange={e => setFormData({ ...formData, total_price: e.target.value })}
+                    required
                   />
                 </div>
                 <div className="form-group half">
                   <label>Trạng thái</label>
-                  <select 
+                  <select
                     value={formData.status}
-                    onChange={e => setFormData({...formData, status: e.target.value})}
+                    onChange={e => setFormData({ ...formData, status: e.target.value })}
                   >
                     <option value="Pending">Chờ xác nhận</option>
                     <option value="Confirmed">Đã chốt lịch</option>
@@ -1368,12 +1304,12 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                   </select>
                 </div>
               </div>
-              
+
               <div className="form-group">
                 <label>PHƯƠNG THỨC ĐẶT CỌC (ADMIN OVERRIDE)</label>
-                <select 
+                <select
                   value={formData.deposit_type}
-                  onChange={e => setFormData({...formData, deposit_type: e.target.value})}
+                  onChange={e => setFormData({ ...formData, deposit_type: e.target.value })}
                   style={{ borderColor: formData.deposit_type === 'student' ? '#eb9173' : '#d5d5d5' }}
                 >
                   <option value="standard">Cơ bản: CCCD + 3.000.000 VNĐ</option>
@@ -1386,7 +1322,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                   </small>
                 )}
               </div>
-               <div className="modal-footer">
+              <div className="modal-footer">
                 {conflictError && (
                   <div className="conflict-monitor-box animate-in">
                     <div className="modal-conflict-msg">{conflictError}</div>
@@ -1394,7 +1330,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       <p>Sản phẩm đã bận bởi các lịch sau:</p>
                       {conflicts.map(c => (
                         <div key={c.id} className="conflict-detail-item">
-                          <span>Mã #{c.booking_id || c.id.slice(0,5)}: <strong>{c.customerName}</strong></span>
+                          <span>Mã #{c.booking_id || c.id.slice(0, 5)}: <strong>{c.customerName}</strong></span>
                           <small>({new Date(c.start).toLocaleDateString('vi-VN')} - {new Date(c.end).toLocaleDateString('vi-VN')})</small>
                         </div>
                       ))}
@@ -1403,10 +1339,10 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                 )}
 
                 {formData.id && formData.status === 'Pending' && !conflictError && (
-                  <button 
-                    type="button" 
-                    className="btn-confirm-deposit" 
-                    onClick={() => setFormData({...formData, status: 'Confirmed'})}
+                  <button
+                    type="button"
+                    className="btn-confirm-deposit"
+                    onClick={() => setFormData({ ...formData, status: 'Confirmed' })}
                   >
                     Chốt lịch
                   </button>
