@@ -224,7 +224,8 @@ export const adminService = {
       .select(`
         *,
         customers (full_name, phone, city),
-        products (name)
+        products (name, image_url),
+        inventory_units (serial_number)
       `, { count: 'exact' })
       .order('start_time', { ascending: false });
 
@@ -259,18 +260,24 @@ export const adminService = {
         customerName: b.customers?.full_name || 'Khách lẻ',
         phone: b.customers?.phone || '',
         productName: b.products?.name || 'Sản phẩm',
+        productImage: b.products?.image_url || null,
+        unitName: b.inventory_units?.serial_number || 'N/A',
         startDate: format(start),
         endDate: format(end),
         totalPrice: new Intl.NumberFormat('vi-VN').format(b.total_price),
         source: b.source || 'Website',
         status: b.status,
+        rentalType: b.rental_type,
         start_time: b.start_time,
         end_time: b.end_time,
+        customer_id: b.customer_id,
         product_id: b.product_id,
+        unit_id: b.unit_id,
         deposit_type: b.deposit_type || 'standard',
         city: b.city || b.customers?.city || '',
         is_seen: b.is_seen,
-        booking_id: b.booking_id
+        booking_id: b.booking_id,
+        created_at: b.created_at
       };
     });
 
@@ -289,7 +296,8 @@ export const adminService = {
       .select(`
         *,
         customers (full_name, phone, city),
-        products (name)
+        products (name, image_url),
+        inventory_units (serial_number)
       `);
 
     const cleanQuery = query.trim().toLowerCase();
@@ -332,20 +340,27 @@ export const adminService = {
 
     return data.map(b => ({
       id: b.id,
-      booking_id: b.booking_id,
       customerName: b.customers?.full_name || 'Khách lẻ',
       phone: b.customers?.phone || '',
       productName: b.products?.name || 'Sản phẩm',
       productImage: b.products?.image_url || null,
+      unitName: b.inventory_units?.serial_number || 'N/A',
       startDate: formatDate(b.start_time),
       endDate: formatDate(b.end_time),
-      start_time: b.start_time, // Keep raw for editing
-      end_time: b.end_time,
-      status: b.status,
       totalPrice: new Intl.NumberFormat('vi-VN').format(b.total_price),
-      city: b.city || b.customers?.city || '',
       source: b.source || 'Website',
-      deposit_type: b.deposit_type || 'standard'
+      status: b.status,
+      rentalType: b.rental_type,
+      start_time: b.start_time,
+      end_time: b.end_time,
+      customer_id: b.customer_id,
+      product_id: b.product_id,
+      unit_id: b.unit_id,
+      deposit_type: b.deposit_type || 'standard',
+      city: b.city || b.customers?.city || '',
+      is_seen: b.is_seen,
+      booking_id: b.booking_id,
+      created_at: b.created_at
     }));
   },
 

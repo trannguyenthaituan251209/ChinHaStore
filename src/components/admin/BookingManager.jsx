@@ -102,6 +102,32 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [invoiceCustomerName, setInvoiceCustomerName] = useState('');
   const [invoiceCustomerPhone, setInvoiceCustomerPhone] = useState('');
   const [invoiceShowQr, setInvoiceShowQr] = useState(true);
+
+  // Quick fill presets states and helper methods
+  const [invoiceTitlePresets, setInvoiceTitlePresets] = useState([
+    'Hóa đơn cọc lịch',
+    'Biên lai nhận cọc lịch',
+    'Hóa đơn cọc thiết bị',
+    'Biên lai cọc thiết bị'
+  ]);
+  const [depositPresets, setDepositPresets] = useState([
+    'CCCD + 3.000.000 VNĐ',
+    'CCCD + Tài sản (Laptop/Lens/...) tương đương'
+  ]);
+
+  const addTitlePreset = () => {
+    const newVal = prompt('Nhập tiêu đề hóa đơn mới để lưu làm mẫu nhanh:');
+    if (newVal && newVal.trim()) {
+      setInvoiceTitlePresets(prev => [...prev, newVal.trim()]);
+    }
+  };
+
+  const addDepositPreset = () => {
+    const newVal = prompt('Nhập tài sản cọc mới để lưu làm mẫu nhanh:');
+    if (newVal && newVal.trim()) {
+      setDepositPresets(prev => [...prev, newVal.trim()]);
+    }
+  };
   const [productList, setProductList] = useState([]);
   const [conflictError, setConflictError] = useState(null);
   const [conflicts, setConflicts] = useState([]);
@@ -358,7 +384,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     
     // Set POS-like customization defaults
     setInvoiceStoreName('CHINHA STORE');
-    setInvoiceSubtitle('HÓA ĐƠN DỊCH VỤ THUÊ THIẾT BỊ');
+    setInvoiceSubtitle('');
     setInvoiceStoreAddress(booking.city || 'TẠI CỬA HÀNG (22 LÊ THÁNH TÔNG)');
     setInvoiceCustomerName(booking.customerName || '');
     setInvoiceCustomerPhone(booking.phone || '');
@@ -1028,13 +1054,10 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       {/* Bill Modal */}
       {isBillOpen && selectedBooking && (
         (() => {
-          // Khôi phục logic hiển thị modal Dual-Panel
           const discountNum = Number(discountAmount.replace(/\D/g, '')) || 0;
-          const totalLineItems = customLineItems.reduce((acc, curr) => {
-            const val = Number(curr.value) || 0;
-            return curr.type === 'discount' ? acc - val : acc + val;
-          }, 0);
-          const finalTotalNum = totalLineItems - discountNum;
+          const totalAddition = customLineItems.filter(item => item.type !== 'discount').reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
+          const totalDiscount = customLineItems.filter(item => item.type === 'discount').reduce((acc, curr) => acc + (Number(curr.value) || 0), 0) + discountNum;
+          const finalTotalNum = totalAddition - totalDiscount;
           const displayTotalWithSecurity = finalTotalNum + (Number(depositProperty.replace(/\D/g, '')) || 0);
               
           return (
@@ -1102,9 +1125,52 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                         <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TÊN CỬA HÀNG / THƯƠNG HIỆU:</label>
                         <input type="text" value={invoiceStoreName} onChange={e => setInvoiceStoreName(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
                       </div>
-                      <div>
+                       <div>
                         <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TIÊU ĐỀ HÓA ĐƠN:</label>
                         <input type="text" value={invoiceSubtitle} onChange={e => setInvoiceSubtitle(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
+                        
+                        {/* Quick fill pills */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                          {invoiceTitlePresets.map((preset, index) => (
+                            <button
+                              key={`title-preset-${index}`}
+                              type="button"
+                              onClick={() => setInvoiceSubtitle(preset)}
+                              style={{
+                                padding: '4px 8px',
+                                fontSize: '0.75rem',
+                                background: '#f0f0f0',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease',
+                                outline: 'none'
+                              }}
+                              onMouseOver={e => e.currentTarget.style.background = '#e0e0e0'}
+                              onMouseOut={e => e.currentTarget.style.background = '#f0f0f0'}
+                            >
+                              {preset}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={addTitlePreset}
+                            style={{
+                              padding: '4px 8px',
+                              fontSize: '0.75rem',
+                              background: '#000',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontWeight: 'bold',
+                              outline: 'none'
+                            }}
+                            title="Thêm mẫu tiêu đề mới"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                       <div>
                         <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>ĐỊA CHỈ NHẬN MÁY / CỬA HÀNG:</label>
@@ -1124,6 +1190,49 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       <div>
                         <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TÀI SẢN THẾ CHẤP (CỌC):</label>
                         <input type="text" value={depositProperty} onChange={e => setDepositProperty(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
+                        
+                        {/* Quick fill pills */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                          {depositPresets.map((preset, index) => (
+                            <button
+                              key={`deposit-preset-${index}`}
+                              type="button"
+                              onClick={() => setDepositProperty(preset)}
+                              style={{
+                                padding: '4px 8px',
+                                fontSize: '0.75rem',
+                                background: '#f0f0f0',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease',
+                                outline: 'none'
+                              }}
+                              onMouseOver={e => e.currentTarget.style.background = '#e0e0e0'}
+                              onMouseOut={e => e.currentTarget.style.background = '#f0f0f0'}
+                            >
+                              {preset}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={addDepositPreset}
+                            style={{
+                              padding: '4px 8px',
+                              fontSize: '0.75rem',
+                              background: '#000',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontWeight: 'bold',
+                              outline: 'none'
+                            }}
+                            title="Thêm mẫu tài sản cọc mới"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
 
                       <div style={{borderTop: '1px dashed #ccc', margin: '10px 0'}}></div>
@@ -1192,12 +1301,12 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       
                       <div className="bill-v2-details-section">
                         <p className="details-title">CHI TIẾT THANH TOÁN</p>
-                        {customLineItems.map((item, idx) => (
-                          <div key={idx} className="bill-v2-toc-item" style={{ color: item.type === 'discount' ? '#ff4d4f' : 'inherit' }}>
+                        {customLineItems.filter(item => item.type !== 'discount').map((item, idx) => (
+                          <div key={idx} className="bill-v2-toc-item">
                             <span className="bill-v2-toc-label">{item.label}</span>
-                            <div className="bill-v2-toc-dots" style={{ borderBottomColor: item.type === 'discount' ? '#ff4d4f' : '#ddd' }}></div>
+                            <div className="bill-v2-toc-dots"></div>
                             <span className="bill-v2-toc-value">
-                              {item.type === 'discount' ? '-' : ''}{new Intl.NumberFormat('vi-VN').format(item.value)} VNĐ
+                              {new Intl.NumberFormat('vi-VN').format(item.value)} VNĐ
                             </span>
                           </div>
                         ))}
@@ -1206,8 +1315,32 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       <hr className="bill-v2-divider" />
                       
                       <div className="bill-v2-total-section">
-                        <div className="total-row"><span>TẠM TÍNH:</span> <span>{new Intl.NumberFormat('vi-VN').format(totalLineItems)} VNĐ</span></div>
-                        <div className="total-row"><span>GIẢM GIÁ:</span> <span>{new Intl.NumberFormat('vi-VN').format(discountNum)} VNĐ</span></div>
+                        <div className="total-row">
+                          <span>TẠM TÍNH:</span> 
+                          <span>{new Intl.NumberFormat('vi-VN').format(totalAddition)} VNĐ</span>
+                        </div>
+                        
+                        {/* Discount Breakdown */}
+                        {customLineItems.filter(item => item.type === 'discount').map((item, idx) => (
+                          <div key={`discount-${idx}`} className="total-row" style={{ color: '#ff4d4f', fontSize: '0.8rem', paddingLeft: '12px', opacity: 0.9 }}>
+                            <span>↳ {item.label.toUpperCase()}:</span> 
+                            <span>-{new Intl.NumberFormat('vi-VN').format(item.value)} VNĐ</span>
+                          </div>
+                        ))}
+                        
+                        {discountNum > 0 && (
+                          <div className="total-row" style={{ color: '#ff4d4f', fontSize: '0.8rem', paddingLeft: '12px', opacity: 0.9 }}>
+                            <span>↳ GIẢM GIÁ TỔNG CHUNG:</span> 
+                            <span>-{new Intl.NumberFormat('vi-VN').format(discountNum)} VNĐ</span>
+                          </div>
+                        )}
+                        
+                        {totalDiscount > 0 && (
+                          <div className="total-row" style={{ color: '#ff4d4f', marginTop: '4px' }}>
+                            <span>TỔNG GIẢM GIÁ:</span> 
+                            <span>-{new Intl.NumberFormat('vi-VN').format(totalDiscount)} VNĐ</span>
+                          </div>
+                        )}
                         
                         <div className="total-row main-total" style={{borderTop: '2px solid #000', paddingTop: '10px', marginTop: '10px'}}>
                           <span>TỔNG CỘNG:</span> 
