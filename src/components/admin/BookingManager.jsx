@@ -96,6 +96,12 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [discountAmount, setDiscountAmount] = useState('0');
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [customLineItems, setCustomLineItems] = useState([]);
+  const [invoiceStoreName, setInvoiceStoreName] = useState('CHINHA STORE');
+  const [invoiceSubtitle, setInvoiceSubtitle] = useState('HÓA ĐƠN DỊCH VỤ THUÊ THIẾT BỊ');
+  const [invoiceStoreAddress, setInvoiceStoreAddress] = useState('TẠI CỬA HÀNG (22 LÊ THÁNH TÔNG)');
+  const [invoiceCustomerName, setInvoiceCustomerName] = useState('');
+  const [invoiceCustomerPhone, setInvoiceCustomerPhone] = useState('');
+  const [invoiceShowQr, setInvoiceShowQr] = useState(true);
   const [productList, setProductList] = useState([]);
   const [conflictError, setConflictError] = useState(null);
   const [conflicts, setConflicts] = useState([]);
@@ -349,6 +355,14 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     setCustomLineItems([
       { id: Date.now().toString(), label: label, value: defaultPrice, type: 'addition' }
     ]);
+    
+    // Set POS-like customization defaults
+    setInvoiceStoreName('CHINHA STORE');
+    setInvoiceSubtitle('HÓA ĐƠN DỊCH VỤ THUÊ THIẾT BỊ');
+    setInvoiceStoreAddress(booking.city || 'TẠI CỬA HÀNG (22 LÊ THÁNH TÔNG)');
+    setInvoiceCustomerName(booking.customerName || '');
+    setInvoiceCustomerPhone(booking.phone || '');
+    setInvoiceShowQr(true);
     
     setIsBillOpen(true);
   };
@@ -1082,15 +1096,52 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       </button>
                     </div>
 
-                    <h4 style={{ marginTop: '25px', marginBottom: '15px', fontSize: '0.9rem', fontWeight: 'bold' }}>THÔNG TIN KHÁC</h4>
+                    <h4 style={{ marginTop: '25px', marginBottom: '15px', fontSize: '0.9rem', fontWeight: 'bold' }}>THÔNG TIN BẢN IN HÓA ĐƠN</h4>
                     <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
                       <div>
-                        <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TÀI SẢN CỌC:</label>
-                        <input type="text" value={depositProperty} onChange={e => setDepositProperty(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px'}} />
+                        <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TÊN CỬA HÀNG / THƯƠNG HIỆU:</label>
+                        <input type="text" value={invoiceStoreName} onChange={e => setInvoiceStoreName(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
                       </div>
                       <div>
-                        <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>GIẢM GIÁ TỔNG (VNĐ):</label>
-                        <input type="number" value={discountAmount} onChange={e => setDiscountAmount(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px'}} />
+                        <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TIÊU ĐỀ HÓA ĐƠN:</label>
+                        <input type="text" value={invoiceSubtitle} onChange={e => setInvoiceSubtitle(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
+                      </div>
+                      <div>
+                        <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>ĐỊA CHỈ NHẬN MÁY / CỬA HÀNG:</label>
+                        <input type="text" value={invoiceStoreAddress} onChange={e => setInvoiceStoreAddress(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
+                      </div>
+                      
+                      <div style={{borderTop: '1px dashed #ccc', margin: '10px 0'}}></div>
+
+                      <div>
+                        <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TÊN KHÁCH HÀNG:</label>
+                        <input type="text" value={invoiceCustomerName} onChange={e => setInvoiceCustomerName(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
+                      </div>
+                      <div>
+                        <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>SỐ ĐIỆN THOẠI:</label>
+                        <input type="text" value={invoiceCustomerPhone} onChange={e => setInvoiceCustomerPhone(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
+                      </div>
+                      <div>
+                        <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>TÀI SẢN THẾ CHẤP (CỌC):</label>
+                        <input type="text" value={depositProperty} onChange={e => setDepositProperty(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
+                      </div>
+
+                      <div style={{borderTop: '1px dashed #ccc', margin: '10px 0'}}></div>
+
+                      <div>
+                        <label style={{fontSize:'0.8rem', fontWeight: 600, display: 'block', marginBottom: '8px'}}>KHẤU TRỪ / GIẢM GIÁ CHUNG (VNĐ):</label>
+                        <input type="number" value={discountAmount} onChange={e => setDiscountAmount(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
+                      </div>
+
+                      <div style={{display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 0'}}>
+                        <input 
+                          type="checkbox" 
+                          id="invoice-toggle-qr"
+                          checked={invoiceShowQr} 
+                          onChange={e => setInvoiceShowQr(e.target.checked)} 
+                          style={{width: '18px', height: '18px', cursor: 'pointer'}}
+                        />
+                        <label htmlFor="invoice-toggle-qr" style={{fontSize:'0.8rem', fontWeight: 600, cursor: 'pointer', userSelect: 'none'}}>HIỂN THỊ MÃ QR CHUYỂN KHOẢN</label>
                       </div>
                     </div>
                   </div>
@@ -1099,8 +1150,8 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                   <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', backgroundColor: '#e2e8f0' }}>
                     <div className="bill-invoice-v2" id="invoice-capture-area" style={{ margin: '0 auto' }}>
                       <div className="bill-v2-header">
-                        <h2>CHINHA STORE</h2>
-                        <p>HÓA ĐƠN DỊCH VỤ THUÊ THIẾT BỊ</p>
+                        <h2>{invoiceStoreName.toUpperCase()}</h2>
+                        <p>{invoiceSubtitle.toUpperCase()}</p>
                         <p style={{fontSize: '0.7rem', fontWeight: 'bold', marginTop: '4px', color: '#000'}}>Mã hợp đồng: {selectedBooking.booking_id || selectedBooking.id.toUpperCase()}</p>
                       </div>
                       
@@ -1130,9 +1181,9 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       </div>
 
                       <div className="bill-v2-customer-section">
-                        <p>Tên khách hàng: {selectedBooking.customerName.toUpperCase()}</p>
-                        <p>Số điện thoại: {selectedBooking.phone}</p>
-                        <p>Nhận máy tại: {selectedBooking.city || 'TẠI CỬA HÀNG (22 LÊ THÁNH TÔNG)'}</p>
+                        <p>Tên khách hàng: {invoiceCustomerName.toUpperCase()}</p>
+                        <p>Số điện thoại: {invoiceCustomerPhone}</p>
+                        <p>Nhận máy tại: {invoiceStoreAddress.toUpperCase()}</p>
                         <p>Tài sản cọc: {depositProperty.toUpperCase()}</p>
                         <p>Nền tảng đặt lịch: {selectedBooking.rentalType === 'Manual' ? 'Đặt trực tiếp' : 'Qua Website'}</p>
                       </div>
@@ -1164,7 +1215,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                         </div>
                       </div>
                       
-                      {finalTotalNum > 0 && (
+                      {invoiceShowQr && finalTotalNum > 0 && (
                         <div className="bill-v2-qr-section" style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                           <img 
                             src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${finalTotalNum}&addInfo=${selectedBooking.booking_id || selectedBooking.id.slice(0, 8)}`} 
