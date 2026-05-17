@@ -279,6 +279,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
         setFormData(prev => ({ ...prev, product_id: productsData[0].id }));
       }
     } catch (err) {
+      console.error('Fetch products failed:', err);
       setError('Lỗi khi cập nhật danh sách thiết bị/đặt lịch.');
     } finally {
       setLoading(false);
@@ -344,6 +345,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       setHistoryData(result.data || []);
       setHistoryCount(result.count || 0);
     } catch (err) {
+      console.error('Fetch history page failed:', err);
       setError('Lỗi khi tải lịch sử thuê máy.');
     } finally {
       setIsHistoryLoading(false);
@@ -408,9 +410,6 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       // Secondary sort: Recent first (start_time descending)
       return new Date(b.start_time) - new Date(a.start_time);
     });
-
-  // Use server search results if searching, otherwise use filtered local data
-  const effectiveData = searchQuery ? serverSuggestions : mainListData;
 
   const handleMarkAsSeen = async (id) => {
     try {
@@ -852,32 +851,6 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     }
   };
 
-  const handlePrevDay = () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const newDate = new Date(selectedFutureDate);
-    newDate.setDate(newDate.getDate() - 1);
-    if (newDate >= today) {
-      setSelectedFutureDate(newDate);
-    }
-  };
-
-  const handleNextDay = () => {
-    const newDate = new Date(selectedFutureDate);
-    newDate.setDate(newDate.getDate() + 1);
-    setSelectedFutureDate(newDate);
-  };
-
-  const formatDateLabel = (date) => {
-    const today = new Date();
-    if (date.toDateString() === today.toDateString()) return 'Hôm nay';
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    if (date.toDateString() === tomorrow.toDateString()) return 'Ngày mai';
-    
-    return new Intl.DateTimeFormat('vi-VN', { weekday: 'long' }).format(date);
-  };
-
   return (
     <div className="booking-manager animate-in">
       
@@ -1210,7 +1183,6 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
           const totalAddition = customLineItems.filter(item => item.type !== 'discount').reduce((acc, curr) => acc + (Number(curr.value) || 0), 0);
           const totalDiscount = customLineItems.filter(item => item.type === 'discount').reduce((acc, curr) => acc + (Number(curr.value) || 0), 0) + discountNum;
           const finalTotalNum = totalAddition - totalDiscount;
-          const displayTotalWithSecurity = finalTotalNum + (Number(depositProperty.replace(/\D/g, '')) || 0);
               
           return (
             <div className="admin-modal-overlay">

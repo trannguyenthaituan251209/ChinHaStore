@@ -7,30 +7,29 @@ import { adminService } from '../../services/adminService';
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000; 
 
 const AppLock = ({ children }) => {
-  const [isLocked, setIsLocked] = useState(false);
-  const [hasPasskey, setHasPasskey] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
+  const [isLocked, setIsLocked] = useState(() => {
+    const credentialId = localStorage.getItem('admin_passkey_id');
+    const lastActive = localStorage.getItem('admin_last_active');
+    if (lastActive && Date.now() - parseInt(lastActive) > INACTIVITY_TIMEOUT) {
+      return !!credentialId;
+    }
+    return false;
+  });
   const [fallbackPassword, setFallbackPassword] = useState('');
   const [error, setError] = useState('');
 
   // Kiểm tra trạng thái khóa khi load
   useEffect(() => {
     const credentialId = localStorage.getItem('admin_passkey_id');
-    setHasPasskey(!!credentialId);
-
     const lastActive = localStorage.getItem('admin_last_active');
     if (lastActive && Date.now() - parseInt(lastActive) > INACTIVITY_TIMEOUT) {
-      // Nếu đã bật passkey thì khóa, nếu chưa thì thôi (hoặc bắt đăng xuất)
-      if (credentialId) {
-        setIsLocked(true);
-      } else {
+      if (!credentialId) {
         // Nếu không có passkey mà quá hạn, ép đăng xuất luôn cho an toàn
         adminService.signOut().then(() => window.location.reload());
       }
     } else {
       localStorage.setItem('admin_last_active', Date.now().toString());
     }
-    setIsChecking(false);
   }, []);
 
   // Theo dõi hoạt động của người dùng
@@ -120,11 +119,12 @@ const AppLock = ({ children }) => {
       setFallbackPassword('');
       localStorage.setItem('admin_last_active', Date.now().toString());
     } catch (err) {
+      console.warn('Mật khẩu mở khóa sai hoặc lỗi:', err.message);
       setError('Mật khẩu không chính xác.');
     }
   };
 
-  if (isChecking) return null;
+
 
   if (isLocked) {
     return (

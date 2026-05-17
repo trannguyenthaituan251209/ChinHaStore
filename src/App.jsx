@@ -27,7 +27,23 @@ const SECRET_ADMIN_PATH = '/quanly-chinha-trungtam';
 const RestrictedAccessWarning = () => {
   const [ip, setIp] = useState('Đang lấy IP...');
   const [locationStr, setLocationStr] = useState('Đang xác định...');
-  const [deviceInfo, setDeviceInfo] = useState('');
+  const [deviceInfo] = useState(() => {
+    const ua = navigator.userAgent;
+    let browser = 'Không xác định';
+    if (ua.includes('Firefox/')) browser = 'Firefox';
+    else if (ua.includes('Edg/')) browser = 'Edge';
+    else if (ua.includes('Chrome/')) browser = 'Chrome';
+    else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari';
+
+    let os = 'Không xác định';
+    if (ua.includes('Win')) os = 'Windows';
+    else if (ua.includes('Mac')) os = 'MacOS';
+    else if (ua.includes('Linux')) os = 'Linux';
+    else if (ua.includes('Android')) os = 'Android';
+    else if (ua.includes('like Mac')) os = 'iOS';
+
+    return `${os} - ${browser}`;
+  });
 
   useEffect(() => {
     // Fetch IP and Location with Fallback
@@ -54,23 +70,6 @@ const RestrictedAccessWarning = () => {
             setLocationStr('Đã bị ẩn/Proxy');
           });
       });
-
-    // Get Device/Browser Info
-    const ua = navigator.userAgent;
-    let browser = 'Không xác định';
-    if (ua.includes('Firefox/')) browser = 'Firefox';
-    else if (ua.includes('Edg/')) browser = 'Edge';
-    else if (ua.includes('Chrome/')) browser = 'Chrome';
-    else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari';
-
-    let os = 'Không xác định';
-    if (ua.includes('Win')) os = 'Windows';
-    else if (ua.includes('Mac')) os = 'MacOS';
-    else if (ua.includes('Linux')) os = 'Linux';
-    else if (ua.includes('Android')) os = 'Android';
-    else if (ua.includes('like Mac')) os = 'iOS';
-
-    setDeviceInfo(`${os} - ${browser}`);
   }, []);
 
   return (

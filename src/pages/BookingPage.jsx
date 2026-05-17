@@ -16,7 +16,6 @@ const BookingPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const today = new Date().toISOString().split('T')[0];
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
   const [selectedCamera, setSelectedCamera] = useState(initialId || '');
   const [startDate, setStartDate] = useState('');
@@ -472,7 +471,7 @@ const BookingPage = () => {
     }
   };
 
-  const getRecommendations = (start, end) => {
+  const getRecommendations = () => {
     const currentCat = currentProduct.category?.toLowerCase() || '';
     let filtered = [];
     if (currentCat.includes('máy ảnh') || currentCat.includes('body')) {
@@ -579,13 +578,14 @@ const BookingPage = () => {
                   reader.readAsDataURL(blob);
                 });
               }
-            } catch (e1) { console.warn('Proxy 1 failed'); }
+            } catch (e1) { console.warn('Proxy 1 failed:', e1.message); }
 
             if (dataUrl) {
               originalImgs.push({ el: img, src: img.src });
               img.src = dataUrl;
             }
           } catch (e) {
+            console.warn('CORS fallback failed:', e.message);
             originalImgs.push({ el: img, src: img.src });
             img.src = localPlaceholder;
           }

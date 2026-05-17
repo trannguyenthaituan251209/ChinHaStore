@@ -36,6 +36,7 @@ export const analyticsService = {
       sessionStorage.setItem('site_visited_today', 'true');
     } catch (err) {
       // Silently fail for analytics to keep console clean
+      console.warn('Analytics record bypassed:', err.message);
     }
   },
 

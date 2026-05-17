@@ -49,7 +49,7 @@ const HolidayHero = () => {
                     
                     // Reverse the array so newer banners (which are first) overwrite older ones
                     [...banners].reverse().forEach(b => {
-                        if (b.banner_slot && posterLinks.hasOwnProperty(b.banner_slot)) {
+                        if (b.banner_slot && b.banner_slot in posterLinks) {
                             posterLinks[b.banner_slot] = `/blog/${b.slug}`;
                             // Update the image if it has one
                             if (b.thumbnail_url) {

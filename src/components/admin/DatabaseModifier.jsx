@@ -87,7 +87,6 @@ const DatabaseModifier = ({ showStatus }) => {
   // Import States
   const [importData, setImportData] = useState([]);
   const [importStatus, setImportStatus] = useState('idle'); // 'idle', 'review', 'importing', 'done'
-  const [importProgress, setImportProgress] = useState(0);
   const [importResults, setImportResults] = useState(null);
 
   const fetchData = async () => {

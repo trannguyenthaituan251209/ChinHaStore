@@ -37,6 +37,7 @@ const BlogManager = ({ showStatus }) => {
       const data = await blogService.adminGetAllPosts();
       setPosts(data);
     } catch (err) {
+      console.error('Fetch posts failed:', err);
       showStatus('Không thể tải danh sách bài viết.', 'error');
     } finally {
       setLoading(false);
@@ -69,6 +70,7 @@ const BlogManager = ({ showStatus }) => {
         showStatus('Xóa bài viết thành công!');
         fetchPosts();
       } catch (err) {
+        console.error('Delete post failed:', err);
         showStatus('Lỗi khi xóa bài viết.', 'error');
       }
     }
@@ -98,6 +100,7 @@ const BlogManager = ({ showStatus }) => {
       setIsEditing(false);
       fetchPosts();
     } catch (err) {
+      console.error('Save post failed:', err);
       showStatus('Lỗi khi lưu bài viết. Vui lòng kiểm tra slug (phải là duy nhất).', 'error');
     }
   };

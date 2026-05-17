@@ -9,7 +9,6 @@ import './AllCameraPage.css';
 const AllCameraPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [stats, setStats] = useState({ counts: {}, hotProductId: null });
 
   // Filters State
@@ -30,7 +29,6 @@ const AllCameraPage = () => {
         setStats(sData);
       } catch (err) {
         console.error('Error fetching catalog or stats:', err);
-        setError('Không thể tải danh sách máy ảnh.');
       } finally {
         setLoading(false);
       }

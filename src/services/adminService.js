@@ -96,7 +96,7 @@ export const adminService = {
         const { data: c } = await supabase.from('daily_stats').select('visits').eq('date', t).maybeSingle();
         await supabase.from('daily_stats').upsert({ date: t, visits: (c?.visits || 0) + 1 }, { onConflict: 'date' });
       }
-    } catch (e) { console.warn('Stat block bypassed'); }
+    } catch (e) { console.warn('Stat block bypassed:', e.message); }
   },
 
   /**
