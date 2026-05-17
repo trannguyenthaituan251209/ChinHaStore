@@ -3443,3 +3443,152 @@ input:checked+.slider:before {
     padding: 0.2rem 0.4rem;
   }
 }
+
+/* BILL MODAL RESPONSIVE FIX */
+.bill-modal-flex-container {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    overflow: auto;
+}
+
+.bill-modal-left-panel {
+    flex: 1 1 350px;
+    min-width: 300px;
+    max-width: 100%;
+    resize: horizontal;
+    padding: 1.5rem;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    overflow: auto;
+    background-color: #fafafa;
+    box-sizing: border-box;
+}
+
+.bill-modal-right-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background-color: #e2e8f0;
+    box-sizing: border-box;
+}
+
+/* When screen width is 1150px or less, stack panels vertically */
+@media (max-width: 1150px) {
+    .bill-modal-flex-container {
+        flex-direction: column;
+    }
+
+    .bill-modal-left-panel {
+        flex: none;
+        width: 100%;
+        max-width: 100%;
+        resize: none;
+        border-right: none;
+        border-bottom: 2px solid #ddd;
+    }
+
+    .bill-modal-right-panel {
+        flex: none;
+        width: 100%;
+        padding: 1.5rem 1rem;
+    }
+}
+
+/* BILL MODAL PRESETS & VERSION HISTORY STYLES */
+.bill-version-history-box {
+
+    padding: 12px;
+}
+
+.bill-version-history-label {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #2c3e50;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.bill-version-history-select-row {
+    display: flex;
+    gap: 8px;
+}
+
+.bill-version-history-select {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+}
+
+.bill-version-history-select:focus {
+    border-color: #000;
+}
+
+.bill-version-history-delete-btn {
+    padding: 8px 12px;
+    background: #ff4d4f;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    outline: none;
+    transition: background 0.15s ease;
+}
+
+.bill-version-history-delete-btn:hover {
+    background: #e04345;
+}
+
+.bill-version-history-note {
+    display: block;
+    margin-top: 6px;
+    color: #666;
+    font-size: 0.7rem;
+}
+
+/* Quick Fill Presets Container & Buttons */
+.bill-preset-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.bill-preset-btn {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    outline: none;
+}
+
+.bill-preset-btn:hover {
+    background: #e0e0e0;
+    border-color: #ccc;
+}
+
+.bill-preset-add-btn {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    outline: none;
+    transition: opacity 0.15s ease;
+}
+
+.bill-preset-add-btn:hover {
+    opacity: 0.8;
+}

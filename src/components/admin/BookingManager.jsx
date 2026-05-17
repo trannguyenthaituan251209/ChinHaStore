@@ -103,6 +103,10 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
   const [invoiceCustomerPhone, setInvoiceCustomerPhone] = useState('');
   const [invoiceShowQr, setInvoiceShowQr] = useState(true);
 
+  // Invoice version history states
+  const [invoiceVersions, setInvoiceVersions] = useState([]);
+  const [selectedVersionIndex, setSelectedVersionIndex] = useState(-1);
+
   // Quick fill presets states and helper methods
   const [invoiceTitlePresets, setInvoiceTitlePresets] = useState([
     'Hóa đơn cọc lịch',
@@ -126,6 +130,109 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     const newVal = prompt('Nhập tài sản cọc mới để lưu làm mẫu nhanh:');
     if (newVal && newVal.trim()) {
       setDepositPresets(prev => [...prev, newVal.trim()]);
+    }
+  };
+
+  const handleVersionChange = (index) => {
+    setSelectedVersionIndex(index);
+    if (index === -1) {
+      // Reset to original booking defaults
+      setInvoiceStoreName('CHINHA STORE');
+      setInvoiceSubtitle('');
+      setInvoiceStoreAddress(selectedBooking.city || 'TẠI CỬA HÀNG (22 LÊ THÁNH TÔNG)');
+      setInvoiceCustomerName(selectedBooking.customerName || '');
+      setInvoiceCustomerPhone(selectedBooking.phone || '');
+      setInvoiceShowQr(true);
+      setDiscountAmount('0');
+      
+      // Recalculate original price line item
+      let defaultPrice = 0;
+      let label = 'Giá thuê';
+      if (productList.length > 0) {
+        const product = productList.find(p => p.id === selectedBooking.product_id);
+        if (product && selectedBooking.start_time && selectedBooking.end_time) {
+          const start = new Date(selectedBooking.start_time);
+          const end = new Date(selectedBooking.end_time);
+          const diffMs = end - start;
+          const diffHrs = diffMs / (1000 * 60 * 60);
+          const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+          
+          if (diffHrs <= 6) {
+            defaultPrice = Number(product.price6h?.toString().replace(/\./g, '')) || 0;
+            label = 'Gói 6 giờ';
+          } else if (diffDays === 1) {
+            defaultPrice = Number(product.price1Day?.toString().replace(/\./g, '')) || 0;
+            label = 'Giá thuê 1 ngày';
+          } else if (diffDays === 2) {
+            defaultPrice = Number(product.price2Days?.toString().replace(/\./g, '')) || 0;
+            label = 'Giá thuê 2 ngày';
+          } else if (diffDays >= 3) {
+            defaultPrice = Number(product.price3Days?.toString().replace(/\./g, '')) || 0;
+            label = `Giá thuê ${diffDays} ngày`;
+            if (diffDays > 3) {
+              const pExtra = Number(product.price4DaysPlus?.toString().replace(/\./g, '')) || 0;
+              defaultPrice = defaultPrice + (pExtra * (diffDays - 3));
+            }
+          }
+        }
+      }
+      setCustomLineItems([
+        { id: Date.now().toString(), label: label, value: defaultPrice, type: 'addition' }
+      ]);
+      
+      // Auto-map deposit based on customer choice
+      const mapping = {
+        'standard': 'CCCD + 3.000.000 VNĐ',
+        'property': 'CCCD + TÀI SẢN TƯƠNG ĐƯƠNG',
+        'student': 'CCCD + 500k-1M + VNEID IMAGE'
+      };
+      setDepositProperty(mapping[selectedBooking.deposit_type] || 'CĂN CƯỚC CÔNG DÂN');
+    } else {
+      // Load saved version
+      const ver = invoiceVersions[index];
+      if (ver) {
+        setInvoiceStoreName(ver.invoiceStoreName || 'CHINHA STORE');
+        setInvoiceSubtitle(ver.invoiceSubtitle || '');
+        setInvoiceStoreAddress(ver.invoiceStoreAddress || '');
+        setInvoiceCustomerName(ver.invoiceCustomerName || '');
+        setInvoiceCustomerPhone(ver.invoiceCustomerPhone || '');
+        setDepositProperty(ver.depositProperty || '');
+        setDiscountAmount(ver.discountAmount || '0');
+        setInvoiceShowQr(ver.invoiceShowQr !== undefined ? ver.invoiceShowQr : true);
+        setCustomLineItems(ver.customLineItems || []);
+      }
+    }
+  };
+
+  const deleteInvoiceVersion = async (e, index) => {
+    e.stopPropagation();
+    if (!confirm('Bạn có chắc chắn muốn xóa bản chỉnh sửa này không?')) return;
+    
+    const updatedList = invoiceVersions.filter((_, idx) => idx !== index);
+    
+    try {
+      showStatus('Đang xóa bản ghi trên Supabase...', 'success');
+      const { error } = await supabase
+        .from('bookings')
+        .update({ invoice_versions: updatedList })
+        .eq('id', selectedBooking.id);
+        
+      if (error) throw error;
+      
+      // Update local states
+      setInvoiceVersions(updatedList);
+      selectedBooking.invoice_versions = updatedList; // update active reference
+      
+      showStatus('Xóa bản chỉnh sửa thành công!', 'success');
+      
+      if (selectedVersionIndex === index) {
+        handleVersionChange(-1); // reset to default
+      } else if (selectedVersionIndex > index) {
+        setSelectedVersionIndex(prev => prev - 1);
+      }
+    } catch (err) {
+      console.error(err);
+      showStatus('Không thể xóa bản ghi trên Supabase. Vui lòng thử lại!', 'error');
     }
   };
   const [productList, setProductList] = useState([]);
@@ -388,7 +495,9 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     setInvoiceStoreAddress(booking.city || 'TẠI CỬA HÀNG (22 LÊ THÁNH TÔNG)');
     setInvoiceCustomerName(booking.customerName || '');
     setInvoiceCustomerPhone(booking.phone || '');
-    setInvoiceShowQr(true);
+    // Load saved invoice versions for this booking directly from Supabase record
+    setInvoiceVersions(booking.invoice_versions || []);
+    setSelectedVersionIndex(-1); // start with default
     
     setIsBillOpen(true);
   };
@@ -400,6 +509,49 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
     try {
       showStatus('Bắt đầu chuẩn bị hóa đơn...', 'success');
       
+      // Auto-save the current customization state as a new version to Supabase
+      try {
+        const newVersion = {
+          timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date().toLocaleDateString('vi-VN'),
+          invoiceStoreName,
+          invoiceSubtitle,
+          invoiceStoreAddress,
+          invoiceCustomerName,
+          invoiceCustomerPhone,
+          depositProperty,
+          discountAmount,
+          invoiceShowQr,
+          customLineItems
+        };
+        
+        const currentList = selectedBooking.invoice_versions || [];
+        
+        // Check if identical to last saved to prevent duplicates
+        const lastVer = currentList[currentList.length - 1];
+        const isIdentical = lastVer && 
+          lastVer.invoiceSubtitle === invoiceSubtitle &&
+          lastVer.depositProperty === depositProperty &&
+          lastVer.discountAmount === discountAmount &&
+          JSON.stringify(lastVer.customLineItems) === JSON.stringify(customLineItems);
+          
+        if (!isIdentical) {
+          const updatedList = [...currentList, newVersion];
+          
+          const { error } = await supabase
+            .from('bookings')
+            .update({ invoice_versions: updatedList })
+            .eq('id', selectedBooking.id);
+            
+          if (error) throw error;
+          
+          setInvoiceVersions(updatedList);
+          selectedBooking.invoice_versions = updatedList; // update active reference
+          setSelectedVersionIndex(updatedList.length - 1);
+        }
+      } catch (e) {
+        console.error('Error auto-saving invoice version to Supabase:', e);
+      }
+
       const originalImgs = [];
       const imgElements = invoiceElement.querySelectorAll('.bill-v2-product-image img');
       
@@ -1068,9 +1220,42 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                   <button className="close-btn" onClick={() => setIsBillOpen(false)}>×</button>
                 </header>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', flex: 1, overflow: 'auto' }}>
+                <div className="bill-modal-flex-container">
                   {/* LEFT PANEL: MODIFIER */}
-                  <div style={{ flex: '1 1 350px', minWidth: '300px', maxWidth: '100%', resize: 'horizontal', padding: '1.5rem', borderRight: '1px solid #ddd', borderBottom: '1px solid #ddd', overflow: 'auto', backgroundColor: '#fafafa' }}>
+                  <div className="bill-modal-left-panel">
+                    {/* Invoice Versions History Dropdown */}
+                    <div className="bill-version-history-box">
+                      <label className="bill-version-history-label">
+                      LỊCH SỬ BẢN CHỈNH SỬA HÓA ĐƠN:
+                      </label>
+                      <div className="bill-version-history-select-row">
+                        <select
+                          value={selectedVersionIndex}
+                          onChange={(e) => handleVersionChange(Number(e.target.value))}
+                          className="bill-version-history-select"
+                        >
+                          <option value={-1}>Bản mặc định (Từ đơn gốc)</option>
+                          {invoiceVersions.map((ver, idx) => (
+                            <option key={`ver-option-${idx}`} value={idx}>
+                              Bản sửa #{idx + 1} ({ver.timestamp})
+                            </option>
+                          ))}
+                        </select>
+                        {selectedVersionIndex !== -1 && (
+                          <button
+                            onClick={(e) => deleteInvoiceVersion(e, selectedVersionIndex)}
+                            className="bill-version-history-delete-btn"
+                            title="Xóa bản chỉnh sửa này"
+                          >
+                            🗑️
+                          </button>
+                        )}
+                      </div>
+                      <small className="bill-version-history-note">
+                        * Hệ thống tự động lưu bản chỉnh sửa mới khi bạn bấm "TẢI XUỐNG ẢNH HÓA ĐƠN".
+                      </small>
+                    </div>
+
                     <h4 style={{ marginBottom: '15px', fontSize: '0.9rem', fontWeight: 'bold' }}>THÀNH PHẦN GIÁ (KÉO XUỐNG ĐỂ XEM HẾT)</h4>
                     {customLineItems.map(item => (
                       <div key={item.id} style={{ display: 'flex', gap: '5px', marginBottom: '10px', alignItems: 'center' }}>
@@ -1130,24 +1315,13 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                         <input type="text" value={invoiceSubtitle} onChange={e => setInvoiceSubtitle(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
                         
                         {/* Quick fill pills */}
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                        <div className="bill-preset-container">
                           {invoiceTitlePresets.map((preset, index) => (
                             <button
                               key={`title-preset-${index}`}
                               type="button"
                               onClick={() => setInvoiceSubtitle(preset)}
-                              style={{
-                                padding: '4px 8px',
-                                fontSize: '0.75rem',
-                                background: '#f0f0f0',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                transition: 'all 0.15s ease',
-                                outline: 'none'
-                              }}
-                              onMouseOver={e => e.currentTarget.style.background = '#e0e0e0'}
-                              onMouseOut={e => e.currentTarget.style.background = '#f0f0f0'}
+                              className="bill-preset-btn"
                             >
                               {preset}
                             </button>
@@ -1155,17 +1329,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                           <button
                             type="button"
                             onClick={addTitlePreset}
-                            style={{
-                              padding: '4px 8px',
-                              fontSize: '0.75rem',
-                              background: '#000',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontWeight: 'bold',
-                              outline: 'none'
-                            }}
+                            className="bill-preset-add-btn"
                             title="Thêm mẫu tiêu đề mới"
                           >
                             +
@@ -1192,24 +1356,13 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                         <input type="text" value={depositProperty} onChange={e => setDepositProperty(e.target.value)} style={{width:'100%', padding:'10px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.85rem'}} />
                         
                         {/* Quick fill pills */}
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                        <div className="bill-preset-container">
                           {depositPresets.map((preset, index) => (
                             <button
                               key={`deposit-preset-${index}`}
                               type="button"
                               onClick={() => setDepositProperty(preset)}
-                              style={{
-                                padding: '4px 8px',
-                                fontSize: '0.75rem',
-                                background: '#f0f0f0',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                transition: 'all 0.15s ease',
-                                outline: 'none'
-                              }}
-                              onMouseOver={e => e.currentTarget.style.background = '#e0e0e0'}
-                              onMouseOut={e => e.currentTarget.style.background = '#f0f0f0'}
+                              className="bill-preset-btn"
                             >
                               {preset}
                             </button>
@@ -1217,17 +1370,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                           <button
                             type="button"
                             onClick={addDepositPreset}
-                            style={{
-                              padding: '4px 8px',
-                              fontSize: '0.75rem',
-                              background: '#000',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: '4px',
-                              cursor: 'pointer',
-                              fontWeight: 'bold',
-                              outline: 'none'
-                            }}
+                            className="bill-preset-add-btn"
                             title="Thêm mẫu tài sản cọc mới"
                           >
                             +
@@ -1256,7 +1399,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                   </div>
 
                   {/* RIGHT PANEL: INVOICE PREVIEW */}
-                  <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', backgroundColor: '#e2e8f0' }}>
+                  <div className="bill-modal-right-panel">
                     <div className="bill-invoice-v2" id="invoice-capture-area" style={{ margin: '0 auto' }}>
                       <div className="bill-v2-header">
                         <h2>{invoiceStoreName.toUpperCase()}</h2>

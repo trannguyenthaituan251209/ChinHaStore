@@ -151,7 +151,8 @@ export const adminService = {
         city: b.city || b.customers?.city || '',
         is_seen: b.is_seen,
         booking_id: b.booking_id,
-        created_at: b.created_at
+        created_at: b.created_at,
+        invoice_versions: b.invoice_versions || []
       };
     });
   },
@@ -277,7 +278,8 @@ export const adminService = {
         city: b.city || b.customers?.city || '',
         is_seen: b.is_seen,
         booking_id: b.booking_id,
-        created_at: b.created_at
+        created_at: b.created_at,
+        invoice_versions: b.invoice_versions || []
       };
     });
 
@@ -360,7 +362,8 @@ export const adminService = {
       city: b.city || b.customers?.city || '',
       is_seen: b.is_seen,
       booking_id: b.booking_id,
-      created_at: b.created_at
+      created_at: b.created_at,
+      invoice_versions: b.invoice_versions || []
     }));
   },
 
