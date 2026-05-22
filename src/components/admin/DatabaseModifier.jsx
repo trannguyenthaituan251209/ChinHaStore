@@ -47,7 +47,11 @@ const DatabaseModifier = ({ showStatus }) => {
     price: '0',
     charge_type: 'once',
     applicable_categories: ['Tất cả'],
-    status: 'active'
+    status: 'active',
+    config: {
+      ui: { input_type: 'checkbox', unit_label: '' },
+      pricing: { calculate_by: 'once', shift_price: '' }
+    }
   });
   const [productForm, setProductForm] = useState({
     name: '',
@@ -217,7 +221,11 @@ const DatabaseModifier = ({ showStatus }) => {
         price: item.price || '0',
         charge_type: item.charge_type || 'once',
         applicable_categories: item.applicable_categories || ['Tất cả'],
-        status: item.status || 'active'
+        status: item.status || 'active',
+        config: item.config || {
+          ui: { input_type: 'checkbox', unit_label: '' },
+          pricing: { calculate_by: item.charge_type || 'once', shift_price: '' }
+        }
       });
     }
     setModalType(type);
@@ -305,7 +313,11 @@ const DatabaseModifier = ({ showStatus }) => {
         price: '0',
         charge_type: 'once',
         applicable_categories: ['Tất cả'],
-        status: 'active'
+        status: 'active',
+        config: {
+          ui: { input_type: 'checkbox', unit_label: '' },
+          pricing: { calculate_by: 'once', shift_price: '' }
+        }
       });
     }
     setModalType(type);
@@ -910,12 +922,72 @@ const DatabaseModifier = ({ showStatus }) => {
                   <label>Giá (VNĐ)</label>
                   <input type="number" required value={accessoryForm.price} onChange={e => setAccessoryForm({...accessoryForm, price: e.target.value})} />
                 </div>
-                <div className="form-group">
-                  <label>Cách tính phí</label>
-                  <select value={accessoryForm.charge_type} onChange={e => setAccessoryForm({...accessoryForm, charge_type: e.target.value})}>
-                    <option value="once">Thu 1 lần</option>
-                    <option value="per_day">Theo ngày</option>
-                  </select>
+              </div>
+
+              {/* CONFIG BUILDER */}
+              <div className="form-group" style={{ border: '1px solid #ddd', padding: '1rem', marginTop: '1rem', backgroundColor: '#fafafa' }}>
+                <label style={{ fontSize: '0.9rem', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
+                  <Settings size={14} style={{ display: 'inline', marginRight: '5px' }} />
+                  CẤU HÌNH THUỘC TÍNH ĐỘNG (JSON CONFIG)
+                </label>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                  <div>
+                    <label>Loại nhập liệu</label>
+                    <select
+                      value={accessoryForm.config?.ui?.input_type || 'checkbox'}
+                      onChange={(e) => setAccessoryForm({
+                        ...accessoryForm,
+                        config: { ...accessoryForm.config, ui: { ...(accessoryForm.config?.ui || {}), input_type: e.target.value } }
+                      })}
+                    >
+                      <option value="checkbox">Chỉ chọn Có/Không (Checkbox)</option>
+                      <option value="number">Cho phép nhập số lượng</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Tên Đơn Vị (VD: cái, hộp...)</label>
+                    <input
+                      type="text"
+                      placeholder="VD: cái, hộp 20 tấm"
+                      value={accessoryForm.config?.ui?.unit_label || ''}
+                      onChange={(e) => setAccessoryForm({
+                        ...accessoryForm,
+                        config: { ...accessoryForm.config, ui: { ...(accessoryForm.config?.ui || {}), unit_label: e.target.value } }
+                      })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label>Cách tính giá (Rent Unit)</label>
+                    <select
+                      value={accessoryForm.config?.pricing?.calculate_by || 'once'}
+                      onChange={(e) => {
+                        setAccessoryForm({
+                          ...accessoryForm,
+                          charge_type: e.target.value,
+                          config: { ...accessoryForm.config, pricing: { ...(accessoryForm.config?.pricing || {}), calculate_by: e.target.value } }
+                        });
+                      }}
+                    >
+                      <option value="once">Tính 1 Lần (Cố định)</option>
+                      <option value="per_day">Tính Theo Ngày (x Số Ngày)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Giá Combo 6h (Shift Price)</label>
+                    <input
+                      type="number"
+                      placeholder="Bỏ trống nếu dùng giá gốc"
+                      value={accessoryForm.config?.pricing?.shift_price || ''}
+                      onChange={(e) => setAccessoryForm({
+                        ...accessoryForm,
+                        config: { ...accessoryForm.config, pricing: { ...(accessoryForm.config?.pricing || {}), shift_price: e.target.value } }
+                      })}
+                    />
+                  </div>
                 </div>
               </div>
               <div className="form-group">

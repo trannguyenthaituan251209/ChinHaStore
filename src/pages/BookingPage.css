@@ -131,7 +131,7 @@ html, body {
   padding: 0 1rem;
   border: 1px solid #d5d5d5;
   background-color: #ffffff;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-family: "ShopeeDisplayB", sans-serif !important;
   outline: none;
   transition: all 0.2s ease;
@@ -177,7 +177,7 @@ html, body {
   text-align: center;
   cursor: pointer;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   transition: all 0.2s ease;
   background-color: #F8F8F8;
   border-radius: 0;
@@ -203,7 +203,7 @@ html, body {
   text-align: center;
   cursor: pointer;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   transition: all 0.2s ease;
   background-color: #F8F8F8;
   border-radius: 0;
@@ -264,7 +264,7 @@ html, body {
   color: #007bff;
   text-decoration: none;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   width: fit-content;
   transition: opacity 0.2s;
 }
@@ -294,7 +294,7 @@ html, body {
   flex: 1;
   height: 2.8rem;
   border: 1px solid #DDD;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-family: 'ShopeeDisplayB', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -348,7 +348,7 @@ html, body {
   align-items: center;
   justify-content: center;
   font-family: 'ShopeeDisplayB', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #333;
 }
 
@@ -525,10 +525,23 @@ html, body {
 .breakdown-line {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
   font-size: 0.8rem;
   color: #666;
   font-weight: 500;
   font-family: "ShopeeDisplayM", sans-serif !important;
+}
+
+.breakdown-line > span:first-child {
+  flex: 1;
+  text-align: left;
+}
+
+.breakdown-line > span:last-child {
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .res-price-row {
@@ -592,6 +605,7 @@ html, body {
   color: #FFF;
   border: none;
   font-weight: 700;
+  font-size: 0.9rem;
   letter-spacing: 1px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1364,3 +1378,13 @@ html, body {
   pointer-events: none;
 }
 
+.accessory-checkbox {
+  -webkit-appearance: auto !important;
+  -moz-appearance: auto !important;
+  appearance: auto !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 12px !important;
+  cursor: pointer !important;
+  accent-color: #000;
+}

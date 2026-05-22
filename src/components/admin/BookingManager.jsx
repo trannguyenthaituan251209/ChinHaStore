@@ -497,10 +497,46 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       }
     }
     
-    setCustomLineItems([
+    const initialLineItems = [
       { id: Date.now().toString(), label: label, value: defaultPrice, type: 'addition' }
-    ]);
-    
+    ];
+
+    if (booking.optional_accessories && Array.isArray(booking.optional_accessories)) {
+      booking.optional_accessories.forEach((acc, i) => {
+        const qty = acc.selected_quantity || 1;
+        const configPricing = acc.config?.pricing || {};
+        const configUI = acc.config?.ui || {};
+        const calculateBy = configPricing.calculate_by || acc.charge_type || 'once';
+        const unitDisplay = configUI.unit_label ? '/' + configUI.unit_label : '';
+
+        const start = new Date(booking.start_time);
+        const end = new Date(booking.end_time);
+        const diffMs = end - start;
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        const diffHrs = diffMs / (1000 * 60 * 60);
+
+        let effectivePrice = Number(acc.price) || 0;
+        let daysToMultiply = 1;
+
+        if (diffHrs <= 6 && configPricing.shift_price) {
+          effectivePrice = Number(configPricing.shift_price);
+        } else if (calculateBy === 'per_day') {
+          daysToMultiply = diffDays;
+        }
+
+        const itemTotal = effectivePrice * qty * daysToMultiply;
+        const labelText = `Phụ kiện: ${acc.name} (${new Intl.NumberFormat('vi-VN').format(effectivePrice)}đ${unitDisplay} x ${qty}${daysToMultiply > 1 ? ` x ${daysToMultiply} Ngày` : ''})`;
+
+        initialLineItems.push({
+          id: `acc-${acc.id || i}`,
+          label: labelText,
+          value: itemTotal,
+          type: 'addition'
+        });
+      });
+    }
+
+    setCustomLineItems(initialLineItems);
     // Set POS-like customization defaults
     setInvoiceStoreName('CHINHA STORE');
     setInvoiceSubtitle('');

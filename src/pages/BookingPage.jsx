@@ -22,9 +22,9 @@ const BookingPage = () => {
   const [selectedCamera, setSelectedCamera] = useState(initialId || '');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [rentalType, setRentalType] = useState('DAY'); 
-  const [shiftType, setShiftType] = useState('A'); 
-  
+  const [rentalType, setRentalType] = useState('DAY');
+  const [shiftType, setShiftType] = useState('A');
+
   const [cusName, setCusName] = useState('');
   const [cusPhone, setCusPhone] = useState('');
   const [cusEmail, setCusEmail] = useState('');
@@ -32,8 +32,8 @@ const BookingPage = () => {
   const [cusAddress, setCusAddress] = useState('');
   const [receiveMethod, setReceiveMethod] = useState('store'); // 'store' or 'delivery'
   const [cusSocial, setCusSocial] = useState('');
-  const [cusDepositType, setCusDepositType] = useState('standard'); 
-  
+  const [cusDepositType, setCusDepositType] = useState('standard');
+
   const [result, setResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
@@ -56,7 +56,7 @@ const BookingPage = () => {
   const [selProvCode, setSelProvCode] = useState('');
   const [selDistCode, setSelDistCode] = useState('');
   const [selWardCode, setSelWardCode] = useState('');
-  
+
   const [provName, setProvName] = useState('');
   const [distName, setDistName] = useState('');
   const [wardName, setWardName] = useState('');
@@ -78,7 +78,7 @@ const BookingPage = () => {
     setWardName('');
     setDistricts([]);
     setWards([]);
-    
+
     if (code) {
       fetch(`https://provinces.open-api.vn/api/p/${code}?depth=2`)
         .then(res => res.json())
@@ -124,26 +124,26 @@ const BookingPage = () => {
         const d = JSON.parse(saved);
         // Only show prompt if it's potentially useful (it has a camera or we're on Step 2)
         if (d.selectedCamera || d.step > 1 || d.cusName) {
-           setLocalDraft(d);
+          setLocalDraft(d);
 
-           // AUTO-REPLACE IDENTITY INFO (Persistent across all cameras)
-           if (d.cusName) setCusName(d.cusName);
-           if (d.cusPhone) setCusPhone(d.cusPhone);
-           if (d.cusEmail) setCusEmail(d.cusEmail);
-           if (d.cusCity) setCusCity(d.cusCity);
-           if (d.cusAddress) setCusAddress(d.cusAddress);
-           if (d.cusSocial) setCusSocial(d.cusSocial);
-           if (d.cusDepositType) setCusDepositType(d.cusDepositType);
-           if (d.receiveMethod) setReceiveMethod(d.receiveMethod);
+          // AUTO-REPLACE IDENTITY INFO (Persistent across all cameras)
+          if (d.cusName) setCusName(d.cusName);
+          if (d.cusPhone) setCusPhone(d.cusPhone);
+          if (d.cusEmail) setCusEmail(d.cusEmail);
+          if (d.cusCity) setCusCity(d.cusCity);
+          if (d.cusAddress) setCusAddress(d.cusAddress);
+          if (d.cusSocial) setCusSocial(d.cusSocial);
+          if (d.cusDepositType) setCusDepositType(d.cusDepositType);
+          if (d.receiveMethod) setReceiveMethod(d.receiveMethod);
 
-           // Decide if we should show the prompt for FULL session recovery (Camera/Dates/Step)
-           if (initialId && d.selectedCamera !== initialId) {
-             setShowLocalPrompt(true);
-           } else if (d.step > 1 || d.cusName) {
-             setShowLocalPrompt(true);
-           } else if (!initialId) {
-             setShowLocalPrompt(true);
-           }
+          // Decide if we should show the prompt for FULL session recovery (Camera/Dates/Step)
+          if (initialId && d.selectedCamera !== initialId) {
+            setShowLocalPrompt(true);
+          } else if (d.step > 1 || d.cusName) {
+            setShowLocalPrompt(true);
+          } else if (!initialId) {
+            setShowLocalPrompt(true);
+          }
         }
       } catch (err) { console.error('Error reading local draft:', err); }
     }
@@ -153,13 +153,13 @@ const BookingPage = () => {
   // 2. SAVE DATA TO LOCAL STORAGE & SUPABASE DRAFT
   useEffect(() => {
     if (!hasInitialized || step >= 3 || showLocalPrompt || showRemotePrompt) return; // Don't save if not ready, finished, or during recovery prompt
-    
+
     const draftData = {
       selectedCamera, startDate, endDate, rentalType, shiftType,
       cusName, cusPhone, cusEmail, cusCity, cusAddress, receiveMethod, cusSocial, cusDepositType,
       step
     };
-    
+
     // Always update local for same-device recovery
     localStorage.setItem('booking_draft', JSON.stringify(draftData));
 
@@ -179,9 +179,9 @@ const BookingPage = () => {
       if (cusPhone && cusPhone.length >= 10 && !remoteDraft) {
         const d = await adminService.getBookingDraft(cusPhone);
         if (d && (d.step > 1 || d.cusName)) {
-           // We found a draft that has more info than the current local state
-           setRemoteDraft(d);
-           setShowRemotePrompt(true);
+          // We found a draft that has more info than the current local state
+          setRemoteDraft(d);
+          setShowRemotePrompt(true);
         }
       }
     };
@@ -192,7 +192,7 @@ const BookingPage = () => {
     if (!draft) return;
     const d = draft;
     console.log('Restoring draft:', d);
-    
+
     if (d.selectedCamera) setSelectedCamera(d.selectedCamera);
     if (d.startDate) setStartDate(d.startDate);
     if (d.endDate) setEndDate(d.endDate);
@@ -209,7 +209,7 @@ const BookingPage = () => {
     if (d.step && Number(d.step) < 3) {
       setStep(Number(d.step));
     }
-    
+
     setShowLocalPrompt(false);
     setShowRemotePrompt(false);
   };
@@ -217,7 +217,7 @@ const BookingPage = () => {
   const getDraftSummary = (draft) => {
     if (!draft || !draft.selectedCamera) return '';
     const camName = productList.find(p => p.id === draft.selectedCamera)?.name || 'Thiết bị';
-    
+
     const formatD = (dStr) => {
       if (!dStr) return '';
       const parts = dStr.split('-');
@@ -274,10 +274,10 @@ const BookingPage = () => {
         ]);
         const activeProducts = pData.filter(p => p.status?.toLowerCase() === 'active');
         setProductList(activeProducts);
-        
-        const activeAccs = aData.filter(a => a.status?.toLowerCase() === 'active');
-        setGlobalAccessories(activeAccs);
-        
+
+        // Accessories do not have a status field currently, so we use all of them
+        setGlobalAccessories(aData);
+
         if (selectedCamera && !activeProducts.some(p => p.id === selectedCamera)) {
           setSelectedCamera('');
         }
@@ -330,7 +330,7 @@ const BookingPage = () => {
   const calculateBooking = async () => {
     try {
       let startTimestamp, endTimestamp;
-      
+
       if (rentalType === 'SHIFT') {
         const date = startDate;
         if (shiftType === 'A') {
@@ -357,9 +357,9 @@ const BookingPage = () => {
         return parseInt(clean).toLocaleString('vi-VN').replace(/,/g, '.');
       };
 
-      const formatDate = (d) => d.toLocaleString('vi-VN', { 
+      const formatDate = (d) => d.toLocaleString('vi-VN', {
         hour: '2-digit', minute: '2-digit',
-        weekday: 'long', day: '2-digit', month: '2-digit' 
+        weekday: 'long', day: '2-digit', month: '2-digit'
       });
 
       if (end <= start) {
@@ -416,8 +416,8 @@ const BookingPage = () => {
           }
         }
 
-        setResult({ 
-          status: 'conflict', 
+        setResult({
+          status: 'conflict',
           recommendations: getRecommendations(start, end),
           availableSlots: suggestions,
           times: { start: formatDate(start), end: formatDate(end) }
@@ -469,26 +469,39 @@ const BookingPage = () => {
       let accessoryTotal = 0;
       selectedAccessories.forEach(acc => {
         const accPrice = Number(acc.price) || 0;
-        let itemTotal = 0;
+        const qty = acc.selected_quantity || 1;
+        const configPricing = acc.config?.pricing || {};
+        const configUI = acc.config?.ui || {};
         
-        if (acc.charge_type === 'per_day') {
-           itemTotal = accPrice * (rentalType === 'SHIFT' ? 1 : diffDays);
-           breakdown.push({ label: `Phụ kiện: ${acc.name} (${formatNumber(accPrice)}/ngày x ${rentalType === 'SHIFT' ? 1 : diffDays})`, value: formatNumber(itemTotal) });
+        let itemTotal = 0;
+        const calculateBy = configPricing.calculate_by || acc.charge_type || 'once';
+        let effectivePrice = accPrice;
+
+        if (rentalType === 'SHIFT' && configPricing.shift_price) {
+          effectivePrice = Number(configPricing.shift_price);
+        }
+
+        const unitDisplay = configUI.unit_label ? '/' + configUI.unit_label : '';
+
+        if (calculateBy === 'per_day') {
+          const daysToMultiply = rentalType === 'SHIFT' ? 1 : diffDays;
+          itemTotal = effectivePrice * qty * daysToMultiply;
+          breakdown.push({ label: `Phụ kiện: ${acc.name} (${formatNumber(effectivePrice)}đ${unitDisplay} x ${qty} x ${daysToMultiply} ${rentalType === 'SHIFT' ? 'Ca' : 'Ngày'})`, value: formatNumber(itemTotal) });
         } else {
-           itemTotal = accPrice;
-           breakdown.push({ label: `Phụ kiện: ${acc.name} (1 Lần)`, value: formatNumber(itemTotal) });
+          itemTotal = effectivePrice * qty;
+          breakdown.push({ label: `Phụ kiện: ${acc.name} (${formatNumber(effectivePrice)}đ${unitDisplay} x ${qty})`, value: formatNumber(itemTotal) });
         }
         accessoryTotal += itemTotal;
       });
 
       price = formatNumber(parseInt(price.replace(/\./g, '')) + accessoryTotal);
 
-      setResult({ 
-        status: 'success', 
-        price, 
+      setResult({
+        status: 'success',
+        price,
         breakdown,
         days: diffDays,
-        times: { 
+        times: {
           start: formatDate(start),
           end: formatDate(end)
         },
@@ -536,15 +549,15 @@ const BookingPage = () => {
         customerName: cusName,
         phone: cusPhone,
         email: cusEmail,
-        city: receiveMethod === 'store' 
-          ? 'Nhận tại cửa hàng (23 Lê Thánh Tông)' 
-          : (wardName && distName && provName 
-              ? `${cusAddress ? cusAddress + ', ' : ''}${wardName}, ${distName}, ${provName}` 
-              : (cusAddress ? `${cusAddress}, ${cusCity}` : cusCity)),
+        city: receiveMethod === 'store'
+          ? 'Nhận tại cửa hàng (23 Lê Thánh Tông)'
+          : (wardName && distName && provName
+            ? `${cusAddress ? cusAddress + ', ' : ''}${wardName}, ${distName}, ${provName}`
+            : (cusAddress ? `${cusAddress}, ${cusCity}` : cusCity)),
         social: cusSocial,
         product_id: selectedCamera,
-        start_time: startDate + 'T' + (rentalType==='SHIFT'?(shiftType==='A'?'07:00:00':'14:00:00'):(rentalType==='DAY'?'07:30:00':'19:00:00')), 
-        end_time: (rentalType==='SHIFT'?startDate:endDate) + 'T' + (rentalType==='SHIFT'?(shiftType==='A'?'13:00:00':'21:00:00'):(rentalType==='DAY'?'07:30:00':'19:00:00')),
+        start_time: startDate + 'T' + (rentalType === 'SHIFT' ? (shiftType === 'A' ? '07:00:00' : '14:00:00') : (rentalType === 'DAY' ? '07:30:00' : '19:00:00')),
+        end_time: (rentalType === 'SHIFT' ? startDate : endDate) + 'T' + (rentalType === 'SHIFT' ? (shiftType === 'A' ? '13:00:00' : '21:00:00') : (rentalType === 'DAY' ? '07:30:00' : '19:00:00')),
         total_price: parseInt(result.price.replace(/\./g, '')),
         rentalType: rentalType,
         deposit_type: cusDepositType,
@@ -552,14 +565,14 @@ const BookingPage = () => {
         breakdown: result.breakdown,
         optional_accessories: selectedAccessories
       });
-      
+
       if (created && created.booking_id) {
         setCreatedBookingId(created.booking_id);
       }
       // Clear draft on success
       localStorage.removeItem('booking_draft');
       if (cusPhone) adminService.deleteBookingDraft(cusPhone);
-      
+
       setStep(3);
       setShowSuccessNotice(true);
     } catch (error) {
@@ -586,7 +599,7 @@ const BookingPage = () => {
 
     try {
       setIsDownloading(true);
-      
+
       const originalImgs = [];
       const imgElements = invoiceElement.querySelectorAll('.bill-v2-product-image img');
       const localPlaceholder = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNGNUY1RjUiLz48dGV4dCB4PSI2MCIgeT0iNjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iI0FBQSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Q0hJTkhBIFNUT1JFPC90ZXh0Pjwvc3ZnPg==";
@@ -686,8 +699,8 @@ const BookingPage = () => {
       {(showLocalPrompt || showRemotePrompt) && (
         <div className="draft-recovery-bar animate-slide-down">
           <p>
-            {showRemotePrompt 
-              ? "Bạn có một bản nháp từ thiết bị này. Khôi phục thông tin?" 
+            {showRemotePrompt
+              ? "Bạn có một bản nháp từ thiết bị này. Khôi phục thông tin?"
               : "Phát hiện đơn hàng chưa hoàn tất từ trước. Bạn có muốn khôi phục?"}
             <br />
             <span style={{ fontSize: '0.82rem', color: '#ffffffff', marginTop: '4px', display: 'block', fontWeight: 600 }}>
@@ -695,18 +708,18 @@ const BookingPage = () => {
             </span>
           </p>
           <div className="draft-actions">
-             <button onClick={() => applyDraft(showRemotePrompt ? remoteDraft : localDraft)}>
-               QUAY LẠI BOOKING TRƯỚC ĐÓ
-             </button>
-             <button 
-                className="btn-close-draft" 
-                onClick={() => {
-                  setShowLocalPrompt(false);
-                  setShowRemotePrompt(false);
-                }}
-              >
-                BỎ QUA
-              </button>
+            <button onClick={() => applyDraft(showRemotePrompt ? remoteDraft : localDraft)}>
+              QUAY LẠI BOOKING TRƯỚC ĐÓ
+            </button>
+            <button
+              className="btn-close-draft"
+              onClick={() => {
+                setShowLocalPrompt(false);
+                setShowRemotePrompt(false);
+              }}
+            >
+              BỎ QUA
+            </button>
           </div>
         </div>
       )}
@@ -724,7 +737,7 @@ const BookingPage = () => {
           <div className="booking-grid">
             <div className="booking-form-side">
               <h1 className="booking-title">ĐẶT LỊCH THUÊ MÁY</h1>
-              
+
               {step === 1 && (
                 <div className="step-content">
                   <div className="form-group">
@@ -742,19 +755,19 @@ const BookingPage = () => {
                   <div className="form-group">
                     <label>HẠNG MỤC THUÊ</label>
                     <div className="rental-type-selector">
-                      <button 
-                        className={rentalType === 'DAY' ? 'active' : ''} 
+                      <button
+                        className={rentalType === 'DAY' ? 'active' : ''}
                         onClick={() => setRentalType('DAY')}
                       >
                         Lấy Ban Ngày (07:30)
                       </button>
-                      <button 
-                        className={rentalType === 'NIGHT' ? 'active' : ''} 
+                      <button
+                        className={rentalType === 'NIGHT' ? 'active' : ''}
                         onClick={() => setRentalType('NIGHT')}
                       >
                         Lấy Ban Đêm (19:00)
                       </button>
-                      <button 
+                      <button
                         className={`shift-btn ${rentalType === 'SHIFT' ? 'active' : ''} ${(currentProduct.price6h === '0' || !currentProduct.price6h) ? 'disabled' : ''}`}
                         disabled={currentProduct.price6h === '0' || !currentProduct.price6h}
                         onClick={() => setRentalType('SHIFT')}
@@ -784,20 +797,20 @@ const BookingPage = () => {
                   <div className="date-row">
                     <div className="form-group">
                       <label>NGÀY BẮT ĐẦU</label>
-                      <input 
-                        type="date" 
-                        value={startDate} 
+                      <input
+                        type="date"
+                        value={startDate}
                         onChange={(e) => {
                           const newStart = e.target.value;
                           setStartDate(newStart);
                           const nextDay = new Date(new Date(newStart).getTime() + 86400000).toISOString().split('T')[0];
                           setEndDate(nextDay);
-                        }} 
-                        min={today} 
+                        }}
+                        min={today}
                       />
                     </div>
                     {rentalType !== 'SHIFT' && (
-                       <div className="form-group">
+                      <div className="form-group">
                         <label>NGÀY KẾT THÚC</label>
                         <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} min={startDate} />
                       </div>
@@ -815,31 +828,73 @@ const BookingPage = () => {
                         {globalAccessories
                           .filter(a => a.applicable_categories.includes('Tất cả') || a.applicable_categories.includes(currentProduct.category))
                           .map(acc => {
-                            const isSelected = selectedAccessories.some(sa => sa.id === acc.id);
+                            const selectedAcc = selectedAccessories.find(sa => sa.id === acc.id);
+                            const isSelected = !!selectedAcc;
+                            const isNumberInput = acc.config?.ui?.input_type === 'number';
+                            const quantity = selectedAcc ? selectedAcc.selected_quantity : 0;
+                            const unitLabel = acc.config?.ui?.unit_label || '';
+
+                            const updateQty = (newQty) => {
+                              if (newQty <= 0) {
+                                setSelectedAccessories(selectedAccessories.filter(sa => sa.id !== acc.id));
+                              } else {
+                                if (isSelected) {
+                                  setSelectedAccessories(selectedAccessories.map(sa => sa.id === acc.id ? { ...sa, selected_quantity: newQty } : sa));
+                                } else {
+                                  setSelectedAccessories([...selectedAccessories, { ...acc, selected_quantity: newQty }]);
+                                }
+                              }
+                            };
+
                             return (
-                              <label key={acc.id} className={`accessory-card ${isSelected ? 'selected' : ''}`} style={{
-                                display: 'flex', alignItems: 'center', padding: '12px', border: `1.5px solid ${isSelected ? '#3182ce' : '#e2e8f0'}`,
-                                borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: isSelected ? '#ebf8ff' : '#fff'
+                              <div key={acc.id} className={`accessory-card ${isSelected ? 'selected' : ''}`} style={{
+                                display: 'flex', alignItems: 'center', padding: '12px', border: `1px solid ${isSelected ? '#000' : '#DDD'}`,
+                                borderRadius: '0', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: isSelected ? '#F8F8F8' : '#FFF'
+                              }} onClick={() => {
+                                if (!isNumberInput) {
+                                  if (isSelected) updateQty(0);
+                                  else updateQty(1);
+                                }
                               }}>
-                                <input 
-                                  type="checkbox" 
-                                  checked={isSelected}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedAccessories([...selectedAccessories, acc]);
-                                    } else {
-                                      setSelectedAccessories(selectedAccessories.filter(sa => sa.id !== acc.id));
-                                    }
-                                  }}
-                                  style={{ marginRight: '12px', width: '18px', height: '18px', cursor: 'pointer' }}
-                                />
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ fontWeight: '600', color: '#2d3748', fontSize: '0.95rem' }}>{acc.name}</div>
-                                  <div style={{ fontSize: '0.85rem', color: '#718096', marginTop: '2px' }}>
-                                    +{new Intl.NumberFormat('vi-VN').format(acc.price)}đ {acc.charge_type === 'per_day' ? '/ Ngày' : '/ Lần'}
+                                {!isNumberInput ? (
+                                  <input 
+                                    type="checkbox"
+                                    className="accessory-checkbox" 
+                                    checked={isSelected}
+                                    readOnly
+                                  />
+                                ) : (
+                                  <div style={{ marginRight: '12px', display: 'flex', alignItems: 'center', border: '1px solid #ddd', borderRadius: '4px', overflow: 'hidden', background: '#fff' }} onClick={(e) => e.stopPropagation()}>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => updateQty(quantity - 1)}
+                                      style={{ padding: '6px 10px', background: '#f5f5f5', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                                    >-</button>
+                                    <input 
+                                      type="number" 
+                                      value={quantity}
+                                      onChange={(e) => updateQty(parseInt(e.target.value) || 0)}
+                                      style={{ width: '40px', textAlign: 'center', border: 'none', padding: '6px 0', fontSize: '0.9rem', MozAppearance: 'textfield' }}
+                                    />
+                                    <button 
+                                      type="button" 
+                                      onClick={() => updateQty(quantity + 1)}
+                                      style={{ padding: '6px 10px', background: '#f5f5f5', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                                    >+</button>
+                                  </div>
+                                )}
+                                <div style={{ flex: 1 }} onClick={() => {
+                                  if (isNumberInput && !isSelected) updateQty(1);
+                                }}>
+                                  <div style={{ fontWeight: '600', color: '#111', fontSize: '0.85rem', fontFamily: '"ShopeeDisplayB", sans-serif' }}>
+                                    {acc.name} {unitLabel && <span style={{fontWeight: 'normal', color: '#666', fontSize: '0.8rem'}}>({unitLabel})</span>}
+                                  </div>
+                                  <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '2px', fontFamily: '"ShopeeDisplayM", sans-serif' }}>
+                                    +{new Intl.NumberFormat('vi-VN').format(acc.price)}đ {acc.config?.pricing?.calculate_by === 'per_day' || (!acc.config && acc.charge_type === 'per_day') ? '/ Ngày' : '/ Lần'}
+                                    {acc.config?.pricing?.shift_price && ` (Thuê ca: ${new Intl.NumberFormat('vi-VN').format(acc.config.pricing.shift_price)}đ)`}
                                   </div>
                                 </div>
-                              </label>
+                              </div>
                             );
                           })
                         }
@@ -850,7 +905,7 @@ const BookingPage = () => {
                   <div className="guide-inline-desktop" style={{ marginTop: '2rem' }}>
                     {renderGuideContent()}
                   </div>
-                  
+
                   <div className="guide-link-mobile" onClick={() => setShowGuideModal(true)}>
                     Hướng dẫn đặt thuê máy?
                   </div>
@@ -876,16 +931,16 @@ const BookingPage = () => {
                   <div className="form-group">
                     <label>KHU VỰC THUÊ</label>
                     <div className="city-selector">
-                      <button 
-                        className={`city-box ${cusCity === 'Hồ Chí Minh' ? 'active' : ''}`} 
+                      <button
+                        className={`city-box ${cusCity === 'Hồ Chí Minh' ? 'active' : ''}`}
                         disabled={true}
                         style={{ position: 'relative', opacity: 0.6, cursor: 'not-allowed' }}
                       >
                         Hồ Chí Minh
                         <span style={{ display: 'block', fontSize: '0.7rem', color: '#888', marginTop: '2px', textTransform: 'lowercase' }}>(Coming back soon)</span>
                       </button>
-                      <button 
-                        className={`city-box ${cusCity === 'Buôn Ma Thuột' ? 'active' : ''}`} 
+                      <button
+                        className={`city-box ${cusCity === 'Buôn Ma Thuột' ? 'active' : ''}`}
                         onClick={() => setCusCity('Buôn Ma Thuột')}
                       >
                         Buôn Ma Thuột
@@ -896,13 +951,13 @@ const BookingPage = () => {
                   <div className="form-group">
                     <label>HÌNH THỨC NHẬN MÁY</label>
                     <div className="receive-method-selector">
-                      <button 
+                      <button
                         className={`method-box ${receiveMethod === 'store' ? 'active' : ''}`}
                         onClick={() => setReceiveMethod('store')}
                       >
                         Nhận tại cửa hàng
                       </button>
-                      <button 
+                      <button
                         className={`method-box ${receiveMethod === 'delivery' ? 'active' : ''}`}
                         onClick={() => setReceiveMethod('delivery')}
                       >
@@ -917,9 +972,9 @@ const BookingPage = () => {
                       <label>ĐỊA CHỈ CỬA HÀNG</label>
                       <div className="store-address-content">
                         <p>23 Lê Thánh Tông, Phường Buôn Ma Thuột, Tỉnh Đắk Lắk</p>
-                        <a 
-                          href="https://maps.app.goo.gl/jNToF7Fc4keUdDkBA" 
-                          target="_blank" 
+                        <a
+                          href="https://maps.app.goo.gl/jNToF7Fc4keUdDkBA"
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="map-link-btn"
                           title="Xem trên Google Maps"
@@ -945,11 +1000,11 @@ const BookingPage = () => {
                           {wards.map(w => <option key={w.code} value={w.code}>{w.name}</option>)}
                         </select>
                       </div>
-                      <input 
-                        type="text" 
-                        placeholder="Số nhà, Tên đường (địa chỉ chi tiết)..." 
-                        value={cusAddress} 
-                        onChange={(e) => setCusAddress(e.target.value)} 
+                      <input
+                        type="text"
+                        placeholder="Số nhà, Tên đường (địa chỉ chi tiết)..."
+                        value={cusAddress}
+                        onChange={(e) => setCusAddress(e.target.value)}
                       />
                       <small className="form-notice">
                         * Phí giao hàng tính theo ứng dụng (Grab/Be/XanhSM) và do khách hàng thanh toán trực tiếp.
@@ -965,14 +1020,14 @@ const BookingPage = () => {
                   <div className="form-group">
                     <label>HÌNH THỨC ĐẶT CỌC (CHỌN 1 TRONG 2)</label>
                     <div className="deposit-selector-grid">
-                      <div 
+                      <div
                         className={`deposit-option-card ${cusDepositType === 'standard' ? 'active' : ''}`}
                         onClick={() => setCusDepositType('standard')}
                       >
                         <div className="option-header">CƠ BẢN</div>
                         <div className="option-desc">CCCD + 3.000.000 VNĐ</div>
                       </div>
-                      <div 
+                      <div
                         className={`deposit-option-card ${cusDepositType === 'property' ? 'active' : ''}`}
                         onClick={() => setCusDepositType('property')}
                       >
@@ -991,8 +1046,8 @@ const BookingPage = () => {
               {!result ? (
                 <div className="result-placeholder">
                   <p>
-                    {!selectedCamera 
-                      ? 'Vui lòng chọn thiết bị để xem báo giá.' 
+                    {!selectedCamera
+                      ? 'Vui lòng chọn thiết bị để xem báo giá.'
                       : (!startDate || (rentalType !== 'SHIFT' && !endDate))
                         ? 'Vui lòng chọn đầy đủ ngày nhận và trả máy.'
                         : 'Vui lòng hoàn tất thông tin để xem báo giá dự kiến.'}
@@ -1023,8 +1078,8 @@ const BookingPage = () => {
                     <span className="res-total">{result.price} VNĐ</span>
                   </div>
                   {step === 1 ? (
-                    <button 
-                      className={`btn-confirm-booking ${(!selectedCamera || !startDate || (rentalType !== 'SHIFT' && !endDate)) ? 'disabled' : ''}`} 
+                    <button
+                      className={`btn-confirm-booking ${(!selectedCamera || !startDate || (rentalType !== 'SHIFT' && !endDate)) ? 'disabled' : ''}`}
                       onClick={handleNextStep}
                       disabled={!selectedCamera || !startDate || (rentalType !== 'SHIFT' && !endDate)}
                     >
@@ -1033,21 +1088,21 @@ const BookingPage = () => {
                   ) : (
                     <div className="policy-acceptance-container">
                       <label className="policy-checkbox-label">
-                        <input 
-                          type="checkbox" 
-                          checked={isPolicyAccepted} 
-                          onChange={(e) => setIsPolicyAccepted(e.target.checked)} 
+                        <input
+                          type="checkbox"
+                          checked={isPolicyAccepted}
+                          onChange={(e) => setIsPolicyAccepted(e.target.checked)}
                         />
                         <span>
                           Bằng việc bấm thuê bạn đồng ý và chấp nhận <a href="/chinh-sach" target="_blank" rel="noreferrer">Chính sách và điều khoản</a> của ChinHaStore
                         </span>
                       </label>
-                      
+
                       <div className="captcha-wrapper" style={{ margin: '15px 0', display: 'flex', justifyContent: 'center', minHeight: '65px' }}>
                         {step === 2 && !showLocalPrompt && !showRemotePrompt && isPolicyAccepted && (
-                          <Turnstile 
+                          <Turnstile
                             ref={turnstileRef}
-                            siteKey="0x4AAAAAADKQ-kplunorEsim" 
+                            siteKey="0x4AAAAAADKQ-kplunorEsim"
                             onSuccess={(token) => setCaptchaToken(token)}
                             onError={(err) => {
                               console.error('Turnstile Error:', err);
@@ -1063,9 +1118,9 @@ const BookingPage = () => {
                         )}
                       </div>
 
-                      <button 
-                        className={`btn-confirm-booking ${(!isPolicyAccepted || !captchaToken) ? 'disabled' : ''}`} 
-                        disabled={isSubmitting || !isPolicyAccepted || !captchaToken} 
+                      <button
+                        className={`btn-confirm-booking ${(!isPolicyAccepted || !captchaToken) ? 'disabled' : ''}`}
+                        disabled={isSubmitting || !isPolicyAccepted || !captchaToken}
                         onClick={handleFinalSubmit}
                       >
                         {isSubmitting ? 'ĐANG GỬI...' : 'XÁC NHẬN ĐẶT LỊCH'}
@@ -1087,8 +1142,8 @@ const BookingPage = () => {
                     <h3>Máy đã bận!</h3>
                     <p>Khung giờ này đã có khách đặt trước.</p>
                   </div>
-                  <button 
-                    className="btn-scroll-rec" 
+                  <button
+                    className="btn-scroll-rec"
                     onClick={() => document.querySelector('.recommendation-row')?.scrollIntoView({ behavior: 'smooth' })}
                   >
                     XEM GỢI Ý THAY THẾ
@@ -1099,8 +1154,8 @@ const BookingPage = () => {
                       <p className="res-suggestions-title">Gợi ý khung giờ khác cho bạn:</p>
                       <div className="res-suggestions-grid">
                         {result.availableSlots.map((slot, i) => (
-                          <div 
-                            key={i} 
+                          <div
+                            key={i}
                             className="res-suggestion-card"
                             onClick={() => {
                               setStartDate(slot.start.toISOString().split('T')[0]);
@@ -1148,7 +1203,7 @@ const BookingPage = () => {
                     <div className="ticket-equipment-box">
                       <div className="ticket-value">{currentProduct.name}</div>
                       {currentProduct.image && (
-                         <img src={currentProduct.image} alt="Device" className="ticket-device-img" />
+                        <img src={currentProduct.image} alt="Device" className="ticket-device-img" />
                       )}
                     </div>
                   </div>
@@ -1210,10 +1265,10 @@ const BookingPage = () => {
                     return (
                       <>
                         <div className="ticket-summary-left">
-                          <img 
-                            src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${dAmount}&addInfo=${createdBookingId}`} 
-                            alt="QR Code" 
-                            className="ticket-summary-qr" 
+                          <img
+                            src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${dAmount}&addInfo=${createdBookingId}`}
+                            alt="QR Code"
+                            className="ticket-summary-qr"
                           />
                           <div className="qr-text-small">QUÉT ĐỂ ĐẶT CỌC</div>
                         </div>
@@ -1256,13 +1311,13 @@ const BookingPage = () => {
                 <div className="bill-v2-header">
                   <h2>CHINHA STORE</h2>
                   <p>HÓA ĐƠN THANH TOÁN GIỮ LỊCH</p>
-                  <p style={{fontSize: '0.7rem', fontWeight: 'bold', marginTop: '4px'}}>Mã hợp đồng: #{createdBookingId}</p>
+                  <p style={{ fontSize: '0.7rem', fontWeight: 'bold', marginTop: '4px' }}>Mã hợp đồng: #{createdBookingId}</p>
                 </div>
                 <hr className="bill-v2-divider" />
                 <div className="bill-v2-product-section">
                   {currentProduct.image && (
                     <div className="bill-v2-product-image">
-                       <img src={currentProduct.image} alt="Product" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                      <img src={currentProduct.image} alt="Product" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                   )}
                   <div className="bill-v2-product-info">
@@ -1298,18 +1353,18 @@ const BookingPage = () => {
                 <div className="bill-v2-total-section">
                   <div className="total-row main-total">
                     <span>TỔNG CHI PHÍ DỰ KIẾN:</span>
-                    <span style={{color: '#f60'}}>{result?.price} VNĐ</span>
+                    <span style={{ color: '#f60' }}>{result?.price} VNĐ</span>
                   </div>
                 </div>
                 <div className="bill-v2-qr-section">
-                   <img 
-                      src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${Math.round((Number(result?.price?.replace(/\./g, '')) || 0) * ( (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) >= 2 && (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) <= 5 ? 0.5 : 1 ))}&addInfo=${createdBookingId}`} 
-                      alt="QR" 
-                      style={{width: '120px', height: '120px', marginBottom: '10px'}}
-                    />
-                   <p style={{fontSize: '0.9rem', fontWeight: 700, marginBottom: '5px'}}>THÔNG TIN THANH TOÁN CỌC</p>
-                   <p style={{fontSize: '0.8rem'}}>SEABANK: 000000407891</p>
-                   <p style={{fontSize: '0.8rem'}}>CHỦ TK: MAN HI CHIN</p>
+                  <img
+                    src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${Math.round((Number(result?.price?.replace(/\./g, '')) || 0) * ((result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) >= 2 && (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) <= 5 ? 0.5 : 1))}&addInfo=${createdBookingId}`}
+                    alt="QR"
+                    style={{ width: '120px', height: '120px', marginBottom: '10px' }}
+                  />
+                  <p style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '5px' }}>THÔNG TIN THANH TOÁN CỌC</p>
+                  <p style={{ fontSize: '0.8rem' }}>SEABANK: 000000407891</p>
+                  <p style={{ fontSize: '0.8rem' }}>CHỦ TK: MAN HI CHIN</p>
                 </div>
               </div>
             </div>
@@ -1326,13 +1381,13 @@ const BookingPage = () => {
             <h2 className="rec-row-title">NGAY KHUNG GIỜ BẠN CHỌN, CHÚNG TÔI CÒN CÓ</h2>
             <div className="rec-product-grid">
               {result.recommendations.map(rec => (
-                <ProductCard 
-                  key={rec.id} 
-                  product={rec} 
+                <ProductCard
+                  key={rec.id}
+                  product={rec}
                   onClick={(p) => {
                     setSelectedCamera(p.id);
                     document.querySelector('.booking-page')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }} 
+                  }}
                 />
               ))}
             </div>
