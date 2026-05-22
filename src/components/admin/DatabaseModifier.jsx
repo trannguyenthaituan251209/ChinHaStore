@@ -19,7 +19,8 @@ import {
   Bold,
   Italic,
   Heading2,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Tag
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -29,8 +30,8 @@ import { adminService } from '../../services/adminService';
 import '../../pages/AdminDashboard.css';
 
 const DatabaseModifier = ({ showStatus }) => {
-  const [activeTab, setActiveTab] = useState('camera'); // 'camera', 'customer', 'booking'
-  const [data, setData] = useState({ cameras: [], customers: [], bookings: [] });
+  const [activeTab, setActiveTab] = useState('camera'); // 'camera', 'customer', 'booking', 'accessory'
+  const [data, setData] = useState({ cameras: [], customers: [], bookings: [], accessories: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -41,6 +42,13 @@ const DatabaseModifier = ({ showStatus }) => {
   const [showArchived, setShowArchived] = useState(false);
 
   // Form States
+  const [accessoryForm, setAccessoryForm] = useState({
+    name: '',
+    price: '0',
+    charge_type: 'once',
+    applicable_categories: ['Tất cả'],
+    status: 'active'
+  });
   const [productForm, setProductForm] = useState({
     name: '',
     category: 'Mirrorless',
@@ -92,12 +100,13 @@ const DatabaseModifier = ({ showStatus }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [cameras, customers, bookings] = await Promise.all([
+      const [cameras, customers, bookings, accessories] = await Promise.all([
         adminService.getAllProducts(),
         adminService.getAllCustomers(),
-        adminService.getAllBookings()
+        adminService.getAllBookings(),
+        adminService.getAllAccessories().catch(() => []) // Fallback if table doesn't exist yet
       ]);
-      setData({ cameras, customers, bookings });
+      setData({ cameras, customers, bookings, accessories });
     } catch (err) {
       console.error(err);
       setError('Lỗi khi tải dữ liệu từ máy chủ.');
@@ -116,6 +125,7 @@ const DatabaseModifier = ({ showStatus }) => {
       if (type === 'camera') await adminService.deleteProduct(id);
       if (type === 'customer') await adminService.deleteCustomer(id);
       if (type === 'booking') await adminService.deleteBooking(id);
+      if (type === 'accessory') await adminService.deleteAccessory(id);
       fetchData();
       showStatus('Đã xóa dữ liệu thành công', 'success');
     } catch (err) {
@@ -201,6 +211,14 @@ const DatabaseModifier = ({ showStatus }) => {
         status: item.status || 'Pending',
         city: item.city || ''
       });
+    } else if (type === 'accessory') {
+      setAccessoryForm({
+        name: item.name || '',
+        price: item.price || '0',
+        charge_type: item.charge_type || 'once',
+        applicable_categories: item.applicable_categories || ['Tất cả'],
+        status: item.status || 'active'
+      });
     }
     setModalType(type);
   };
@@ -280,6 +298,14 @@ const DatabaseModifier = ({ showStatus }) => {
         total_price: '0',
         status: 'Pending',
         city: ''
+      });
+    } else if (type === 'accessory') {
+      setAccessoryForm({
+        name: '',
+        price: '0',
+        charge_type: 'once',
+        applicable_categories: ['Tất cả'],
+        status: 'active'
       });
     }
     setModalType(type);
@@ -369,6 +395,25 @@ const DatabaseModifier = ({ showStatus }) => {
     }
   };
 
+  const handleSaveAccessory = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      if (currentItem) {
+        await adminService.updateAccessory(currentItem.id, accessoryForm);
+      } else {
+        await adminService.createAccessory(accessoryForm);
+      }
+      setModalType(null);
+      fetchData();
+      showStatus('Đã lưu phụ kiện', 'success');
+    } catch (err) {
+      showStatus('Lỗi khi lưu phụ kiện: ' + err.message, 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const ProductItem = ({ p }) => (
     <div className={`mini-item-v2 ${['archived', 'disabled'].includes(p.status) ? 'item-archived' : ''}`}>
       <div className="item-main-info">
@@ -447,6 +492,23 @@ const DatabaseModifier = ({ showStatus }) => {
     </div>
   );
 
+  const AccessoryItem = ({ a }) => (
+    <div className="mini-item">
+      <div className="mini-icon-circle highlight">
+        <Tag size={18} />
+      </div>
+      <div className="item-details" style={{ flex: 1 }}>
+        <strong>{a.name}</strong>
+        <span>{new Intl.NumberFormat('vi-VN').format(a.price)} VNĐ ({a.charge_type === 'once' ? '1 Lần' : 'Theo Ngày'})</span>
+        <span style={{ fontSize: '0.8rem', color: '#888' }}>Áp dụng: {(a.applicable_categories || []).join(', ')}</span>
+      </div>
+      <div className="item-actions">
+        <button className="action-btn edit" onClick={() => handleEdit('accessory', a)} title="Sửa"><Edit3 size={16} /></button>
+        <button className="action-btn delete" onClick={() => handleDelete('accessory', a.id)} title="Xóa"><Trash2 size={16} /></button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="database-modifier animate-in">
       <div className="modifier-tabs">
@@ -461,6 +523,10 @@ const DatabaseModifier = ({ showStatus }) => {
         <button className={activeTab === 'booking' ? 'active' : ''} onClick={() => setActiveTab('booking')}>
           <Calendar size={18} />
           <span>ĐẶT LỊCH</span>
+        </button>
+        <button className={activeTab === 'accessory' ? 'active' : ''} onClick={() => setActiveTab('accessory')}>
+          <Tag size={18} />
+          <span>PHỤ KIỆN</span>
         </button>
         <button className={activeTab === 'import' ? 'active' : ''} onClick={() => setActiveTab('import')}>
           <FileUp size={18} />
@@ -539,6 +605,27 @@ const DatabaseModifier = ({ showStatus }) => {
                 <div className="mini-list">
                   {data.bookings.map(b => <BookingItem key={b.id} b={b} />)}
                   {data.bookings.length === 0 && <p className="empty-msg">Chưa có đơn đặt lịch nào.</p>}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'accessory' && (
+              <div className="modifier-section">
+                <div className="section-header">
+                  <h3>Quản Lý Phụ Kiện</h3>
+                  <div className="header-actions-group">
+                    <button className={`icon-btn refresh-btn ${loading ? 'syncing' : ''}`} title="Làm mới" onClick={fetchData}>
+                      <RefreshCcw size={16} />
+                    </button>
+                    <button className="btn-add-manual" onClick={() => handleAdd('accessory')}>
+                      <PlusCircle size={18} />
+                      THÊM PHỤ KIỆN
+                    </button>
+                  </div>
+                </div>
+                <div className="mini-list">
+                  {data.accessories.map(a => <AccessoryItem key={a.id} a={a} />)}
+                  {data.accessories.length === 0 && <p className="empty-msg">Chưa có phụ kiện nào.</p>}
                 </div>
               </div>
             )}
@@ -800,6 +887,65 @@ const DatabaseModifier = ({ showStatus }) => {
               <footer className="modal-footer">
                 <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>Hủy</button>
                 <button type="submit" className="btn-save" disabled={isSaving}>LƯU THÔNG TIN</button>
+              </footer>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {modalType === 'accessory' && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal animate-in" style={{ maxWidth: '500px' }}>
+            <header className="modal-header">
+              <h3>{currentItem ? 'SỬA PHỤ KIỆN' : 'THÊM PHỤ KIỆN'}</h3>
+              <button className="close-btn" onClick={() => setModalType(null)}>×</button>
+            </header>
+            <form className="admin-form" onSubmit={handleSaveAccessory}>
+              <div className="form-group">
+                <label>Tên phụ kiện</label>
+                <input type="text" required value={accessoryForm.name} onChange={e => setAccessoryForm({...accessoryForm, name: e.target.value})} placeholder="VD: Film Instax" />
+              </div>
+              <div className="form-row-multi">
+                <div className="form-group">
+                  <label>Giá (VNĐ)</label>
+                  <input type="number" required value={accessoryForm.price} onChange={e => setAccessoryForm({...accessoryForm, price: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>Cách tính phí</label>
+                  <select value={accessoryForm.charge_type} onChange={e => setAccessoryForm({...accessoryForm, charge_type: e.target.value})}>
+                    <option value="once">Thu 1 lần</option>
+                    <option value="per_day">Theo ngày</option>
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Áp dụng cho danh mục (Giữ Ctrl/Cmd để chọn nhiều)</label>
+                <select 
+                  multiple 
+                  style={{ height: '100px' }}
+                  value={accessoryForm.applicable_categories} 
+                  onChange={e => {
+                    const options = Array.from(e.target.options);
+                    const selected = options.filter(o => o.selected).map(o => o.value);
+                    if (selected.includes('Tất cả')) {
+                      setAccessoryForm({...accessoryForm, applicable_categories: ['Tất cả']});
+                    } else {
+                      setAccessoryForm({...accessoryForm, applicable_categories: selected});
+                    }
+                  }}
+                >
+                  <option value="Tất cả">Tất cả</option>
+                  <option value="Mirrorless">Mirrorless</option>
+                  <option value="Compact">Compact</option>
+                  <option value="Film">Film</option>
+                  <option value="Action">Action</option>
+                </select>
+              </div>
+              <footer className="modal-footer">
+                <button type="button" className="btn-cancel" onClick={() => setModalType(null)}>Hủy</button>
+                <button type="submit" className="btn-save" disabled={isSaving}>
+                  {isSaving ? 'ĐANG LƯU...' : 'LƯU PHỤ KIỆN'}
+                </button>
               </footer>
             </form>
           </div>

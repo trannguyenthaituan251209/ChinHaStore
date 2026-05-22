@@ -162,6 +162,7 @@ export const adminService = {
         city: b.city || b.customers?.city || '',
         is_seen: b.is_seen,
         booking_id: b.booking_id,
+        optional_accessories: b.optional_accessories || [],
         created_at: b.created_at,
         invoice_versions: b.invoice_versions || []
       };
@@ -373,6 +374,7 @@ export const adminService = {
       city: b.city || b.customers?.city || '',
       is_seen: b.is_seen,
       booking_id: b.booking_id,
+      optional_accessories: b.optional_accessories || [],
       created_at: b.created_at,
       invoice_versions: b.invoice_versions || []
     }));
@@ -653,6 +655,7 @@ export const adminService = {
         rental_type: bookingData.rentalType,
         deposit_type: bookingData.deposit_type || 'standard',
         total_price: bookingData.total_price,
+        optional_accessories: bookingData.optional_accessories || [],
         source: bookingData.source || 'Admin',
         status: bookingData.status || 'Pending',
         is_seen: (bookingData.source && bookingData.source !== 'Website') ? true : false
@@ -1500,6 +1503,44 @@ export const adminService = {
       .delete()
       .eq('phone', phone);
     if (error) console.error('Error deleting draft:', error);
+  },
+
+  /**
+   * Accessories CRUD
+   */
+  async getAllAccessories() {
+    const { data, error } = await supabase
+      .from('accessories')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+
+  async createAccessory(accessory) {
+    const { data, error } = await supabase
+      .from('accessories')
+      .insert(accessory)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateAccessory(id, updates) {
+    const { error } = await supabase
+      .from('accessories')
+      .update(updates)
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async deleteAccessory(id) {
+    const { error } = await supabase
+      .from('accessories')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
   },
 
   /**

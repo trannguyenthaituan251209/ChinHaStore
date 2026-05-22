@@ -66,12 +66,34 @@ const ProductDetail = () => {
     // Prepare gallery images
     const gallery = [product.image || product.image_url, ...(product.gallery_images || [])].filter(Boolean);
 
+    // --- SEO ENHANCEMENT LOGIC ---
+    const getSeoData = (name) => {
+        if (!name) return { seoName: '', brand: '' };
+        const lower = name.toLowerCase();
+        let brand = '';
+        
+        // Simple heuristic to detect brand from common camera models
+        if (/r50|r10|r8|r6|r5|rp|eos|m50|canon/i.test(lower)) brand = 'Canon';
+        else if (/a6\d{3}|a7|a9|a1|fx3|fx30|zv|sony/i.test(lower)) brand = 'Sony';
+        else if (/xt|x-t|x-s|x-pro|x100|fuji/i.test(lower)) brand = 'Fujifilm';
+        else if (/z5|z6|z7|z8|z9|zfc|nikon/i.test(lower)) brand = 'Nikon';
+        else if (/lumix|panasonic/i.test(lower)) brand = 'Panasonic';
+
+        let seoName = name;
+        if (brand && !lower.includes(brand.toLowerCase())) {
+            seoName = `${brand} ${name}`;
+        }
+        return { seoName, brand };
+    };
+
+    const { seoName, brand } = getSeoData(product.name);
+
     return (
         <>
             <Helmet>
-                <title>Thuê {product.name} Buôn Ma Thuột | {product.category} - ChinHaStore</title>
-                <meta name="description" content={`Dịch vụ cho thuê ${product.name} uy tín tại Buôn Ma Thuột (BMT). ${product.videoRes || ''} ${product.sensor || ''}. Giá thuê tốt nhất BMT, thủ tục đơn giản.`} />
-                <meta name="keywords" content={`thuê ${product.name} bmt, thuê ${product.name} buôn ma thuột, thuê máy ảnh bmt, thuê máy ảnh giá rẻ bmt`} />
+                <title>Thuê {seoName} Buôn Ma Thuột | {product.category} - ChinHaStore</title>
+                <meta name="description" content={`Dịch vụ cho thuê ${seoName} (${product.name}) uy tín tại Buôn Ma Thuột (BMT). ${product.videoRes || ''} ${product.sensor || ''}. Giá thuê tốt nhất BMT, thủ tục đơn giản.`} />
+                <meta name="keywords" content={`thuê ${seoName} bmt, thuê ${seoName} buôn ma thuột, thuê máy ảnh bmt, thuê ${product.name} bmt, thuê máy ảnh ${brand ? brand.toLowerCase() : 'giá rẻ'} bmt, ${brand}`} />
                 <link rel="canonical" href={`https://chinhastore.com/camera/${product.slug}`} />
             </Helmet>
 

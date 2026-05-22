@@ -176,9 +176,22 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
           }
         }
       }
-      setCustomLineItems([
+      const newItems = [
         { id: Date.now().toString(), label: label, value: defaultPrice, type: 'addition' }
-      ]);
+      ];
+
+      if (selectedBooking.optional_accessories && Array.isArray(selectedBooking.optional_accessories)) {
+        selectedBooking.optional_accessories.forEach((acc, idx) => {
+          newItems.push({
+            id: `acc-${Date.now()}-${idx}`,
+            label: `Phụ kiện: ${acc.name}`,
+            value: Number(acc.price) || 0,
+            type: 'addition'
+          });
+        });
+      }
+
+      setCustomLineItems(newItems);
       
       // Auto-map deposit based on customer choice
       const mapping = {

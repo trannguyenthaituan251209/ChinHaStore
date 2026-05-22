@@ -13,6 +13,8 @@ const BookingPage = () => {
 
   const [step, setStep] = useState(1);
   const [productList, setProductList] = useState([]);
+  const [globalAccessories, setGlobalAccessories] = useState([]);
+  const [selectedAccessories, setSelectedAccessories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const today = new Date().toISOString().split('T')[0];
@@ -266,9 +268,15 @@ const BookingPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const data = await adminService.getAllProducts();
-        const activeProducts = data.filter(p => p.status?.toLowerCase() === 'active');
+        const [pData, aData] = await Promise.all([
+          adminService.getAllProducts(),
+          adminService.getAllAccessories().catch(() => [])
+        ]);
+        const activeProducts = pData.filter(p => p.status?.toLowerCase() === 'active');
         setProductList(activeProducts);
+        
+        const activeAccs = aData.filter(a => a.status?.toLowerCase() === 'active');
+        setGlobalAccessories(activeAccs);
         
         if (selectedCamera && !activeProducts.some(p => p.id === selectedCamera)) {
           setSelectedCamera('');
@@ -317,7 +325,7 @@ const BookingPage = () => {
       }
     };
     runCalculation();
-  }, [startDate, endDate, selectedCamera, rentalType, shiftType, availabilitySnapshot, productList]);
+  }, [startDate, endDate, selectedCamera, rentalType, shiftType, availabilitySnapshot, productList, selectedAccessories]);
 
   const calculateBooking = async () => {
     try {
@@ -455,6 +463,26 @@ const BookingPage = () => {
         }
       }
 
+      // ---------------------------------
+      // CÁC TÙY CHỌN PHỤ KIỆN
+      // ---------------------------------
+      let accessoryTotal = 0;
+      selectedAccessories.forEach(acc => {
+        const accPrice = Number(acc.price) || 0;
+        let itemTotal = 0;
+        
+        if (acc.charge_type === 'per_day') {
+           itemTotal = accPrice * (rentalType === 'SHIFT' ? 1 : diffDays);
+           breakdown.push({ label: `Phụ kiện: ${acc.name} (${formatNumber(accPrice)}/ngày x ${rentalType === 'SHIFT' ? 1 : diffDays})`, value: formatNumber(itemTotal) });
+        } else {
+           itemTotal = accPrice;
+           breakdown.push({ label: `Phụ kiện: ${acc.name} (1 Lần)`, value: formatNumber(itemTotal) });
+        }
+        accessoryTotal += itemTotal;
+      });
+
+      price = formatNumber(parseInt(price.replace(/\./g, '')) + accessoryTotal);
+
       setResult({ 
         status: 'success', 
         price, 
@@ -521,7 +549,8 @@ const BookingPage = () => {
         rentalType: rentalType,
         deposit_type: cusDepositType,
         source: 'Website',
-        breakdown: result.breakdown
+        breakdown: result.breakdown,
+        optional_accessories: selectedAccessories
       });
       
       if (created && created.booking_id) {
@@ -775,7 +804,50 @@ const BookingPage = () => {
                     )}
                   </div>
 
-                  <div className="guide-inline-desktop">
+                  {/* VÙNG CHỌN PHỤ KIỆN ĐÍNH KÈM */}
+                  {currentProduct && globalAccessories.filter(a => a.applicable_categories.includes('Tất cả') || a.applicable_categories.includes(currentProduct.category)).length > 0 && (
+                    <div className="form-group accessories-section animate-in" style={{ marginTop: '1.5rem' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1a202c' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                        TÙY CHỌN THUÊ KÈM
+                      </label>
+                      <div className="accessories-grid" style={{ display: 'grid', gap: '0.8rem', marginTop: '0.5rem' }}>
+                        {globalAccessories
+                          .filter(a => a.applicable_categories.includes('Tất cả') || a.applicable_categories.includes(currentProduct.category))
+                          .map(acc => {
+                            const isSelected = selectedAccessories.some(sa => sa.id === acc.id);
+                            return (
+                              <label key={acc.id} className={`accessory-card ${isSelected ? 'selected' : ''}`} style={{
+                                display: 'flex', alignItems: 'center', padding: '12px', border: `1.5px solid ${isSelected ? '#3182ce' : '#e2e8f0'}`,
+                                borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: isSelected ? '#ebf8ff' : '#fff'
+                              }}>
+                                <input 
+                                  type="checkbox" 
+                                  checked={isSelected}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedAccessories([...selectedAccessories, acc]);
+                                    } else {
+                                      setSelectedAccessories(selectedAccessories.filter(sa => sa.id !== acc.id));
+                                    }
+                                  }}
+                                  style={{ marginRight: '12px', width: '18px', height: '18px', cursor: 'pointer' }}
+                                />
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ fontWeight: '600', color: '#2d3748', fontSize: '0.95rem' }}>{acc.name}</div>
+                                  <div style={{ fontSize: '0.85rem', color: '#718096', marginTop: '2px' }}>
+                                    +{new Intl.NumberFormat('vi-VN').format(acc.price)}đ {acc.charge_type === 'per_day' ? '/ Ngày' : '/ Lần'}
+                                  </div>
+                                </div>
+                              </label>
+                            );
+                          })
+                        }
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="guide-inline-desktop" style={{ marginTop: '2rem' }}>
                     {renderGuideContent()}
                   </div>
                   
