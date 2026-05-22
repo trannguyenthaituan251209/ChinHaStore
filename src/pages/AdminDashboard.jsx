@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  LayoutDashboard, 
-  CalendarCheck, 
-  Settings, 
-  PieChart, 
+import {
+  LayoutDashboard,
+  CalendarCheck,
+  Settings,
+  PieChart,
   LogOut,
   Bell,
   Search,
@@ -23,6 +23,7 @@ import ReportCenter from '../components/admin/ReportCenter';
 import BlogManager from '../components/admin/BlogManager';
 import { adminService } from '../services/adminService';
 import { supabase } from '../utils/supabase';
+import { BarChart, Bar, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, LabelList } from 'recharts';
 import './AdminDashboard.css';
 import './AdminDashboard_notifs.css';
 
@@ -33,7 +34,7 @@ const AdminDashboard = ({ onLogout }) => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Real-time Notifications
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -54,7 +55,7 @@ const AdminDashboard = ({ onLogout }) => {
         showStatus('Trình duyệt hoặc thiết bị của bạn không hỗ trợ Sinh trắc học (Passkeys).', 'error');
         return;
       }
-      
+
       const userId = new Uint8Array(16);
       window.crypto.getRandomValues(userId);
 
@@ -151,17 +152,17 @@ const AdminDashboard = ({ onLogout }) => {
   // Real-time Listening
   React.useEffect(() => {
     console.log('Admin: Attaching Real-time Listener...');
-    
+
     const channel = supabase
       .channel('realtime_bookings')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'bookings' 
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'bookings'
       }, (payload) => {
         console.log('⚡ ANY Booking Event Received:', payload);
         const newBooking = payload.new;
-        
+
         // Only trigger notification on INSERT
         if (payload.eventType === 'INSERT') {
           const notification = {
@@ -171,11 +172,11 @@ const AdminDashboard = ({ onLogout }) => {
             time: new Date().toLocaleTimeString('vi-VN'),
             bookingId: newBooking.id
           };
-          
+
           setNotifications(prev => [notification, ...prev].slice(0, 5));
           setUnreadCount(prev => prev + 1);
         }
-        
+
         // Refresh stats for ANY change (Insert/Update/Delete) to keep Dashboard fresh
         if (activeTab === 'dashboard') {
           fetchStats();
@@ -227,17 +228,32 @@ const AdminDashboard = ({ onLogout }) => {
 
           <div className="admin-stat-card">
             <div className="stat-header">
-              <h4>Thống kê khách (Tuần)</h4>
+              <h4>Thống kê khách (7 ngày qua)</h4>
               <PieChart size={20} opacity={0.6} />
             </div>
             <div className="admin-stat-delta">
               <span className="delta-num">{stats.weeklyCustomers}</span>
               <span className="delta-perc positive">▲ {stats.weeklyDelta}</span>
             </div>
-            <div className="mini-chart-placeholder">
-              {[40, 70, 30, 90, 50, 80, 60].map((h, i) => (
-                <div key={i} className="mini-bar" style={{height: `${h}%`}}></div>
-              ))}
+            <div className="mini-chart-placeholder" style={{ height: '110px', width: '100%', marginTop: '10px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.weeklyChartData} margin={{ top: 15, right: 0, left: 0, bottom: 0 }}>
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fill: '#64748b' }}
+                    dy={5}
+                  />
+                  <RechartsTooltip
+                    cursor={{ fill: 'rgba(16, 185, 129, 0.1)' }}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '12px', padding: '5px 10px' }}
+                  />
+                  <Bar dataKey="customers" fill="#10b981" radius={[4, 4, 4, 4]}>
+                    <LabelList dataKey="customers" position="top" style={{ fontSize: 10, fill: '#64748b' }} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
@@ -290,10 +306,10 @@ const AdminDashboard = ({ onLogout }) => {
         <div className="sidebar-logo">
           ChinHa<span>Store</span>
         </div>
-        
+
         <nav className="sidebar-nav">
           {navItems.map((item) => (
-            <button 
+            <button
               key={item.id}
               className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
               onClick={() => setActiveTab(item.id)}
@@ -330,9 +346,9 @@ const AdminDashboard = ({ onLogout }) => {
         <header className="admin-header">
           <div className="header-search">
             <Search size={18} />
-            <input 
-              type="text" 
-              placeholder="Tìm kiếm nhanh..." 
+            <input
+              type="text"
+              placeholder="Tìm kiếm nhanh..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoComplete="off"
@@ -341,8 +357,8 @@ const AdminDashboard = ({ onLogout }) => {
           </div>
           <div className="header-actions">
             {/* Diagnostic Ping for testing Real-time */}
-            <button 
-              className="icon-btn debug-ping" 
+            <button
+              className="icon-btn debug-ping"
               title="Test Real-time Signal"
               onClick={async () => {
                 console.log('Admin: Sending Test Ping...');
@@ -355,14 +371,14 @@ const AdminDashboard = ({ onLogout }) => {
                     total_price: 0,
                     source: 'DEBUG_PING'
                   });
-                } catch(e) { console.error('Ping error:', e); }
+                } catch (e) { console.error('Ping error:', e); }
               }}
             >
               <LogOut size={16} transform="rotate(180)" />
             </button>
 
             <div className="notification-wrapper">
-              <button 
+              <button
                 className={`icon-btn ${unreadCount > 0 ? 'has-unread' : ''}`}
                 onClick={() => {
                   setShowNotifications(!showNotifications);
@@ -402,7 +418,7 @@ const AdminDashboard = ({ onLogout }) => {
               <div className="admin-avatar" onClick={() => setShowProfileMenu(!showProfileMenu)} style={{ cursor: 'pointer' }}>
                 <User size={20} />
               </div>
-              
+
               {showProfileMenu && (
                 <div className="profile-dropdown animate-in" style={{
                   position: 'absolute',
@@ -422,13 +438,13 @@ const AdminDashboard = ({ onLogout }) => {
                     <strong style={{ display: 'block', color: '#0f172a', fontSize: '14px' }}>Mẫn Hi Chin</strong>
                     <small style={{ color: '#64748b', fontSize: '12px' }}>Quản trị viên</small>
                   </div>
-                  <button 
+                  <button
                     onClick={() => { setShowProfileMenu(false); setShowSecurityModal(true); }}
                     style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 15px', background: 'none', border: 'none', borderBottom: '1px solid #f1f5f9', width: '100%', textAlign: 'left', cursor: 'pointer', color: '#334155', fontSize: '14px', fontWeight: '500' }}
                   >
                     <ShieldCheck size={16} /> Bảo mật
                   </button>
-                  <button 
+                  <button
                     onClick={onLogout}
                     style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 15px', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', color: '#ef4444', fontSize: '14px', fontWeight: '500' }}
                   >
@@ -445,12 +461,12 @@ const AdminDashboard = ({ onLogout }) => {
             <div className="modal-container security-modal-container" onClick={e => e.stopPropagation()}>
               <div className="modal-header">
                 <h3>Cài Đặt Bảo Mật Sinh Trắc Học</h3>
-                <button className="close-btn" onClick={() => setShowSecurityModal(false)}><X size={20}/></button>
+                <button className="close-btn" onClick={() => setShowSecurityModal(false)}><X size={20} /></button>
               </div>
               <div className="modal-body" style={{ padding: '20px', textAlign: 'center' }}>
                 <Fingerprint size={48} style={{ color: '#10b981', margin: '0 auto 20px' }} />
                 <p style={{ marginBottom: '20px', lineHeight: '1.6', color: '#475569' }}>
-                  Thiết lập đăng nhập bằng <strong>FaceID, TouchID hoặc Windows Hello</strong>. 
+                  Thiết lập đăng nhập bằng <strong>FaceID, TouchID hoặc Windows Hello</strong>.
                   Sau khi kích hoạt, hệ thống sẽ tự động khóa màn hình nếu bạn không hoạt động trong 5 phút để chống kẻ gian xâm nhập.
                 </p>
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
@@ -502,7 +518,7 @@ const AdminDashboard = ({ onLogout }) => {
       {/* Bottom Nav Mobile */}
       <nav className="mobile-nav">
         {navItems.map((item) => (
-          <button 
+          <button
             key={item.id}
             className={`mobile-nav-item ${activeTab === item.id ? 'active' : ''}`}
             onClick={() => setActiveTab(item.id)}

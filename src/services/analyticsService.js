@@ -9,34 +9,26 @@ export const analyticsService = {
     const today = new Date().toISOString().split('T')[0];
 
     try {
-      // Try to increment for today via RPC
+      // 1. Try to increment for today via RPC (Recommended approach)
       const { error: rpcError } = await supabase.rpc('increment_daily_visit', { target_date: today });
 
-      // If RPC fails (404 or others), try fallback but catch silently
       if (rpcError) {
-        const { data: current } = await supabase
+        console.warn('RPC increment_daily_visit failed (possibly missing or RLS issue):', rpcError.message);
+        
+        // 2. Fallback: Try direct UPSERT (requires RLS to allow anon INSERT & UPDATE)
+        const { error: upsertError } = await supabase
           .from('site_analytics')
-          .select('visit_count')
-          .eq('date', today)
-          .maybeSingle();
+          .upsert({ date: today, visit_count: 1 }, { onConflict: 'date' });
 
-        if (current) {
-          await supabase
-            .from('site_analytics')
-            .update({ visit_count: (current.visit_count || 0) + 1 })
-            .eq('date', today);
-        } else {
-          // First visit of the day
-          await supabase
-            .from('site_analytics')
-            .insert([{ date: today, visit_count: 1 }]);
+        if (upsertError) {
+          console.error('Direct upsert to site_analytics failed (RLS violation):', upsertError.message);
+          return; // Stop here, do not set sessionStorage so it can retry later if fixed
         }
       }
       
       sessionStorage.setItem('site_visited_today', 'true');
     } catch (err) {
-      // Silently fail for analytics to keep console clean
-      console.warn('Analytics record bypassed:', err.message);
+      console.error('Analytics record error:', err.message);
     }
   },
 

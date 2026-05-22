@@ -71,8 +71,27 @@ export const adminService = {
 
     // 8. Weekly Customers (Last 7 days)
     const last7Str = new Date(today.getTime() - 6 * 86400000).toISOString();
-    const { data: cwD } = await supabase.from('bookings').select('customer_id').gte('created_at', last7Str).not('status', 'eq', 'Cancelled');
+    const { data: cwD } = await supabase.from('bookings').select('customer_id, created_at').gte('created_at', last7Str).not('status', 'eq', 'Cancelled');
     const wCust = new Set(cwD?.map(b => b.customer_id)).size;
+
+    const weeklyChartData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today.getTime() - i * 86400000);
+      const dayName = d.toLocaleDateString('vi-VN', { weekday: 'short' });
+      
+      const customersThatDay = new Set();
+      (cwD || []).forEach(b => {
+        const bd = new Date(b.created_at);
+        if (bd.getDate() === d.getDate() && bd.getMonth() === d.getMonth()) {
+          customersThatDay.add(b.customer_id);
+        }
+      });
+      
+      weeklyChartData.push({
+        name: dayName,
+        customers: customersThatDay.size
+      });
+    }
 
     return {
       rentingToday: rentingToday || 0,
@@ -84,20 +103,12 @@ export const adminService = {
       visitsDelta: '▲ 0%',
       bookingNew: bookingNew || 0,
       bookingReturned: bookingReturned || 0,
-      bookingConfirmed: bookingConfirmed || 0
+      bookingConfirmed: bookingConfirmed || 0,
+      weeklyChartData
     };
   },
 
-  async recordVisit() {
-    try {
-      const t = new Date().toISOString().split('T')[0];
-      const { error } = await supabase.rpc('increment_visits', { target_date: t });
-      if (error) {
-        const { data: c } = await supabase.from('daily_stats').select('visits').eq('date', t).maybeSingle();
-        await supabase.from('daily_stats').upsert({ date: t, visits: (c?.visits || 0) + 1 }, { onConflict: 'date' });
-      }
-    } catch (e) { console.warn('Stat block bypassed:', e.message); }
-  },
+
 
   /**
    * Fetches all bookings with joined customer and product information.
