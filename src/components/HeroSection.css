@@ -18,9 +18,16 @@
   height: auto;
 }
 
+.hero-desktop {
+  aspect-ratio: 4269 / 2400;
+  object-fit: cover;
+}
+
 /* Ẩn ảnh mobile trên màn hình máy tính */
 .hero-mobile {
   display: none;
+  aspect-ratio: 3375 / 6000;
+  object-fit: cover;
 }
 
 .hero-content {
@@ -165,7 +172,7 @@
   .hero-story-text {
     font-size: 15vw;
     margin-left: 15%;
-    margin-top: -7vw;
+    margin-top: -5vw;
     margin-bottom: 6vw;
   }
 

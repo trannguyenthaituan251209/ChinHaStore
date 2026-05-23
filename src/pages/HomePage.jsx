@@ -66,10 +66,10 @@ const HomePage = () => {
         </script>
       </Helmet>
       <HeroSection />
+      <HowItWorks />
       <HolidayHero />
       <FeaturedProducts />
       <NeedsRecommendation />
-      <HowItWorks />
       <Commitments />
       <BlogSection />
       <FinalCTA />

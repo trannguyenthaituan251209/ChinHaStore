@@ -1,48 +1,104 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './HowItWorks.css';
 
-const steps = [
-  {
-    number: '01',
-    title: 'Chọn máy & Xem giá',
-    description: 'Duyệt qua danh mục hơn 40+ loại máy và ống kính. Xem giá thuê chi tiết theo từng mốc thời gian (6h/1 ngày/3 ngày...).'
-  },
-  {
-    number: '02',
-    title: 'Check lịch & Đặt online',
-    description: 'Bạn hoàn toàn có thể check lịch và booking thông qua các nền tảng mạng xã hội như Facebook hoặc Instagram. Hơn cả thế, bạn có thể dễ dàng đặt lịch ngay tại Website.'
-  },
-  {
-    number: '03',
-    title: 'Giao nhận & Hợp đồng',
-    description: 'Đến trực tiếp store hoặc chọn giao hàng tận nơi. Thủ tục ký gửi giấy tờ/cọc diễn ra trong vòng 5 phút, minh bạch và nhanh chóng.'
-  },
-  {
-    number: '04',
-    title: 'Sáng tạo & Hoàn trả',
-    description: 'Thỏa sức ghi lại những khoảnh khắc đẹp nhất. Sau khi hoàn thành, hãy trả máy và nhận lại ngay 100% tiền cọc/giấy tờ của bạn.'
-  }
-];
+gsap.registerPlugin(ScrollTrigger);
 
 const HowItWorks = () => {
+  const containerRef = useRef(null);
+
+  useGSAP(() => {
+    // Reveal animation for items
+    const items = gsap.utils.toArray('.timeline-item');
+    
+    items.forEach((item, i) => {
+      gsap.fromTo(item, 
+        { 
+          opacity: 0, 
+          y: 60,
+          x: item.classList.contains('left') ? -50 : 50 
+        },
+        {
+          scrollTrigger: {
+            trigger: item,
+            start: "top 85%",
+            toggleActions: "play none none reverse"
+          },
+          opacity: 1,
+          y: 0,
+          x: 0,
+          duration: 0.8,
+          ease: "power3.out"
+        }
+      );
+    });
+
+    // Draw line
+    gsap.fromTo('.timeline-line-inner',
+      { height: '0%' },
+      {
+        height: '100%',
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.timeline-container',
+          start: "top 50%",
+          end: "bottom 60%",
+          scrub: true
+        }
+      }
+    );
+  }, { scope: containerRef });
+
   return (
-    <section className="how-it-works">
+    <section id="how-it-works" className="how-it-works dark-section" ref={containerRef}>
       <div className="container">
         
-        <div className="section-header">
-          <h2 className="section-title">QUY TRÌNH THUÊ MÁY</h2>
-          <p className="section-subtitle">Tối giản - Nhanh chóng - Tin cậy. Chúng tôi tự động hóa mọi quy trình để bạn tập trung vào sáng tạo.</p>
+        <div className="section-header dark-header">
+          <h2 className="section-title">
+            Nền tảng cho thuê máy ảnh số <span className="highlight-number">#1</span>
+          </h2>
+          <p className="section-subtitle">
+            Không cần chờ đợi reply tin nhắn, kiểm tra lịch trống và đặt trực tiếp ngay website
+          </p>
         </div>
 
-        <div className="steps-grid">
-          {steps.map((step, index) => (
-            <div key={index} className="step-card">
-              <div className="step-number">{step.number}</div>
-              <h3 className="step-title">{step.title}</h3>
-              <p className="step-description">{step.description}</p>
-              {index < steps.length - 1 && <div className="step-connector"></div>}
+        <div className="timeline-container">
+          <div className="timeline-line">
+            <div className="timeline-line-inner"></div>
+          </div>
+
+          {/* Step 1 */}
+          <div className="timeline-item left">
+            <div className="timeline-content">
+              <h3>Lựa chọn thiết bị & thời gian nhận</h3>
+              <p>Chọn máy bạn yêu thích, chọn ngày bạn muốn nhận và chọn phụ kiện bạn muốn thuê cùng</p>
             </div>
-          ))}
+            <div className="timeline-connector"></div>
+            <div className="timeline-circle">1</div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="timeline-item right">
+            <div className="timeline-circle">2</div>
+            <div className="timeline-connector"></div>
+            <div className="timeline-content">
+              <h3>Xác nhận thông tin thanh toán</h3>
+              <p>Cung cấp phương thức liên lạc và chọn hình thức nhận/trả máy tiện lợi nhất cho bạn. Mọi dữ liệu đều được bảo mật</p>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="timeline-item left">
+            <div className="timeline-content">
+              <h3>Nhận máy và trải nghiệm</h3>
+              <p>Hệ thống sẽ xuất biên nhận để thanh toán cọc giữ lịch, sau khi xác nhận thanh toán, bạn chỉ việc nhận máy và tận hưởng khoảng khắc riêng bạn</p>
+            </div>
+            <div className="timeline-connector"></div>
+            <div className="timeline-circle">3</div>
+          </div>
+
         </div>
 
       </div>

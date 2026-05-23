@@ -11,13 +11,17 @@ const HeroSection = () => {
           src="https://imgh.in/host/p0yk5t" 
           alt="Hero Background Desktop" 
           className="hero-bg hero-desktop" 
+          width="4269"
+          height="2400"
         />
         
         {/* Ảnh Mobile */}
         <img 
           src="https://imgh.in/host/iwn2cf" 
           alt="Hero Background Mobile" 
-          className="hero-bg hero-mobile" 
+          className="hero-bg hero-mobile"
+          width="3375"
+          height="6000"
         />
 
         {/* Nội dung chữ & Nút bấm */}
