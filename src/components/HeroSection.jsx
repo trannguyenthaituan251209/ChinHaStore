@@ -17,7 +17,7 @@ const HeroSection = () => {
         
         {/* Ảnh Mobile */}
         <img 
-          src="https://imgh.in/host/iwn2cf" 
+          src="https://imgh.in/host/frbzb3" 
           alt="Hero Background Mobile" 
           className="hero-bg hero-mobile"
           width="3375"
