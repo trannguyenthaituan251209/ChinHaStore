@@ -51,7 +51,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-family: "ShopeeDisplayR";
+  
   font-size: 11px;
   color: #666;
   margin-top: -0.5rem;
@@ -90,7 +90,7 @@
 }
 
 .product-card-name {
-  font-family: "ShopeeDisplayR";
+  
   font-size: 1.1rem;
   font-weight: 500;
   color: #000000;
@@ -125,7 +125,7 @@
 }
 
 .product-card-price {
-  font-family: "ShopeeDisplayB";
+  font-weight: bold;
   font-size: 1rem;
   font-weight: 600;
   color: #000000;
@@ -150,7 +150,7 @@
 
 .product-card-actions-stacked .btn-buy-vip,
 .product-card-actions-stacked .btn-info-vip {
-  font-family: "ShopeeDisplayR";
+  
   display: block;
   width: 100%;
   padding: 0.6rem 0.5rem;

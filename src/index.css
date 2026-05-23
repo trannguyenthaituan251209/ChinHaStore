@@ -1,66 +1,60 @@
 @font-face {
-  font-family: 'FontDaughter';
-  src: url("/assets/Font Daughter VH/Font Daughter VH/Font-Daughter.otf") format("opentype");
+  font-family: 'Product Sans';
+  src: url("/assets/Product Sans VH/Product Sans VH/Product Sans Regular.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'VIPNesans';
-  src: url("/assets/VIP Nesans VH/VIP Nesans VH/1FTV-VIP-Nesans.otf") format("opentype");
-  font-weight: normal;
+  font-family: 'Product Sans';
+  src: url("/assets/Product Sans VH/Product Sans VH/Product Sans Bold.otf") format("opentype");
+  font-weight: bold;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'ShopeeDisplayR';
-  src: url("/assets/Shopee Font Full VH/ShopeeDisplay-Regular.ttf") format("truetype");
+  font-family: 'Product Sans';
+  src: url("/assets/Product Sans VH/Product Sans VH/Product Sans Italic.otf") format("opentype");
   font-weight: normal;
-  font-style: normal;
+  font-style: italic;
 }
 
 @font-face {
-  font-family: 'ShopeeDisplayB';
-  src: url("/assets/Shopee Font Full VH/ShopeeDisplay-Bold.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+  font-family: 'Product Sans';
+  src: url("/assets/Product Sans VH/Product Sans VH/Product Sans Bold Italic.otf") format("opentype");
+  font-weight: bold;
+  font-style: italic;
 }
 
 @font-face {
-  font-family: 'ShopeeDisplayL';
-  src: url("/assets/Shopee Font Full VH/ShopeeDisplay-Light.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'ShopeeDisplayM';
-  src: url("/assets/Shopee Font Full VH/ShopeeDisplay-Medium.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'ShopeeDisplayEB';
-  src: url("/assets/Shopee Font Full VH/ShopeeDisplay-ExtraBold.ttf") format("truetype");
+  font-family: 'PhotographSignature';
+  src: url("/assets/Photograph Signature VH/1FTV-Photograph-Signature.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
 }
 
 :root {
-  --color-bg-body: #D6D4D4;
+  --color-bg-body: #FFFFFF; /* Tối giản: Nền trắng sạch */
   --color-bg-white: #ffffff;
-  --color-bg-dark: #333333;
+  --color-bg-dark: #222222;
   
-  --color-text-main: #333333;
+  --color-primary: #7A6629; /* Màu thương hiệu Nâu Olive */
+  --color-primary-hover: #5C4C1E;
+  
+  --color-text-main: #2A2A2A;
   --color-text-light: #666666;
   --color-text-white: #ffffff;
   
-  --color-accent-blue: #007bff;
-  --color-accent-red: #dc3545;
+  --color-border: #EEEEEE;
+  
+  --radius-md: 8px; /* Bo góc nhẹ hơn cho sự thanh lịch */
+  --radius-lg: 12px;
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
 
-  --font-logo: 'FontDaughter', cursive, sans-serif;
-  --font-main: 'VIPNesans', sans-serif;
+  --font-logo: 'Product Sans', sans-serif;
+  --font-main: 'Product Sans', sans-serif;
+  --font-bold: 'Product Sans', sans-serif;
 }
 
 * {

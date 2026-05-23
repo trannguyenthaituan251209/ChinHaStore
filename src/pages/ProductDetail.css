@@ -15,11 +15,7 @@
     display: flex;
     gap: 0.5rem;
     align-items: center;
-    font-family: "ShopeeDisplayR"
-}
-
-.product-detail-breadcrumb a {
-    color: #000;
+    
     text-decoration: none;
     font-weight: 500;
 }
@@ -41,13 +37,9 @@
     line-height: 1.2;
     margin-bottom: 0.5rem;
     letter-spacing: -1px;
-    font-family: "ShopeeDisplayB"
-}
-
-.product-detail-meta {
-    font-size: 0.9rem;
+    font-weight: bold;
     color: #888;
-    font-family: "ShopeeDisplayR";
+    
 }
 
 /* HERO SECTION */
@@ -131,7 +123,7 @@
     border-bottom: 2px solid #000;
     padding-bottom: 0.5rem;
     display: inline-block;
-    font-family: "ShopeeDisplayB";
+    font-weight: bold;
 }
 
 .specs-list-mini {
@@ -145,12 +137,12 @@
     display: flex;
     justify-content: space-between;
     font-size: 0.95rem;
-    font-family: "ShopeeDisplayR";
+    
 }
 
 .spec-row .label {
     color: #666;
-    font-family: "ShopeeDisplayR";
+    
 }
 
 .spec-row .value {
@@ -164,7 +156,7 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     margin-bottom: 3rem;
-    font-family: "ShopeeDisplayR";
+    
 }
 
 .combo-item {
@@ -197,26 +189,59 @@
     color: #444;
 }
 
-/* ACTION SECTION */
-.hero-price-action {
-    padding-top: 2rem;
-    border-top: 1px dashed #DDD;
+/* ACTION SECTION & PRICING TABLE */
+.pricing-detail-group {
+    margin-bottom: 2rem;
 }
 
-.price-box {
-    margin-bottom: 1.5rem;
-}
-
-.price-val {
-    font-size: 2.2rem;
-    font-weight: 800;
-    font-family: "ShopeeDisplayB";
-}
-
-.price-unit {
-    color: #666;
+.pricing-detail-group h3 {
     font-size: 1rem;
-    margin-left: 5px;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #000;
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.detail-pricing-table {
+    border: 1px solid #EEE;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.d-price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 1.2rem;
+    border-bottom: 1px solid #EEE;
+    font-size: 0.95rem;
+}
+
+.d-price-row:last-child {
+    border-bottom: none;
+}
+
+.d-price-row.highlight {
+    background-color: #f9f6f0;
+    font-weight: bold;
+    color: #7A6629;
+}
+
+.d-time {
+    color: #555;
+    font-weight: 500;
+}
+
+.d-val {
+    font-weight: 700;
+}
+
+.d-price-row.highlight .d-time {
+    color: #7A6629;
+}
+
+.hero-price-action {
+    padding-top: 1rem;
 }
 
 .btn-book-hero {
@@ -258,7 +283,7 @@
     font-size: 1.1rem;
     line-height: 1.8;
     color: #333;
-    font-family: "ShopeeDisplayR";
+    
 }
 
 /* RELATED MACHINES */

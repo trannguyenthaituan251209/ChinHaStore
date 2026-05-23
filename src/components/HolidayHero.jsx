@@ -72,14 +72,7 @@ const HolidayHero = () => {
     return (
         <section className="holiday-hero">
             <div className="container">
-                {/* HERO INFOGRAPHIC POSTER (Static) */}
-                <div className="hero-infographic">
-                    <img 
-                        src={isMobile ? posters.heroMobile : posters.hero} 
-                        alt="ChinHaStore - Dịch vụ cho thuê máy ảnh chất lượng cao tại Buôn Ma Thuột." 
-                        className="hero-poster-img"
-                    />
-                </div>
+
 
                 {/* TOP SECTION: POSTER LAYOUT 1-2 */}
                 <div className="poster-layout">

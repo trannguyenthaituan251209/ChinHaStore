@@ -14,7 +14,7 @@
     border: 1px solid #000;
     padding: 0.8rem 1.5rem;
     border-radius: 0;
-    font-family: 'ShopeeDisplayB';
+    font-weight: bold;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
@@ -52,7 +52,7 @@
 
 .field-group label {
     display: block;
-    font-family: 'ShopeeDisplayB';
+    font-weight: bold;
     font-size: 0.9rem;
     color: #444;
     margin-bottom: 0.6rem;
@@ -65,7 +65,7 @@
     padding: 0.8rem 1rem;
     border: 1px solid #DDD;
     border-radius: 0;
-    font-family: 'ShopeeDisplayR';
+    
     font-size: 1rem;
     outline: none;
     transition: none;
@@ -152,7 +152,7 @@
 }
 
 .markdown-preview {
-    font-family: 'ShopeeDisplayR';
+    
     line-height: 1.6;
 }
 
@@ -171,7 +171,7 @@
 .posts-table th {
     text-align: left;
     padding: 1.2rem 1rem;
-    font-family: 'ShopeeDisplayB';
+    font-weight: bold;
     color: #888;
     font-size: 0.8rem;
     text-transform: uppercase;
@@ -199,7 +199,7 @@
 
 .post-info-cell strong {
     display: block;
-    font-family: 'ShopeeDisplayB';
+    font-weight: bold;
     font-size: 1rem;
 }
 
@@ -212,7 +212,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-family: 'ShopeeDisplayR';
+    
     color: #555;
     font-weight: 600;
 }
@@ -220,7 +220,7 @@
 .status-badge {
     border-radius: 0;
     font-size: 0.75rem;
-    font-family: 'ShopeeDisplayB';
+    font-weight: bold;
     text-transform: uppercase;
 }
 
@@ -249,16 +249,16 @@
 }
 
 .checkbox-label {
-    display: flex !important;
+    display: flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    margin-bottom: 0 !important;
+    margin-bottom: 0;
 }
 
 .checkbox-label input[type="checkbox"] {
-    width: 20px !important;
-    height: 20px !important;
+    width: 20px;
+    height: 20px;
     cursor: pointer;
 }
 .banner-slot-select {
@@ -305,7 +305,7 @@
     border: 1px solid #000;
     padding: 0.7rem 1.2rem;
     border-radius: 0;
-    font-family: 'ShopeeDisplayB';
+    font-weight: bold;
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s;
@@ -317,11 +317,11 @@
 
 .admin-section-header-content h2{
     color: #000;
-    font-family: 'ShopeeDisplayB';
+    font-weight: bold;
 }
 .admin-section-header-content p{
     color: #000;
-    font-family: 'ShopeeDisplayR';
+    
 }
 .icon-btn-admin.edit:hover { background: #E8F0FE; color: #1A73E8; }
 .icon-btn-admin.view:hover { background: #F1F3F4; color: #5F6368; }
@@ -334,7 +334,7 @@
     color: #FFF;
     border: 1px solid #000;
     border-radius: 0;
-    font-family: 'ShopeeDisplayB';
+    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -1,26 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Phone } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Store Hours: 07:30 - 21:00 (BMT Time - UTC+7)
-  const isStoreOpen = () => {
-    // We adjust for UTC+7
-    const now = new Date();
-    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const bmtTime = new Date(utcTime + (3600000 * 7));
-
-    const hours = bmtTime.getHours();
-    const minutes = bmtTime.getMinutes();
-    const totalMinutes = hours * 60 + minutes;
-
-    const openTime = 7 * 60 + 30; // 07:30
-    const closeTime = 21 * 60;    // 21:00
-
-    return totalMinutes >= openTime && totalMinutes < closeTime;
-  };
+  const location = useLocation();
+  const isHome = location.pathname === '/';
 
   return (
     <nav className="navbar">
@@ -38,24 +24,27 @@ const Navbar = () => {
 
         {/* Logo */}
         <div className="navbar-logo">
-          <Link to="/">ChinHaStore</Link>
+          <Link to="/">
+            <img src="/assets/image/main_logo.png" alt="ChinHaStore" className="logo-image" />
+          </Link>
         </div>
 
         {/* Navigation Links */}
         <ul className={`navbar-links ${isMobileMenuOpen ? 'open' : ''}`}>
-          <li><Link to="/" onClick={() => setIsMobileMenuOpen(false)}>TRANG CHỦ</Link></li>
-          <li><Link to="/all-camera" onClick={() => setIsMobileMenuOpen(false)}>KHO MÁY</Link></li>
-          <li><Link to="/dat-lich" onClick={() => setIsMobileMenuOpen(false)}>ĐẶT THUÊ</Link></li>
-          <li><Link to="/chinh-sach" onClick={() => setIsMobileMenuOpen(false)}>CHÍNH SÁCH</Link></li>
+          <li><NavLink to="/" onClick={() => setIsMobileMenuOpen(false)}>TRANG CHỦ</NavLink></li>
+          <li><NavLink to="/all-camera" onClick={() => setIsMobileMenuOpen(false)}>KHO MÁY</NavLink></li>
+          <li><NavLink to="/chinh-sach" onClick={() => setIsMobileMenuOpen(false)}>CHÍNH SÁCH</NavLink></li>
         </ul>
 
-        {/* Live Status Indicator */}
-        <div className="navbar-status">
-          <span className={`status-dot ${isStoreOpen() ? 'pulsing' : 'closed'}`}></span>
-          <span className="status-text">
-            {isStoreOpen() ? 'ĐANG MỞ CỬA' : 'ĐÃ ĐÓNG CỬA'}
-          </span>
-        </div>
+        {/* Right Section: CTA & Phone */}
+        {isHome && (
+          <div className="navbar-right">
+            <Link to="/dat-lich" className="btn-nav-cta">ĐẶT MÁY NGAY</Link>
+            <a href="tel:0842204207" className="btn-nav-phone" title="Gọi Hotline: 0842204207">
+              <Phone size={18} />
+            </a>
+          </div>
+        )}
 
       </div>
     </nav>

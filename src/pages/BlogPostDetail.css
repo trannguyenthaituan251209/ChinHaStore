@@ -46,7 +46,7 @@
   gap: 8px;
   color: #FFFFFF;
   text-decoration: none;
-  font-family: 'ShopeeDisplayR';
+  
   font-size: 0.9rem;
   margin-bottom: 2rem;
   opacity: 0.8;
@@ -58,7 +58,7 @@
 }
 
 .post-title-main {
-  font-family: 'ShopeeDisplayB';
+  font-weight: bold;
   font-size: 3.5rem;
   line-height: 1.1;
   max-width: 900px;
@@ -69,7 +69,7 @@
 .post-meta-main {
   display: flex;
   gap: 2.5rem;
-  font-family: 'ShopeeDisplayR';
+  
   opacity: 0.9;
 }
 
@@ -86,7 +86,7 @@
 }
 
 .post-article-content {
-  font-family: 'ShopeeDisplayR';
+  
   font-size: 1.15rem;
   line-height: 1.8;
   color: #222;
@@ -99,7 +99,7 @@
 }
 
 .post-article-content strong {
-  font-family: 'ShopeeDisplayB';
+  font-weight: bold;
   color: #000;
 }
 
@@ -112,7 +112,7 @@
   color: #f19747;
   text-decoration: underline;
   text-underline-offset: 4px;
-  font-family: 'ShopeeDisplayB';
+  font-weight: bold;
   transition: color 0.3s;
 }
 
@@ -122,7 +122,7 @@
 
 .post-article-content h1,
 .post-article-content h2 {
-  font-family: 'ShopeeDisplayB';
+  font-weight: bold;
   font-size: 2.2rem;
   margin: 3.5rem 0 1.5rem;
   color: #000;
@@ -130,7 +130,7 @@
 }
 
 .post-article-content h3 {
-  font-family: 'ShopeeDisplayB';
+  font-weight: bold;
   font-size: 1.6rem;
   margin: 2.5rem 0 1.2rem;
   color: #111;
@@ -172,7 +172,7 @@
 }
 
 .share-box span {
-  font-family: 'ShopeeDisplayB';
+  font-weight: bold;
   font-size: 0.9rem;
   color: #888;
 }
@@ -187,7 +187,7 @@
   border: 1px solid #EEE;
   padding: 8px 16px;
   border-radius: 0;
-  font-family: 'ShopeeDisplayR';
+  
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.3s;
@@ -200,7 +200,7 @@
 }
 
 .post-tags {
-  font-family: 'ShopeeDisplayR';
+  
   font-size: 0.9rem;
   color: #999;
 }

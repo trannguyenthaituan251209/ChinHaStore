@@ -331,7 +331,7 @@ body {
 
 .admin-stat-number {
     font-size: 3rem;
-    font-family: 'ShopeeDisplayB', sans-serif;
+    font-weight: bold;
     font-weight: 700;
     margin: 0.5rem 0;
     line-height: 1;
@@ -409,7 +409,7 @@ body {
 
 .booking-sub-stat strong {
     font-size: 1.5rem;
-    font-family: 'ShopeeDisplayB', sans-serif;
+    font-weight: bold;
     color: #111;
 }
 
@@ -779,7 +779,7 @@ body {
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: #989898;
-    font-family: "ShopeeDisplayR", sans-serif;
+    
     margin-top: 1rem;
 
 }
@@ -852,7 +852,7 @@ body {
     font-size: 0.9rem;
     min-width: 1000px;
     /* Reduced from 1200px to allow better desktop responsiveness */
-    font-family: "ShopeeDisplayR", sans-serif;
+    
     background-color: #fff;
     border: 1px solid #EEE;
 }
@@ -968,7 +968,7 @@ body {
     justify-content: space-between;
     align-items: center;
     color: #000;
-    font-family: "ShopeeDisplayB", sans-serif;
+    font-weight: bold;
     border-bottom: 1px solid #E2E2E2;
 }
 
@@ -976,7 +976,7 @@ body {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 700;
-    font-family: "ShopeeDisplayB", sans-serif;
+    font-weight: bold;
 }
 
 .close-btn {
@@ -1040,7 +1040,7 @@ body {
     padding: 0.8rem;
     border: 1px solid #E2E2E2;
     border-radius: 0;
-    font-family: "ShopeeDisplayR", sans-serif;
+    
     font-size: 0.95rem;
     color: #000;
     background-color: #FFF;
@@ -1077,7 +1077,7 @@ body {
     border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 800;
-    font-family: "ShopeeDisplayB", sans-serif;
+    font-weight: bold;
     border: 1px solid #C62828;
     text-align: center;
 }
@@ -1148,7 +1148,7 @@ body {
     padding: 0.7rem;
     border: 1px solid #E2E2E2;
     border-radius: 0;
-    font-family: "ShopeeDisplayR", sans-serif;
+    
     font-size: 0.9rem;
     color: #000;
     transition: all 0.2s;
@@ -1183,7 +1183,7 @@ body {
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
-    font-family: "ShopeeDisplayB", sans-serif;
+    font-weight: bold;
     box-shadow: none;
     background-image: none;
 }
@@ -1254,14 +1254,14 @@ body {
     font-weight: 800;
     color: #000000;
     letter-spacing: 0.5px;
-    font-family: "ShopeeDisplayR";
+    
 }
 
 .filter-group select {
     padding: 0.6rem;
     border: var(--color-admin-border);
     border-radius: 0;
-    font-family: "ShopeeDisplayR";
+    
     color: #737373;
     font-size: 0.85rem;
     background-color: #FFF;
@@ -1543,7 +1543,7 @@ body {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1px;
-    font-family: "ShopeeDisplayR";
+    
 }
 
 .mini-item-v2 .toggle-status-text.on {
@@ -1695,16 +1695,16 @@ body {
 }
 
 .verification-table {
-    margin-bottom: 0 !important;
-    background-color: transparent !important;
+    margin-bottom: 0;
+    background-color: transparent;
 }
 
 .verification-table tr {
-    background-color: rgba(255, 255, 255, 0.4) !important;
+    background-color: rgba(255, 255, 255, 0.4);
 }
 
 .verification-table th {
-    background-color: rgba(0, 0, 0, 0.05) !important;
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .btn-quick-verify {
@@ -2228,7 +2228,7 @@ body {
 }
 
 .item-archived {
-    background-color: #fff6f6 !important;
+    background-color: #fff6f6;
 }
 
 .item-archived strong small {
@@ -2619,7 +2619,7 @@ body {
 }
 
 .bill-v2-header h2 {
-    font-family: "VIPNesans", sans-serif;
+    font-weight: bold;
     font-size: 2rem;
     margin: 0 0 0.3rem 0;
     font-weight: bold;
@@ -2664,7 +2664,7 @@ body {
 }
 
 .camera-name {
-    font-family: "ShopeeDisplayB", sans-serif;
+    font-weight: bold;
     font-size: 1rem;
     margin: 0 0 0.6rem 0;
     line-height: 1.1;
@@ -2696,7 +2696,7 @@ body {
 }
 
 .date-box strong {
-    font-family: "ShopeeDisplayB", sans-serif;
+    font-weight: bold;
     font-size: 0.8rem;
 }
 
@@ -2715,7 +2715,7 @@ body {
 }
 
 .details-title {
-    font-family: "ShopeeDisplayB", sans-serif;
+    font-weight: bold;
     margin-bottom: 0.5rem;
     font-size: 0.85rem;
     text-transform: uppercase;
@@ -2755,7 +2755,7 @@ body {
     white-space: nowrap;
     vertical-align: bottom;
     /* Physically ground at text-foot */
-    font-family: "ShopeeDisplayB", sans-serif;
+    font-weight: bold;
     font-size: 0.85rem;
     padding-left: 6px;
     padding-bottom: 1.5px;
@@ -2778,22 +2778,22 @@ body {
 }
 
 .total-row span {
-    font-family: "ShopeeDisplayM", sans-serif;
+    font-weight: 500;
     font-size: 0.8rem;
 }
 
 .total-row span:last-child {
-    font-family: "ShopeeDisplayB", sans-serif;
+    font-weight: bold;
     font-size: 0.8rem;
 }
 
 .bill-v2-customer-section p {
     font-size: 0.9rem;
-    font-family: "ShopeeDisplayM", sans-serif;
+    font-weight: 500;
 }
 
 .main-total {
-    font-family: "ShopeeDisplayB", sans-serif;
+    font-weight: bold;
     font-size: 1.4rem;
     margin-top: 0.4rem;
     border-top: 2px solid #000;
@@ -2816,7 +2816,7 @@ body {
 
 .bill-v2-qr-section p {
     margin: 0.15rem 0;
-    font-family: "ShopeeDisplayB", sans-serif;
+    font-weight: bold;
     font-size: 0.95rem;
 }
 
@@ -2911,28 +2911,28 @@ body {
 
 /* Checkbox Styling Overwrite */
 .checkbox-label-vip {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 0.8rem !important;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.8rem;
     cursor: pointer;
     background: #FFF;
     border: 1px solid #EEE;
-    padding: 1rem !important;
+    padding: 1rem;
     transition: all 0.2s;
 }
 
 .checkbox-label-vip input {
-    width: 20px !important;
-    height: 20px !important;
-    margin: 0 !important;
+    width: 20px;
+    height: 20px;
+    margin: 0;
 }
 
 .checkbox-label-vip span {
-    font-size: 0.85rem !important;
-    font-weight: 700 !important;
-    color: #111 !important;
-    text-transform: none !important;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #111;
+    text-transform: none;
 }
 
 @media (max-width: 600px) {
@@ -3053,7 +3053,7 @@ input:checked+.slider:before {
 .nav-date-main {
     font-size: 1.4rem;
     font-weight: 900;
-    font-family: "ShopeeDisplayB";
+    font-weight: bold;
     color: #111;
     text-transform: capitalize;
 }
@@ -3108,7 +3108,7 @@ input:checked+.slider:before {
     border: 1px solid #E2E8F0;
     cursor: pointer;
     transition: all 0.2s;
-    font-family: "ShopeeDisplayB";
+    font-weight: bold;
 }
 
 .btn-today-reset:hover {
@@ -3153,8 +3153,8 @@ input:checked+.slider:before {
 
 /* == FULL CONTENT EDITOR MODAL == */
 .full-editor-modal {
-    max-width: 1400px !important;
-    width: 95% !important;
+    max-width: 1400px;
+    width: 95%;
     height: 90vh;
     display: flex;
     flex-direction: column;
@@ -3249,7 +3249,7 @@ input:checked+.slider:before {
     flex: 1;
     padding: 1rem;
     border: 1px solid #DDD;
-    font-family: 'ShopeeDisplayR', monospace;
+    
     font-size: 1rem;
     line-height: 1.6;
     resize: none;
@@ -3390,7 +3390,7 @@ input:checked+.slider:before {
 }
 
 .editor-left {
-    overflow-y: auto !important;
+    overflow-y: auto;
     padding-right: 1rem;
 }
 
@@ -3404,7 +3404,7 @@ input:checked+.slider:before {
 }
 
 .full-editor-layout {
-    overflow: visible !important;
+    overflow: visible;
 }
 
 .editor-main-container {
@@ -3417,23 +3417,23 @@ input:checked+.slider:before {
 }
 
 .full-editor-modal {
-    overflow-y: auto !important;
-    display: block !important;
+    overflow-y: auto;
+    display: block;
 }
 
 .full-editor-layout {
-    display: grid !important;
-    height: auto !important;
-    overflow: visible !important;
+    display: grid;
+    height: auto;
+    overflow: visible;
 }
 
 .editor-left,
 .editor-right {
-    overflow: visible !important;
-    height: auto !important;
+    overflow: visible;
+    height: auto;
 }
 
 .full-editor-form {
-    display: block !important;
-    overflow: visible !important;
+    display: block;
+    overflow: visible;
 }

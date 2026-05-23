@@ -924,7 +924,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-              style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}
+              
             />
             
             {/* SUGGESTION DROPDOWN - Now powered by Server Search */}

@@ -1,90 +1,191 @@
 .hero {
   background-color: var(--color-bg-white);
-  padding: 4rem 0 0 0;
-  text-align: center;
+  padding: 0;
+  width: 100%;
 }
 
-.hero-container {
+.hero-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Ảnh nền tĩnh - Tự động định hình chiều cao container */
+.hero-bg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Ẩn ảnh mobile trên màn hình máy tính */
+.hero-mobile {
+  display: none;
+}
+
+.hero-content {
+  position: absolute;
+  top: 50%;
+  left: 6%; /* Đẩy vào một chút từ mép trái */
+  transform: translateY(-50%);
+  width: 48%; /* Không lấn sang phần kim cương */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  text-align: left;
+  z-index: 5;
 }
 
-/* Base sizing (Mobile <= 767px) */
+.hero-welcome {
+  color: #bcb29c;
+  font-size: 1.1vw; /* Responsive font size */
+  font-family: var(--font-bold);
+  margin-bottom: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
 .hero-title {
-  font-family: 'VIPNesans', serif;
-  font-size: 50px;
-  font-weight: 400;
-  color: var(--color-text-main);
-  margin-bottom: 1rem;
-  line-height: 1.1;
+  color: #000000;
+  font-size: 2.8vw; /* Fluid typography */
+  font-family: var(--font-bold);
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
   letter-spacing: -0.5px;
+  text-transform: uppercase;
 }
 
-.hero-subtitle {
-  font-size: 17px;
-  color: var(--color-text-light);
+.hero-story-text {
+  color: var(--color-primary); /* #7A6629 */
+  font-family: 'PhotographSignature', cursive;
+  font-size: 6vw; /* Fluid typography */
+  line-height: 0.6;
+  margin-top: -3vw; /* Kéo lên sát đuôi chữ LÊN hơn */
+  margin-bottom: 3rem;
+  margin-left: 10%; /* Đẩy mạnh sang phải để nối tiếp chữ LÊN */
+  transform: rotate(-3deg);
+}
+
+.hero-description {
+  color: var(--color-primary);
+  font-size: 1.1vw;
+  line-height: 1.5;
   margin-bottom: 2rem;
-  line-height: 1.6;
+  font-family: var(--font-bold);
+}
+
+.hero-cta-group {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .btn-hero-cta {
-  display: inline-block;
-  background-color: #EB8F3D;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #83713f;
   color: #FFF;
-  padding: 1.2rem 3.5rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  padding: 0.8rem 2.2rem;
+  font-size: 1.1vw;
+  font-family: var(--font-bold);
   text-decoration: none;
-  letter-spacing: 1px;
-  border-radius: 4px;
-  transition: opacity 0.3s ease;
-  margin-bottom: 3rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(122, 102, 41, 0.2);
 }
 
 .btn-hero-cta:hover {
-  opacity: 0.8;
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(122, 102, 41, 0.3);
+  color: #FFF;
 }
 
-.hero-image-wrapper {
-  width: 100%;
-  display: flex;
+.btn-hero-secondary {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  align-items: flex-end;
+  background-color: transparent;
+  color: #83713f;
+  border: 2px solid #83713f;
+  padding: 0.7rem 2rem;
+  font-size: 1.1vw;
+  font-family: var(--font-bold);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-.hero-image {
-  width: 100%;
-  height: 55vh;
-  /* Take up roughly half the screen height */
-  min-height: 250px;
-  /* Prevent it from getting too tiny on phones */
-  max-height: 800px;
-  /* Prevent it from exploding on 4k monitors */
-  object-fit: cover;
-  /* Crop gracefully without distorting cameras */
-  object-position: bottom;
-  /* Always keep the dark shelf and cameras in frame */
+.btn-hero-secondary:hover {
+  background-color: #83713f;
+  color: #FFF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(122, 102, 41, 0.2);
 }
 
-/* Tablet (768px -> 1023px) */
-@media (min-width: 768px) {
+/* Tablet Media Query */
+@media (max-width: 1024px) {
+  .hero-welcome { font-size: 1.5vw; }
+  .hero-title { font-size: 3.5vw; }
+  .hero-story-text { font-size: 7.5vw; margin-top: -4vw; margin-left: 30%; }
+  .hero-description { font-size: 1.5vw; }
+  .btn-hero-cta { font-size: 1.5vw; }
+  .btn-hero-secondary { font-size: 1.5vw; }
+}
+
+/* Mobile Media Query (MAX-WIDTH 768px) */
+@media (max-width: 768px) {
+  .hero-desktop { display: none; }
+  .hero-mobile { display: block; }
+
+  .hero-content {
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-welcome {
+    padding-top: 5vw;
+    font-size: 3.5vw;
+    margin-bottom: 2vw;
+  }
+
   .hero-title {
-    font-size: 70px;
+    font-size: 6.5vw;
+    margin-bottom: 2vw;
   }
 
-  .hero-subtitle {
-    font-size: 20px;
-  }
-}
-
-/* Desktop (>= 1024px) */
-@media (min-width: 1024px) {
-  .hero-title {
-    font-size: 85px;
+  .hero-story-text {
+    font-size: 15vw;
+    margin-left: 15%;
+    margin-top: -7vw;
+    margin-bottom: 6vw;
   }
 
-  .hero-subtitle {
-    font-size: 25px;
+  .hero-description {
+    font-size: 3.8vw;
+    margin-bottom: 8vw;
+  }
+
+  .hero-cta-group {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .btn-hero-cta {
+    font-size: 4vw;
+    padding: 3vw 10vw;
+  }
+
+  .btn-hero-secondary {
+    font-size: 4vw;
+    padding: 2.8vw 8vw;
   }
 }

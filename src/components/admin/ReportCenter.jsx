@@ -28,7 +28,7 @@ const CustomTooltip = ({ active, payload }) => {
         backgroundColor: '#fff',
         padding: '10px 15px',
         border: '1px solid #000',
-        fontFamily: 'ShopeeDisplayR, sans-serif'
+        
       }}>
         <p style={{ fontWeight: 700, margin: 0 }}>{payload[0].payload.name}</p>
         <p style={{ margin: '5px 0 0 0', color: '#1cc2ba' }}>
@@ -147,12 +147,12 @@ const ReportCenter = ({ showStatus }) => {
 
   return (
     <div className="report-center animate-in">
-      <div className="report-header" style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}>
+      <div className="report-header" >
         <div className="report-title-group">
-          <h2 style={{ fontFamily: 'ShopeeDisplayB, sans-serif' }}>Báo Cáo & Thống Kê</h2>
-          <p style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}>Dữ liệu tổng hợp từ hệ thống Supabase</p>
+          <h2 style={{ fontWeight: "bold" }}>Báo Cáo & Thống Kê</h2>
+          <p >Dữ liệu tổng hợp từ hệ thống Supabase</p>
         </div>
-        <button className="btn-export-excel" onClick={() => handleExportExcel('all')} style={{ fontFamily: 'ShopeeDisplayB, sans-serif' }}>
+        <button className="btn-export-excel" onClick={() => handleExportExcel('all')} style={{ fontWeight: "bold" }}>
           <FileSpreadsheet size={18} />
           <span>XUẤT TOÀN BỘ DOANH THU</span>
         </button>
@@ -164,41 +164,41 @@ const ReportCenter = ({ showStatus }) => {
       {!loading && stats && (
         <>
           <div className="admin-stats-grid">
-            <div className="admin-stat-card" style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}>
+            <div className="admin-stat-card" >
               <div className="stat-header">
-                <h4 style={{ fontFamily: 'ShopeeDisplayM, sans-serif' }}>Doanh Thu Tổng</h4>
+                <h4 style={{ fontWeight: 500 }}>Doanh Thu Tổng</h4>
                 <TrendingUp size={20} color="#2E7D32" />
               </div>
-              <div className="report-num" style={{ fontFamily: 'ShopeeDisplayB, sans-serif' }}>
-                {new Intl.NumberFormat('vi-VN').format(stats.totalRevenue)} <small style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}>VND</small>
+              <div className="report-num" style={{ fontWeight: "bold" }}>
+                {new Intl.NumberFormat('vi-VN').format(stats.totalRevenue)} <small >VND</small>
               </div>
               <div className="admin-stat-delta">
-                <span className="delta-perc positive" style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}>▲ Toàn thời gian</span>
+                <span className="delta-perc positive" >▲ Toàn thời gian</span>
               </div>
             </div>
 
-            <div className="admin-stat-card" style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}>
+            <div className="admin-stat-card" >
               <div className="stat-header">
-                <h4 style={{ fontFamily: 'ShopeeDisplayM, sans-serif' }}>Đơn Hoàn Tất</h4>
+                <h4 style={{ fontWeight: 500 }}>Đơn Hoàn Tất</h4>
                 <CheckCircle size={20} color="#2E7D32" />
               </div>
-              <div className="report-num" style={{ fontFamily: 'ShopeeDisplayB, sans-serif' }}>{stats.completedCount} <small style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}>đơn</small></div>
+              <div className="report-num" style={{ fontWeight: "bold" }}>{stats.completedCount} <small >đơn</small></div>
             </div>
 
-            <div className="admin-stat-card" style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}>
+            <div className="admin-stat-card" >
               <div className="stat-header">
-                <h4 style={{ fontFamily: 'ShopeeDisplayM, sans-serif' }}>Đơn Đã Hủy</h4>
+                <h4 style={{ fontWeight: 500 }}>Đơn Đã Hủy</h4>
                 <AlertCircle size={20} color="#dc3545" />
               </div>
-              <div className="report-num accent-red" style={{ fontFamily: 'ShopeeDisplayB, sans-serif' }}>{stats.cancelledCount} <small style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}>đơn</small></div>
+              <div className="report-num accent-red" style={{ fontWeight: "bold" }}>{stats.cancelledCount} <small >đơn</small></div>
             </div>
           </div>
 
           {/* PERFORMANCE CHART */}
-          <div className="report-tools-box animate-in" style={{ fontFamily: 'ShopeeDisplayR, sans-serif' }}>
+          <div className="report-tools-box animate-in" >
             <div className="report-section-title">
               <BarChart3 size={20} />
-              <h3 style={{ fontFamily: 'ShopeeDisplayB, sans-serif' }}>Thiết Bị Hiệu Suất Cao</h3>
+              <h3 style={{ fontWeight: "bold" }}>Thiết Bị Hiệu Suất Cao</h3>
             </div>
             
             <div className="performance-chart-container" style={{ height: '350px', width: '100%', marginTop: '2rem' }}>
@@ -218,7 +218,7 @@ const ReportCenter = ({ showStatus }) => {
                       dataKey="name" 
                       type="category" 
                       width={120}
-                      tick={{ fontFamily: 'ShopeeDisplayR, sans-serif', fontSize: 13, fill: '#333' }}
+                      tick={{ fontSize: 13, fill: '#333' }}
                       axisLine={{ stroke: '#000', strokeWidth: 1 }}
                       tickLine={false}
                     />
@@ -232,13 +232,13 @@ const ReportCenter = ({ showStatus }) => {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="empty-msg" style={{ fontFamily: 'ShopeeDisplayR, sans-serif', textAlign: 'center', padding: '2rem' }}>Chưa có dữ liệu hiệu suất.</p>
+                <p className="empty-msg" style={{ textAlign: 'center', padding: '2rem' }}>Chưa có dữ liệu hiệu suất.</p>
               )}
             </div>
           </div>
 
           {/* DATE RANGE REVENUE REPORT - OPTIMIZED & RESPONSIVE */}
-          <div className="daily-detailed-report animate-in" style={{ marginTop: '3rem', fontFamily: 'ShopeeDisplayR, sans-serif' }}>
+          <div className="daily-detailed-report animate-in" style={{ marginTop: '3rem',  }}>
             
             <style>{`
               @media (max-width: 768px) {
@@ -273,7 +273,7 @@ const ReportCenter = ({ showStatus }) => {
                       backgroundColor: 'transparent',
                       border: '1px solid #EEE',
                       padding: '0.5rem',
-                      fontFamily: 'ShopeeDisplayM, sans-serif',
+                      fontWeight: 500,
                       fontSize: '1.1rem',
                       color: '#000',
                       outline: 'none',
@@ -293,7 +293,7 @@ const ReportCenter = ({ showStatus }) => {
                       backgroundColor: 'transparent',
                       border: '1px solid #EEE',
                       padding: '0.5rem',
-                      fontFamily: 'ShopeeDisplayM, sans-serif',
+                      fontWeight: 500,
                       fontSize: '1.1rem',
                       color: '#000',
                       outline: 'none',
@@ -317,7 +317,7 @@ const ReportCenter = ({ showStatus }) => {
                   flex: 1
                 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                     <strong style={{ fontFamily: 'ShopeeDisplayB, sans-serif', fontSize: '0.9rem', textTransform: 'uppercase' }}>TỔNG DOANH THU THEO KỲ</strong>
+                     <strong style={{ fontWeight: "bold", fontSize: '0.9rem', textTransform: 'uppercase' }}>TỔNG DOANH THU THEO KỲ</strong>
                      <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>
                         {new Date(startDate).toLocaleDateString('vi-VN')} - {new Date(endDate).toLocaleDateString('vi-VN')}
                      </span>
@@ -325,7 +325,7 @@ const ReportCenter = ({ showStatus }) => {
                   <div className="report-total-num" style={{ 
                     textAlign: 'right', 
                     fontSize: '4.2rem', 
-                    fontFamily: 'ShopeeDisplayB, sans-serif', 
+                    fontWeight: "bold", 
                     color: '#7AD321',
                     lineHeight: 1,
                     marginTop: '0.5rem'
@@ -343,7 +343,7 @@ const ReportCenter = ({ showStatus }) => {
                     color: '#FFF',
                     border: 'none',
                     padding: '1.2rem',
-                    fontFamily: 'ShopeeDisplayB, sans-serif',
+                    fontWeight: "bold",
                     fontSize: '1rem',
                     cursor: 'pointer',
                     display: 'flex',
@@ -364,14 +364,14 @@ const ReportCenter = ({ showStatus }) => {
               
               {/* Performance Table */}
               <div style={{ border: '1px solid #f0f0f0', padding: '1rem' }}>
-                <h4 style={{ fontFamily: 'ShopeeDisplayB, sans-serif', fontSize: '0.75rem', marginBottom: '1rem', textTransform: 'uppercase', opacity: 0.6 }}>Hiệu suất thiết bị</h4>
+                <h4 style={{ fontWeight: "bold", fontSize: '0.75rem', marginBottom: '1rem', textTransform: 'uppercase', opacity: 0.6 }}>Hiệu suất thiết bị</h4>
                 <div className="custom-scrollbar" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid #000', position: 'sticky', top: 0, backgroundColor: '#FFF' }}>
-                        <th style={{ textAlign: 'left', padding: '1rem 0', fontFamily: 'ShopeeDisplayM, sans-serif', fontSize: '1rem', color: '#000' }}>Loại máy</th>
-                        <th style={{ textAlign: 'center', padding: '1rem 0', fontFamily: 'ShopeeDisplayM, sans-serif', fontSize: '1rem', color: '#000' }}>Lượt thuê</th>
-                        <th style={{ textAlign: 'right', padding: '1rem 0', fontFamily: 'ShopeeDisplayM, sans-serif', fontSize: '1rem', color: '#000' }}>Doanh thu</th>
+                        <th style={{ textAlign: 'left', padding: '1rem 0', fontWeight: 500, fontSize: '1rem', color: '#000' }}>Loại máy</th>
+                        <th style={{ textAlign: 'center', padding: '1rem 0', fontWeight: 500, fontSize: '1rem', color: '#000' }}>Lượt thuê</th>
+                        <th style={{ textAlign: 'right', padding: '1rem 0', fontWeight: 500, fontSize: '1rem', color: '#000' }}>Doanh thu</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -392,15 +392,15 @@ const ReportCenter = ({ showStatus }) => {
 
               {/* Transactions Table */}
               <div style={{ border: '1px solid #f0f0f0', padding: '1rem' }}>
-                <h4 style={{ fontFamily: 'ShopeeDisplayB, sans-serif', fontSize: '0.75rem', marginBottom: '1rem', textTransform: 'uppercase', opacity: 0.6 }}>Danh sách đơn thuê</h4>
+                <h4 style={{ fontWeight: "bold", fontSize: '0.75rem', marginBottom: '1rem', textTransform: 'uppercase', opacity: 0.6 }}>Danh sách đơn thuê</h4>
                 <div className="custom-scrollbar" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid #000', position: 'sticky', top: 0, backgroundColor: '#FFF' }}>
-                        <th style={{ textAlign: 'left', padding: '1rem 0', fontFamily: 'ShopeeDisplayM, sans-serif', fontSize: '1rem', color: '#000' }}>Ngày</th>
-                        <th style={{ textAlign: 'left', padding: '1rem 0', fontFamily: 'ShopeeDisplayM, sans-serif', fontSize: '1rem', color: '#000' }}>Tên Khách</th>
-                        <th style={{ textAlign: 'left', padding: '1rem 0', fontFamily: 'ShopeeDisplayM, sans-serif', fontSize: '1rem', color: '#000' }}>Loại máy</th>
-                        <th style={{ textAlign: 'right', padding: '1rem 0', fontFamily: 'ShopeeDisplayM, sans-serif', fontSize: '1rem', color: '#000' }}>Tổng tiền</th>
+                        <th style={{ textAlign: 'left', padding: '1rem 0', fontWeight: 500, fontSize: '1rem', color: '#000' }}>Ngày</th>
+                        <th style={{ textAlign: 'left', padding: '1rem 0', fontWeight: 500, fontSize: '1rem', color: '#000' }}>Tên Khách</th>
+                        <th style={{ textAlign: 'left', padding: '1rem 0', fontWeight: 500, fontSize: '1rem', color: '#000' }}>Loại máy</th>
+                        <th style={{ textAlign: 'right', padding: '1rem 0', fontWeight: 500, fontSize: '1rem', color: '#000' }}>Tổng tiền</th>
                       </tr>
                     </thead>
                     <tbody>

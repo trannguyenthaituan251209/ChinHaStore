@@ -194,11 +194,33 @@ const ProductDetail = () => {
                                 </div>
                             </div>
 
-                            <div className="hero-price-action">
-                                <div className="price-box">
-                                    <span className="price-val">{formattedPrice}VNĐ</span>
-                                    <span className="price-unit">/Ngày</span>
+                            <div className="pricing-detail-group">
+                                <h3>BẢNG GIÁ THUÊ</h3>
+                                <div className="detail-pricing-table">
+                                    <div className="d-price-row">
+                                        <span className="d-time">6 Giờ</span>
+                                        <span className="d-val">{product.price6h ? new Intl.NumberFormat('vi-VN').format(product.price6h) + 'đ' : 'Liên hệ'}</span>
+                                    </div>
+                                    <div className="d-price-row highlight">
+                                        <span className="d-time">1 Ngày</span>
+                                        <span className="d-val">{product.price1Day ? new Intl.NumberFormat('vi-VN').format(product.price1Day) + 'đ' : 'Liên hệ'}</span>
+                                    </div>
+                                    <div className="d-price-row">
+                                        <span className="d-time">2 Ngày</span>
+                                        <span className="d-val">{product.price2Days ? new Intl.NumberFormat('vi-VN').format(product.price2Days) + 'đ' : 'Liên hệ'}</span>
+                                    </div>
+                                    <div className="d-price-row">
+                                        <span className="d-time">3 Ngày</span>
+                                        <span className="d-val">{product.price3Days ? new Intl.NumberFormat('vi-VN').format(product.price3Days) + 'đ' : 'Liên hệ'}</span>
+                                    </div>
+                                    <div className="d-price-row">
+                                        <span className="d-time">Từ ngày 4</span>
+                                        <span className="d-val">{product.price4DaysPlus ? new Intl.NumberFormat('vi-VN').format(product.price4DaysPlus) + 'đ/ngày' : 'Liên hệ'}</span>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div className="hero-price-action">
                                 <button 
                                     className="btn-book-hero"
                                     onClick={() => navigate(`/dat-lich?id=${product.id}`)}

@@ -27,7 +27,7 @@
 }
 
 .featured-swiper {
-  padding-bottom: 4rem !important;
+  padding-bottom: 4rem;
 }
 
 /* Force Swiper slides to mirror the height of the tallest slide in the row */
@@ -122,7 +122,7 @@
 }
 
 .border-bottom-none {
-  border-bottom: none !important;
+  border-bottom: none;
 }
 
 .pricing-subtext {
@@ -136,7 +136,7 @@
   margin-top: auto; 
   width: 100%;
   padding: 1rem 0;
-  color: #ffffff !important;
+  color: #ffffff;
   font-size: 1.2rem;
   font-weight: 700;
   border: none;

@@ -47,8 +47,7 @@ const NeedsRecommendation = () => {
               price3Days: dbMatch.price3Days,
               price4DaysPlus: dbMatch.price4DaysPlus,
               price6h: dbMatch.price6h,
-              name: dbMatch.name, 
-            };
+              name: dbMatch.name };
           }
           return meta; 
         });
@@ -77,7 +76,7 @@ const NeedsRecommendation = () => {
   }
 
   return (
-    <section className="featured-products">
+    <section id="needs-recommendation" className="featured-products">
       <div className="container">
         
         <div className="section-header">
@@ -95,13 +94,10 @@ const NeedsRecommendation = () => {
             breakpoints={{
               768: {
                 slidesPerView: 2,
-                spaceBetween: 30,
-              },
+                spaceBetween: 30 },
               1024: {
                 slidesPerView: 3,
-                spaceBetween: 40,
-              },
-            }}
+                spaceBetween: 40 } }}
             className="featured-swiper"
           >
             {mergedProducts.map(product => (

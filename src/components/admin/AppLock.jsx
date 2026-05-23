@@ -86,10 +86,8 @@ const AppLock = ({ children }) => {
           challenge: challenge,
           allowCredentials: [{
             type: 'public-key',
-            id: credentialId,
-          }],
-          userVerification: 'required',
-        }
+            id: credentialId }],
+          userVerification: 'required' }
       });
 
       if (credential) {

@@ -886,10 +886,10 @@ const BookingPage = () => {
                                 <div style={{ flex: 1 }} onClick={() => {
                                   if (isNumberInput && !isSelected) updateQty(1);
                                 }}>
-                                  <div style={{ fontWeight: '600', color: '#111', fontSize: '0.85rem', fontFamily: '"ShopeeDisplayB", sans-serif' }}>
+                                  <div style={{ fontWeight: '600', color: '#111', fontSize: '0.85rem', }}>
                                     {acc.name} {unitLabel && <span style={{fontWeight: 'normal', color: '#666', fontSize: '0.8rem'}}>({unitLabel})</span>}
                                   </div>
-                                  <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '2px', fontFamily: '"ShopeeDisplayM", sans-serif' }}>
+                                  <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '2px', }}>
                                     +{new Intl.NumberFormat('vi-VN').format(acc.price)}đ {acc.config?.pricing?.calculate_by === 'per_day' || (!acc.config && acc.charge_type === 'per_day') ? '/ Ngày' : '/ Lần'}
                                     {acc.config?.pricing?.shift_price && ` (Thuê ca: ${new Intl.NumberFormat('vi-VN').format(acc.config.pricing.shift_price)}đ)`}
                                   </div>

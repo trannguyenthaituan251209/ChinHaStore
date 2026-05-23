@@ -1,24 +1,87 @@
 import { Link } from 'react-router-dom';
+import SplitText from './SplitText';
 import './HeroSection.css';
 
 const HeroSection = () => {
   return (
     <section className="hero">
-      <div className="container hero-container">
-        <h1 className="hero-title">
-          Thuê Máy Ảnh Buôn Ma Thuột <br /> Dịch Vụ Chuyên Nghiệp
-        </h1>
-        <p className="hero-subtitle">
-          Dịch vụ cho thuê máy ảnh, máy quay chuyên nghiệp tại Buôn Ma Thuột (BMT) với giá tốt nhất<br />
-          thị trường. Hỗ trợ HSSV thuê không cần cọc thế chấp. Giá thuê chỉ từ 180.000VND/Ngày.
-        </p>
-      </div>
-      <div className="hero-image-wrapper">
-        <img
-          src="/assets/image/hero_section.png"
-          alt="Các dòng máy ảnh tại ChinHaStore"
-          className="hero-image"
+      <div className="hero-wrapper">
+        {/* Ảnh Desktop */}
+        <img 
+          src="https://imgh.in/host/p0yk5t" 
+          alt="Hero Background Desktop" 
+          className="hero-bg hero-desktop" 
         />
+        
+        {/* Ảnh Mobile */}
+        <img 
+          src="https://imgh.in/host/iwn2cf" 
+          alt="Hero Background Mobile" 
+          className="hero-bg hero-mobile" 
+        />
+
+        {/* Nội dung chữ & Nút bấm */}
+        <div className="hero-content">
+          <SplitText
+            text="Chào mừng bạn đến với ChinHaStore"
+            className="hero-welcome"
+            delay={30}
+            duration={1}
+            ease="power3.out"
+            splitType="lines"
+            from={{ opacity: 0, y: 20 }}
+            to={{ opacity: 1, y: 0 }}
+            tag="p"
+          />
+          
+          <SplitText
+            text="HÃY ĐỂ CHÚNG TÔI GIÚP BẠN VIẾT LÊN"
+            className="hero-title"
+            delay={40}
+            duration={1.2}
+            ease="power3.out"
+            splitType="lines"
+            from={{ opacity: 0, y: 30 }}
+            to={{ opacity: 1, y: 0 }}
+            tag="h1"
+          />
+          
+          <SplitText
+            text="Câu chuyện"
+            className="hero-story-text"
+            delay={80}
+            duration={1.5}
+            ease="power3.out"
+            splitType="lines"
+            from={{ opacity: 0, y: 40 }}
+            to={{ opacity: 1, y: 0 }}
+            tag="div"
+          />
+          
+          <SplitText
+            text="Nền tảng cho thuê máy ảnh chuyên nghiệp, nhanh chóng và tiện lợi. ChinHaStore, hỗ trợ ưu đãi học sinh sinh viên. Giá tốt nhất thị trường."
+            className="hero-description"
+            delay={10}
+            duration={1}
+            ease="power3.out"
+            splitType="lines"
+            from={{ opacity: 0, y: 15 }}
+            to={{ opacity: 1, y: 0 }}
+            tag="p"
+          />
+          
+          <div className="hero-cta-group">
+            <button 
+              onClick={() => document.getElementById('needs-recommendation')?.scrollIntoView({ behavior: 'smooth' })} 
+              className="btn-hero-cta"
+            >
+              Gợi ý máy cho bạn &raquo;
+            </button>
+            <Link to="/all-camera" className="btn-hero-secondary">
+              Kho máy & Bảng giá
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
   );
