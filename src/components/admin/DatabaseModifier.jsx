@@ -101,16 +101,29 @@ const DatabaseModifier = ({ showStatus }) => {
   const [importStatus, setImportStatus] = useState('idle'); // 'idle', 'review', 'importing', 'done'
   const [importResults, setImportResults] = useState(null);
 
+  // Settings State
+  const [siteSettings, setSiteSettings] = useState({
+    pickup_time_day: '07:30',
+    pickup_time_night: '19:00',
+    pickup_time_shift_a: '07:00',
+    return_time_shift_a: '13:00',
+    pickup_time_shift_b: '14:00',
+    return_time_shift_b: '21:00'
+  });
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [cameras, customers, bookings, accessories] = await Promise.all([
+      const [cameras, customers, bookings, accessories, settings] = await Promise.all([
         adminService.getAllProducts(),
         adminService.getAllCustomers(),
         adminService.getAllBookings(),
-        adminService.getAllAccessories().catch(() => []) // Fallback if table doesn't exist yet
+        adminService.getAllAccessories().catch(() => []), // Fallback if table doesn't exist yet
+        adminService.getSiteSettings()
       ]);
       setData({ cameras, customers, bookings, accessories });
+      if (settings) setSiteSettings(settings);
     } catch (err) {
       console.error(err);
       setError('Lỗi khi tải dữ liệu từ máy chủ.');
@@ -160,6 +173,18 @@ const DatabaseModifier = ({ showStatus }) => {
       showStatus(newStatus === 'active' ? 'Đã cho phép hiển thị trên web' : 'Đã dừng hiển thị trên web', 'success');
     } catch (err) {
       showStatus('Lỗi khi thay đổi trạng thái: ' + err.message, 'error');
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true);
+    try {
+      await adminService.updateSiteSettings(siteSettings);
+      showStatus('Đã lưu cấu hình thời gian nhận trả máy', 'success');
+    } catch (err) {
+      showStatus('Lỗi khi lưu cấu hình: ' + err.message, 'error');
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -544,6 +569,10 @@ const DatabaseModifier = ({ showStatus }) => {
           <FileUp size={18} />
           <span>DỮ LIỆU</span>
         </button>
+        <button className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>
+          <Settings size={18} />
+          <span>CẤU HÌNH</span>
+        </button>
       </div>
 
       <div className="modifier-content">
@@ -552,6 +581,53 @@ const DatabaseModifier = ({ showStatus }) => {
 
         {!loading && !error && (
           <>
+            {activeTab === 'settings' && (
+              <div className="modifier-section">
+                <div className="section-header">
+                  <h3>Cấu Hình Thời Gian Nhận / Trả Máy</h3>
+                  <div className="header-actions-group">
+                    <button className="btn-add-manual" onClick={handleSaveSettings} disabled={isSavingSettings}>
+                      {isSavingSettings ? 'Đang lưu...' : 'LƯU CẤU HÌNH'}
+                    </button>
+                  </div>
+                </div>
+                <div className="settings-form-grid" style={{ display: 'grid', gap: '1.5rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px', border: '1px solid #ddd' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="form-group">
+                      <label style={{fontWeight: 'bold', marginBottom: '8px'}}>Giờ Lấy Máy (Thuê Ngày thường)</label>
+                      <input type="time" value={siteSettings.pickup_time_day} onChange={e => setSiteSettings({...siteSettings, pickup_time_day: e.target.value})} style={{padding: '10px', borderRadius: '4px', border: '1px solid #ccc', width: '100%'}} />
+                    </div>
+                    <div className="form-group">
+                      <label style={{fontWeight: 'bold', marginBottom: '8px'}}>Giờ Lấy Máy (Thuê Đêm)</label>
+                      <input type="time" value={siteSettings.pickup_time_night} onChange={e => setSiteSettings({...siteSettings, pickup_time_night: e.target.value})} style={{padding: '10px', borderRadius: '4px', border: '1px solid #ccc', width: '100%'}} />
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderTop: '1px solid #ddd', paddingTop: '1rem' }}>
+                    <div className="form-group">
+                      <label style={{fontWeight: 'bold', marginBottom: '8px'}}>Giờ Lấy Máy (Ca Sáng - Thuê 6H)</label>
+                      <input type="time" value={siteSettings.pickup_time_shift_a} onChange={e => setSiteSettings({...siteSettings, pickup_time_shift_a: e.target.value})} style={{padding: '10px', borderRadius: '4px', border: '1px solid #ccc', width: '100%'}} />
+                    </div>
+                    <div className="form-group">
+                      <label style={{fontWeight: 'bold', marginBottom: '8px'}}>Giờ Trả Máy (Ca Sáng - Thuê 6H)</label>
+                      <input type="time" value={siteSettings.return_time_shift_a} onChange={e => setSiteSettings({...siteSettings, return_time_shift_a: e.target.value})} style={{padding: '10px', borderRadius: '4px', border: '1px solid #ccc', width: '100%'}} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderTop: '1px solid #ddd', paddingTop: '1rem' }}>
+                    <div className="form-group">
+                      <label style={{fontWeight: 'bold', marginBottom: '8px'}}>Giờ Lấy Máy (Ca Chiều - Thuê 6H)</label>
+                      <input type="time" value={siteSettings.pickup_time_shift_b} onChange={e => setSiteSettings({...siteSettings, pickup_time_shift_b: e.target.value})} style={{padding: '10px', borderRadius: '4px', border: '1px solid #ccc', width: '100%'}} />
+                    </div>
+                    <div className="form-group">
+                      <label style={{fontWeight: 'bold', marginBottom: '8px'}}>Giờ Trả Máy (Ca Chiều - Thuê 6H)</label>
+                      <input type="time" value={siteSettings.return_time_shift_b} onChange={e => setSiteSettings({...siteSettings, return_time_shift_b: e.target.value})} style={{padding: '10px', borderRadius: '4px', border: '1px solid #ccc', width: '100%'}} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {activeTab === 'camera' && (
               <div className="modifier-section">
                 <div className="section-header">

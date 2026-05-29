@@ -1611,6 +1611,58 @@ export const adminService = {
       console.error('Error in getRecentActivity:', err);
       return [];
     }
+  },
+
+  /**
+   * Fetches the dynamic site settings (like pickup times).
+   * Provides fallback defaults if the table doesn't exist yet.
+   */
+  async getSiteSettings() {
+    try {
+      const { data, error } = await supabase.from('site_settings').select('*').single();
+      if (error) {
+        console.warn('Could not fetch site_settings, using defaults:', error.message);
+        return {
+          pickup_time_day: '07:30',
+          pickup_time_night: '19:00',
+          pickup_time_shift_a: '07:00',
+          return_time_shift_a: '13:00',
+          pickup_time_shift_b: '14:00',
+          return_time_shift_b: '21:00'
+        };
+      }
+      return data;
+    } catch (err) {
+      console.error('Exception fetching site_settings:', err);
+      return {
+        pickup_time_day: '07:30',
+        pickup_time_night: '19:00',
+        pickup_time_shift_a: '07:00',
+        return_time_shift_a: '13:00',
+        pickup_time_shift_b: '14:00',
+        return_time_shift_b: '21:00'
+      };
+    }
+  },
+
+  /**
+   * Updates the site settings. Creates the row if it doesn't exist.
+   */
+  async updateSiteSettings(settings) {
+    try {
+      // Upsert to handle the case where row 1 doesn't exist
+      const { data, error } = await supabase
+        .from('site_settings')
+        .upsert({ id: 1, ...settings })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error('Error updating site_settings:', err);
+      throw err;
+    }
   }
 };
 

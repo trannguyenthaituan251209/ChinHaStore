@@ -46,7 +46,14 @@ const BookingPage = () => {
   const [captchaToken, setCaptchaToken] = useState('');
   const turnstileRef = useRef(null);
 
-
+  const [siteSettings, setSiteSettings] = useState({
+    pickup_time_day: '07:30',
+    pickup_time_night: '19:00',
+    pickup_time_shift_a: '07:00',
+    return_time_shift_a: '13:00',
+    pickup_time_shift_b: '14:00',
+    return_time_shift_b: '21:00'
+  });
 
   // Address Autocomplete states
   const [provinces, setProvinces] = useState([]);
@@ -268,15 +275,17 @@ const BookingPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const [pData, aData] = await Promise.all([
+        const [pData, aData, settings] = await Promise.all([
           adminService.getAllProducts(),
-          adminService.getAllAccessories().catch(() => [])
+          adminService.getAllAccessories().catch(() => []),
+          adminService.getSiteSettings()
         ]);
         const activeProducts = pData.filter(p => p.status?.toLowerCase() === 'active');
         setProductList(activeProducts);
 
         // Accessories do not have a status field currently, so we use all of them
         setGlobalAccessories(aData);
+        if (settings) setSiteSettings(settings);
 
         if (selectedCamera && !activeProducts.some(p => p.id === selectedCamera)) {
           setSelectedCamera('');
@@ -325,7 +334,7 @@ const BookingPage = () => {
       }
     };
     runCalculation();
-  }, [startDate, endDate, selectedCamera, rentalType, shiftType, availabilitySnapshot, productList, selectedAccessories]);
+  }, [startDate, endDate, selectedCamera, rentalType, shiftType, availabilitySnapshot, productList, selectedAccessories, siteSettings]);
 
   const calculateBooking = async () => {
     try {
@@ -334,18 +343,18 @@ const BookingPage = () => {
       if (rentalType === 'SHIFT') {
         const date = startDate;
         if (shiftType === 'A') {
-          startTimestamp = `${date}T07:00:00`;
-          endTimestamp = `${date}T13:00:00`;
+          startTimestamp = `${date}T${siteSettings.pickup_time_shift_a}:00`;
+          endTimestamp = `${date}T${siteSettings.return_time_shift_a}:00`;
         } else {
-          startTimestamp = `${date}T14:00:00`;
-          endTimestamp = `${date}T21:00:00`;
+          startTimestamp = `${date}T${siteSettings.pickup_time_shift_b}:00`;
+          endTimestamp = `${date}T${siteSettings.return_time_shift_b}:00`;
         }
       } else if (rentalType === 'DAY') {
-        startTimestamp = `${startDate}T07:30:00`;
-        endTimestamp = `${endDate}T07:30:00`;
+        startTimestamp = `${startDate}T${siteSettings.pickup_time_day}:00`;
+        endTimestamp = `${endDate}T${siteSettings.pickup_time_day}:00`;
       } else if (rentalType === 'NIGHT') {
-        startTimestamp = `${startDate}T19:00:00`;
-        endTimestamp = `${endDate}T19:00:00`;
+        startTimestamp = `${startDate}T${siteSettings.pickup_time_night}:00`;
+        endTimestamp = `${endDate}T${siteSettings.pickup_time_night}:00`;
       }
 
       const start = new Date(startTimestamp);
@@ -556,8 +565,8 @@ const BookingPage = () => {
             : (cusAddress ? `${cusAddress}, ${cusCity}` : cusCity)),
         social: cusSocial,
         product_id: selectedCamera,
-        start_time: startDate + 'T' + (rentalType === 'SHIFT' ? (shiftType === 'A' ? '07:00:00' : '14:00:00') : (rentalType === 'DAY' ? '07:30:00' : '19:00:00')),
-        end_time: (rentalType === 'SHIFT' ? startDate : endDate) + 'T' + (rentalType === 'SHIFT' ? (shiftType === 'A' ? '13:00:00' : '21:00:00') : (rentalType === 'DAY' ? '07:30:00' : '19:00:00')),
+        start_time: startDate + 'T' + (rentalType === 'SHIFT' ? (shiftType === 'A' ? `${siteSettings.pickup_time_shift_a}:00` : `${siteSettings.pickup_time_shift_b}:00`) : (rentalType === 'DAY' ? `${siteSettings.pickup_time_day}:00` : `${siteSettings.pickup_time_night}:00`)),
+        end_time: (rentalType === 'SHIFT' ? startDate : endDate) + 'T' + (rentalType === 'SHIFT' ? (shiftType === 'A' ? `${siteSettings.return_time_shift_a}:00` : `${siteSettings.return_time_shift_b}:00`) : (rentalType === 'DAY' ? `${siteSettings.pickup_time_day}:00` : `${siteSettings.pickup_time_night}:00`)),
         total_price: parseInt(result.price.replace(/\./g, '')),
         rentalType: rentalType,
         deposit_type: cusDepositType,
@@ -759,13 +768,13 @@ const BookingPage = () => {
                         className={rentalType === 'DAY' ? 'active' : ''}
                         onClick={() => setRentalType('DAY')}
                       >
-                        Lấy Ban Ngày (07:30)
+                        Lấy Ban Ngày ({siteSettings.pickup_time_day})
                       </button>
                       <button
                         className={rentalType === 'NIGHT' ? 'active' : ''}
                         onClick={() => setRentalType('NIGHT')}
                       >
-                        Lấy Ban Đêm (19:00)
+                        Lấy Ban Đêm ({siteSettings.pickup_time_night})
                       </button>
                       <button
                         className={`shift-btn ${rentalType === 'SHIFT' ? 'active' : ''} ${(currentProduct.price6h === '0' || !currentProduct.price6h) ? 'disabled' : ''}`}
@@ -785,10 +794,10 @@ const BookingPage = () => {
                       <label>CHỌN CA THUÊ</label>
                       <div className="shift-selector">
                         <button className={`shift-box ${shiftType === 'A' ? 'active' : ''}`} onClick={() => setShiftType('A')}>
-                          <span>Ca Sáng (07:00 - 13:00)</span>
+                          <span>Ca Sáng ({siteSettings.pickup_time_shift_a} - {siteSettings.return_time_shift_a})</span>
                         </button>
                         <button className={`shift-box ${shiftType === 'B' ? 'active' : ''}`} onClick={() => setShiftType('B')}>
-                          <span>Ca Chiều (14:00 - 21:00)</span>
+                          <span>Ca Chiều ({siteSettings.pickup_time_shift_b} - {siteSettings.return_time_shift_b})</span>
                         </button>
                       </div>
                     </div>
