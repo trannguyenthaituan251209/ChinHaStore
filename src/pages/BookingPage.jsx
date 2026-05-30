@@ -1258,29 +1258,34 @@ const BookingPage = () => {
         )}
 
         {step === 3 && !paymentOption && (
-          <div className="payment-options-container animate-in" style={{padding: '2rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-            <h2 style={{color: '#83713f', fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center'}}>Hoàn Tất Đặt Lịch</h2>
-            <p style={{marginBottom: '2.5rem', textAlign: 'center', color: '#666', fontSize: '1.1rem'}}>Vui lòng chọn hình thức hoàn tất đơn hàng của bạn:</p>
-            <div className="payment-options-grid" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', width: '100%', maxWidth: '600px'}}>
+          <div className="payment-step-container animate-in">
+            <h2 className="payment-step-title">Bước cuối cùng</h2>
+            <p className="payment-step-subtitle">Chọn hình thức hoàn tất đơn đặt thuê của bạn</p>
+            
+            <div className="payment-options-list">
               
               <div 
-                className="payment-option-card highlight-option"
+                className="payment-option-row hover-fade"
                 onClick={() => setPaymentOption('pay')}
-                style={{border: '2px solid #83713f', borderRadius: '12px', padding: '2rem', cursor: 'pointer', background: '#fcfaf5', position: 'relative', overflow: 'hidden', boxShadow: '0 8px 24px rgba(131, 113, 63, 0.15)', transition: 'transform 0.3s'}}
               >
-                <div style={{position: 'absolute', top: 0, right: 0, background: '#83713f', color: '#fff', fontSize: '0.85rem', padding: '6px 16px', borderBottomLeftRadius: '12px', fontWeight: 'bold'}}>Khuyên dùng</div>
-                <div className="option-header" style={{fontSize: '1.3rem', fontWeight: 'bold', color: '#83713f', marginBottom: '0.8rem'}}>Thanh Toán Cọc Ngay (Chốt Đơn Tự Động)</div>
-                <div className="option-desc" style={{fontSize: '1rem', color: '#444', lineHeight: '1.5'}}>Thanh toán tiền cọc qua quét mã QR SePay. Hệ thống sẽ tự động xác nhận và chốt lịch ngay lập tức mà không cần chờ đợi.</div>
+                <div className="payment-option-content">
+                  <h3 className="payment-option-header-gradient">Chốt đơn ngay!</h3>
+                  <p className="payment-option-desc payment-option-desc-gold">Thanh toán trực tiếp và đơn thuê của bạn sẽ tự động được đăng ký. Không cần lo lắng mất lịch thuê, thanh toán ngay<br/>QR hỗ trợ tất cả ngân hàng Việt Nam trừ VNPay</p>
+                </div>
+                <div className="payment-option-arrow">→</div>
               </div>
 
               <div 
-                className="payment-option-card"
+                className="payment-option-row hover-fade"
                 onClick={() => setPaymentOption('wait')}
-                style={{border: '1px solid #ddd', borderRadius: '12px', padding: '2rem', cursor: 'pointer', background: '#fff', transition: 'transform 0.3s'}}
               >
-                <div className="option-header" style={{fontSize: '1.3rem', fontWeight: 'bold', color: '#333', marginBottom: '0.8rem'}}>Chờ Admin Xác Nhận</div>
-                <div className="option-desc" style={{fontSize: '1rem', color: '#666', lineHeight: '1.5'}}>Gửi yêu cầu đặt lịch dạng chờ. Admin của cửa hàng sẽ gọi điện để tư vấn thêm và hướng dẫn thanh toán cọc thủ công sau.</div>
+                <div className="payment-option-content">
+                  <h3 className="payment-option-header-solid">Hoàn tất sau</h3>
+                  <p className="payment-option-desc payment-option-desc-gray">Bạn còn cân nhắc? Đừng lo, đơn của bạn đã được gửi đi. ChinHaStore sẽ liên lạc và tư vấn cho bạn. Bấm để nhận hóa đơn ngay. Thanh toán sớm để chốt lịch nhé</p>
+                </div>
+                <div className="payment-option-arrow">→</div>
               </div>
+
             </div>
           </div>
         )}

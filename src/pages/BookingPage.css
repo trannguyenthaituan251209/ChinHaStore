@@ -1319,6 +1319,10 @@ html, body {
   .draft-actions button {
     flex: 1;
   }
+  .payment-option-content .payment-option-header-gradient{
+    font-size: 2.5rem;
+  }
+  
 }
 
 
@@ -1390,3 +1394,18 @@ html, body {
   cursor: pointer;
   accent-color: #000;
 }
+
+.hover-fade:hover { opacity: 0.6; }
+
+.payment-step-container { padding: 3rem 1rem; display: flex; flex-direction: column; align-items: center; }
+.payment-step-title { color: #000; font-size: 2.5rem; margin-bottom: 0.5rem; text-align: center; font-weight: bold; }
+.payment-step-subtitle { margin-bottom: 3rem; text-align: center; color: #333; font-size: 1.2rem; font-weight: 500; }
+.payment-options-list { display: flex; flex-direction: column; width: 100%; max-width: 700px; }
+.payment-option-row { display: flex; justify-content: space-between; align-items: center; padding: 2rem 0; cursor: pointer; transition: opacity 0.2s; }
+.payment-option-content { flex: 1; padding-right: 2rem; }
+.payment-option-header-gradient { font-size: 3rem; font-weight: bold; background: linear-gradient(90deg, #5D9C8B, #C2A266); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+.payment-option-header-solid { font-size: 1.8rem; font-weight: bold; color: #333; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+.payment-option-desc { font-size: 0.95rem; line-height: 1.5; margin: 0; font-weight: 500; }
+.payment-option-desc-gold { color: #7A6629; }
+.payment-option-desc-gray { color: #636367; }
+.payment-option-arrow { font-size: 2.5rem; color: #333; font-weight: 300; }
