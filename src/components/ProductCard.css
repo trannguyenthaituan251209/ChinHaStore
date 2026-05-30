@@ -8,6 +8,8 @@
   border: none;
   transition: opacity 0.3s ease;
   height: 100%; /* Ensure all cards in a row have same height */
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .product-card-image-wrapper {
@@ -158,7 +160,7 @@
   font-weight: 700;
   text-transform: uppercase;
   text-decoration: none;
-  border-radius: 0;
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
   transition: opacity 0.2s ease;

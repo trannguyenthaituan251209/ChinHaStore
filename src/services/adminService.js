@@ -1019,6 +1019,16 @@ export const adminService = {
     };
   },
 
+  async getBookingById(id) {
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('booking_id', id)
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
   async getReportData() {
     // 1. All Bookings for aggregation
     const { data: bookings, error: bErr } = await supabase

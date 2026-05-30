@@ -46,6 +46,11 @@ const BookingPage = () => {
   const [captchaToken, setCaptchaToken] = useState('');
   const turnstileRef = useRef(null);
 
+  const [paymentOption, setPaymentOption] = useState(null); // 'wait' | 'pay' | null
+  const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(600);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
   const [siteSettings, setSiteSettings] = useState({
     pickup_time_day: '07:30',
     pickup_time_night: '19:00',
@@ -335,6 +340,64 @@ const BookingPage = () => {
     };
     runCalculation();
   }, [startDate, endDate, selectedCamera, rentalType, shiftType, availabilitySnapshot, productList, selectedAccessories, siteSettings]);
+
+  useEffect(() => {
+    let interval;
+    if (step === 3 && paymentOption === 'pay' && createdBookingId && !isPaymentConfirmed) {
+      interval = setInterval(async () => {
+        try {
+          const b = await adminService.getBookingById(createdBookingId);
+          if (b && b.status === 'Confirmed') {
+            setIsPaymentConfirmed(true);
+            clearInterval(interval);
+          }
+        } catch(e) { }
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [step, paymentOption, createdBookingId, isPaymentConfirmed]);
+
+  useEffect(() => {
+    let timer;
+    if (step === 3 && paymentOption === 'pay' && !isPaymentConfirmed && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft(prev => prev - 1);
+      }, 1000);
+    } else if (step === 3 && paymentOption === 'pay' && !isPaymentConfirmed && timeLeft === 0) {
+      handleCancelTransaction(true);
+    }
+    return () => clearInterval(timer);
+  }, [step, paymentOption, isPaymentConfirmed, timeLeft]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (step === 3 && paymentOption === 'pay' && !isPaymentConfirmed) {
+        e.preventDefault();
+        e.returnValue = "Bạn muốn hủy giao dịch này chứ?";
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [step, paymentOption, isPaymentConfirmed]);
+
+  const handleCancelTransaction = async (isAuto = false) => {
+    try {
+      const { supabase } = await import('../utils/supabase');
+      const booking = await adminService.getBookingById(createdBookingId);
+      if (booking) {
+        await supabase.from('bookings').update({ status: 'Cancelled' }).eq('id', booking.id);
+      }
+    } catch(e) { console.error("Cancel error", e); }
+    
+    alert(isAuto ? "Đã hết thời gian thanh toán (10 phút). Giao dịch đã bị hủy." : "Giao dịch thanh toán đã bị hủy.");
+    window.location.reload();
+  };
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
   const calculateBooking = async () => {
     try {
@@ -678,6 +741,15 @@ const BookingPage = () => {
 
   if (isLoading) return <div className="booking-loading">VIP LOADING...</div>;
 
+  let calculatedDeposit = 0;
+  if (result) {
+    const priceNum = Number(result.price?.toString().replace(/\./g, '')) || 0;
+    const durationDays = result.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1;
+    let dPerc = 100;
+    if (durationDays >= 2 && durationDays <= 5) dPerc = 50;
+    calculatedDeposit = Math.round(priceNum * (dPerc / 100));
+  }
+
   return (
     <div className="booking-page animate-in">
       <Helmet>
@@ -858,7 +930,7 @@ const BookingPage = () => {
                             return (
                               <div key={acc.id} className={`accessory-card ${isSelected ? 'selected' : ''}`} style={{
                                 display: 'flex', alignItems: 'center', padding: '12px', border: `1px solid ${isSelected ? '#000' : '#DDD'}`,
-                                borderRadius: '0', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: isSelected ? '#F8F8F8' : '#FFF'
+                                borderRadius: 'var(--radius-lg)', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: isSelected ? '#F8F8F8' : '#FFF'
                               }} onClick={() => {
                                 if (!isNumberInput) {
                                   if (isSelected) updateQty(0);
@@ -1185,11 +1257,91 @@ const BookingPage = () => {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 3 && !paymentOption && (
+          <div className="payment-options-container animate-in" style={{padding: '2rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+            <h2 style={{color: '#83713f', fontSize: '2rem', marginBottom: '0.5rem', textAlign: 'center'}}>Hoàn Tất Đặt Lịch</h2>
+            <p style={{marginBottom: '2.5rem', textAlign: 'center', color: '#666', fontSize: '1.1rem'}}>Vui lòng chọn hình thức hoàn tất đơn hàng của bạn:</p>
+            <div className="payment-options-grid" style={{display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', width: '100%', maxWidth: '600px'}}>
+              
+              <div 
+                className="payment-option-card highlight-option"
+                onClick={() => setPaymentOption('pay')}
+                style={{border: '2px solid #83713f', borderRadius: '12px', padding: '2rem', cursor: 'pointer', background: '#fcfaf5', position: 'relative', overflow: 'hidden', boxShadow: '0 8px 24px rgba(131, 113, 63, 0.15)', transition: 'transform 0.3s'}}
+              >
+                <div style={{position: 'absolute', top: 0, right: 0, background: '#83713f', color: '#fff', fontSize: '0.85rem', padding: '6px 16px', borderBottomLeftRadius: '12px', fontWeight: 'bold'}}>Khuyên dùng</div>
+                <div className="option-header" style={{fontSize: '1.3rem', fontWeight: 'bold', color: '#83713f', marginBottom: '0.8rem'}}>Thanh Toán Cọc Ngay (Chốt Đơn Tự Động)</div>
+                <div className="option-desc" style={{fontSize: '1rem', color: '#444', lineHeight: '1.5'}}>Thanh toán tiền cọc qua quét mã QR SePay. Hệ thống sẽ tự động xác nhận và chốt lịch ngay lập tức mà không cần chờ đợi.</div>
+              </div>
+
+              <div 
+                className="payment-option-card"
+                onClick={() => setPaymentOption('wait')}
+                style={{border: '1px solid #ddd', borderRadius: '12px', padding: '2rem', cursor: 'pointer', background: '#fff', transition: 'transform 0.3s'}}
+              >
+                <div className="option-header" style={{fontSize: '1.3rem', fontWeight: 'bold', color: '#333', marginBottom: '0.8rem'}}>Chờ Admin Xác Nhận</div>
+                <div className="option-desc" style={{fontSize: '1rem', color: '#666', lineHeight: '1.5'}}>Gửi yêu cầu đặt lịch dạng chờ. Admin của cửa hàng sẽ gọi điện để tư vấn thêm và hướng dẫn thanh toán cọc thủ công sau.</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 3 && paymentOption === 'pay' && !isPaymentConfirmed && (
+          <div className="qr-payment-container animate-in" style={{maxWidth: '500px', margin: '3rem auto', textAlign: 'center', background: '#fff', padding: '3rem 2rem', borderRadius: '24px', boxShadow: '0 12px 40px rgba(0,0,0,0.1)'}}>
+            <h2 style={{color: '#83713f', marginBottom: '1rem', fontSize: '1.8rem'}}>Thanh Toán Tiền Cọc</h2>
+            <p style={{marginBottom: '2rem', color: '#555', fontSize: '1.05rem', lineHeight: '1.5'}}>Mở ứng dụng ngân hàng và quét mã QR dưới đây để thanh toán tự động.</p>
+            
+            <div className="qr-code-box" style={{display: 'inline-block', padding: '1rem', border: '2px solid #eee', borderRadius: '16px', marginBottom: '1rem', background: '#fff', position: 'relative'}}>
+              <img 
+                src={`https://img.vietqr.io/image/tpbank-04276529401-compact2.jpg?amount=${calculatedDeposit}&addInfo=CHINHA%20${createdBookingId}`}
+                alt="QR Code"
+                style={{width: '280px', height: '280px', display: 'block'}}
+              />
+              <div style={{position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.7)', color: '#fff', padding: '4px 12px', borderRadius: '20px', fontSize: '0.9rem', fontWeight: 'bold'}}>
+                Còn lại: {formatTime(timeLeft)}
+              </div>
+            </div>
+            
+            <div style={{fontSize: '1.2rem', fontWeight: 'bold', color: '#333', marginBottom: '2rem'}}>
+              Số tiền: <span style={{color: '#83713f'}}>{new Intl.NumberFormat('vi-VN').format(calculatedDeposit)} VNĐ</span>
+            </div>
+
+            <div className="payment-status" style={{padding: '1.2rem', background: '#f8f9fa', borderRadius: '12px', marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px'}}>
+              <div className="spinner" style={{width: '24px', height: '24px', border: '3px solid #ddd', borderTopColor: '#83713f', borderRadius: '50%', animation: 'spin 1s linear infinite'}} />
+              <span style={{fontWeight: 'bold', color: '#444', fontSize: '1.1rem'}}>Đang chờ thanh toán...</span>
+            </div>
+
+            <button 
+              className="btn-back"
+              onClick={() => setShowCancelModal(true)}
+              style={{background: 'none', border: 'none', color: '#dc3545', textDecoration: 'underline', cursor: 'pointer', fontSize: '1rem', padding: '0.5rem'}}
+            >
+              Hủy giao dịch
+            </button>
+
+            {showCancelModal && (
+              <div className="cancel-modal" style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999}}>
+                <div style={{background: '#fff', padding: '2rem', borderRadius: '16px', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 12px 40px rgba(0,0,0,0.2)'}}>
+                  <h3 style={{marginBottom: '1rem', color: '#333', fontSize: '1.5rem'}}>Xác nhận hủy</h3>
+                  <p style={{marginBottom: '2rem', color: '#666', fontSize: '1.05rem', lineHeight: 1.5}}>Bạn muốn hủy giao dịch này chứ? Đơn đặt lịch của bạn sẽ bị hủy bỏ ngay lập tức.</p>
+                  <div style={{display: 'flex', gap: '1rem', justifyContent: 'center'}}>
+                    <button onClick={() => setShowCancelModal(false)} style={{padding: '0.8rem 1.5rem', border: '1px solid #ddd', borderRadius: '8px', background: '#fff', cursor: 'pointer', flex: 1, fontWeight: 'bold'}}>Không, để tôi thanh toán</button>
+                    <button onClick={() => handleCancelTransaction(false)} style={{padding: '0.8rem 1.5rem', border: 'none', borderRadius: '8px', background: '#dc3545', color: '#fff', cursor: 'pointer', flex: 1, fontWeight: 'bold'}}>Đồng ý hủy</button>
+                  </div>
+                </div>
+              </div>
+            )}
+            <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+          </div>
+        )}
+
+        {step === 3 && (paymentOption === 'wait' || isPaymentConfirmed) && (
           <div className="ticket-container animate-in">
             <div className="booking-ticket" id="main-ticket-view">
               <div className="ticket-header">
                 <h1>PHIẾU THANH TOÁN GIỮ LỊCH</h1>
+                {isPaymentConfirmed ? (
+                  <div style={{display: 'inline-block', background: '#4caf50', color: '#fff', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '8px', boxShadow: '0 2px 8px rgba(76,175,80,0.4)'}}>ĐÃ THANH TOÁN</div>
+                ) : null}
                 <p style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#000000' }}>Mã yêu cầu: #{createdBookingId || 'PROCESSING'}</p>
                 <p>Vui lòng cung cấp mã này nếu có thắc mắc cần giải đáp</p>
               </div>
@@ -1275,7 +1427,7 @@ const BookingPage = () => {
                       <>
                         <div className="ticket-summary-left">
                           <img
-                            src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${dAmount}&addInfo=${createdBookingId}`}
+                            src={`https://img.vietqr.io/image/tpbank-04276529401-compact2.jpg?amount=${dAmount}&addInfo=${createdBookingId}`}
                             alt="QR Code"
                             className="ticket-summary-qr"
                           />
@@ -1367,7 +1519,7 @@ const BookingPage = () => {
                 </div>
                 <div className="bill-v2-qr-section">
                   <img
-                    src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${Math.round((Number(result?.price?.replace(/\./g, '')) || 0) * ((result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) >= 2 && (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) <= 5 ? 0.5 : 1))}&addInfo=${createdBookingId}`}
+                    src={`https://img.vietqr.io/image/tpbank-04276529401-compact2.jpg?amount=${Math.round((Number(result?.price?.replace(/\./g, '')) || 0) * ((result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) >= 2 && (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) <= 5 ? 0.5 : 1))}&addInfo=${createdBookingId}`}
                     alt="QR"
                     style={{ width: '120px', height: '120px', marginBottom: '10px' }}
                   />

@@ -1108,7 +1108,7 @@ html, body {
 .bill-v2-customer-section p { font-size: 0.9rem; margin: 0.3rem 0; }
 .bill-v2-details-section { font-size: 0.8rem; margin-bottom: 0.4rem; }
 .bill-v2-toc-item { display: flex; width: 100%; margin-bottom: 0.3rem; align-items: flex-end; }
-.bill-v2-toc-label { font-size: 0.85rem; padding-right: 6px; flex: 1; text-align: left; line-height: 1.4; }
+.bill-v2-toc-label { font-size: 0.85rem; padding-right: 6px; flex: 1; text-align: left; line-height: 1.4; word-wrap: break-word; word-break: break-word; white-space: normal; }
 .bill-v2-toc-dots { flex-grow: 1; border-bottom: 1.5px dotted #ccc; margin-bottom: 4px; min-width: 20px; }
 .bill-v2-toc-value { font-size: 0.85rem; padding-left: 6px; font-weight: bold; white-space: nowrap; flex-shrink: 0; }
 .bill-v2-total-section { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; margin-top: 0.8rem; }

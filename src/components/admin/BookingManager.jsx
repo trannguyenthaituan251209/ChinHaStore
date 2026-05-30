@@ -1515,7 +1515,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       {invoiceShowQr && finalTotalNum > 0 && (
                         <div className="bill-v2-qr-section" style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                           <img 
-                            src={`https://img.vietqr.io/image/seabank-000000407891-compact2.jpg?amount=${finalTotalNum}&addInfo=${selectedBooking.booking_id || selectedBooking.id.slice(0, 8)}`} 
+                            src={`https://img.vietqr.io/image/tpbank-04276529401-compact2.jpg?amount=${finalTotalNum}&addInfo=${selectedBooking.booking_id || selectedBooking.id.slice(0, 8)}`} 
                             alt="QR Code" 
                             className="qr-img" 
                             crossOrigin="anonymous" 
