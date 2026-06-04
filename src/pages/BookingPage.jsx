@@ -1297,7 +1297,7 @@ const BookingPage = () => {
             
             <div className="qr-code-box" style={{display: 'inline-block', padding: '1rem', border: '2px solid #eee', borderRadius: '16px', marginBottom: '1rem', background: '#fff', position: 'relative'}}>
               <img 
-                src={`https://img.vietqr.io/image/tpbank-04276529401-compact2.jpg?amount=${calculatedDeposit}&addInfo=CHINHA%20${createdBookingId}`}
+                src={`https://qr.sepay.vn/img?bank=TPBank&acc=00003565930&template=compact&amount=${calculatedDeposit}&des=CHINHA%20${createdBookingId}`}
                 alt="QR Code"
                 style={{width: '280px', height: '280px', display: 'block'}}
               />
@@ -1432,7 +1432,7 @@ const BookingPage = () => {
                       <>
                         <div className="ticket-summary-left">
                           <img
-                            src={`https://img.vietqr.io/image/tpbank-04276529401-compact2.jpg?amount=${dAmount}&addInfo=${createdBookingId}`}
+                            src={`https://qr.sepay.vn/img?bank=TPBank&acc=00003565930&template=compact&amount=${dAmount}&des=CHINHA%20${createdBookingId}`}
                             alt="QR Code"
                             className="ticket-summary-qr"
                           />
@@ -1524,7 +1524,7 @@ const BookingPage = () => {
                 </div>
                 <div className="bill-v2-qr-section">
                   <img
-                    src={`https://img.vietqr.io/image/tpbank-04276529401-compact2.jpg?amount=${Math.round((Number(result?.price?.replace(/\./g, '')) || 0) * ((result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) >= 2 && (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) <= 5 ? 0.5 : 1))}&addInfo=${createdBookingId}`}
+                    src={`https://qr.sepay.vn/img?bank=TPBank&acc=00003565930&template=compact&amount=${Math.round((Number(result?.price?.replace(/\./g, '')) || 0) * ((result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) >= 2 && (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) <= 5 ? 0.5 : 1))}&des=CHINHA%20${createdBookingId}`}
                     alt="QR"
                     style={{ width: '120px', height: '120px', marginBottom: '10px' }}
                   />
