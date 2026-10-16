@@ -112,13 +112,26 @@ const RestrictedAccessWarning = () => {
 function App() {
   const location = useLocation();
   
+  // Standalone PWA detection (iOS Home Screen Web App or Android PWA)
+  const isStandalone = typeof window !== 'undefined' && (
+    window.navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+  );
+
   // High-Precision Host & Path Detection
   const isAdminHost = window.location.hostname.startsWith('admin.');
   const isSecretPath = location.pathname.startsWith(SECRET_ADMIN_PATH);
   const isLegacyAdminPath = location.pathname.startsWith('/admin');
+  const isLocalDev = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' || 
+    window.location.hostname === '127.0.0.1' || 
+    window.location.hostname.startsWith('192.168.') ||
+    window.location.hostname.startsWith('10.') ||
+    window.location.hostname.endsWith('.local')
+  );
   
-  // Authoritative Admin Mode Flag
-  const isAdminMode = isAdminHost || isSecretPath;
+  // Authoritative Admin Mode Flag: Active if admin subdomain, secret path, or running as standalone PWA
+  const isAdminMode = isAdminHost || isSecretPath || isStandalone || DEPLOY_TARGET === 'ADMIN';
 
   const [adminUser, setAdminUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -134,7 +147,7 @@ function App() {
           setAdminUser(session?.user || null);
           
           // Record visit ONLY for non-admins (storefront visitors)
-          if (!isAdminHost && !isSecretPath) {
+          if (!isAdminHost && !isSecretPath && !isStandalone) {
             analyticsService.recordVisit();
           }
         }
@@ -149,7 +162,7 @@ function App() {
     };
     initApp();
     return () => { isMounted = false; };
-  }, [isAdminHost, isSecretPath]);
+  }, [isAdminHost, isSecretPath, isStandalone]);
 
   const handleLoginSuccess = async () => {
     const user = await adminService.getUser();
@@ -171,13 +184,18 @@ function App() {
     );
   }
 
-  // Specialized Restricted Access Deterrence
+  // Local dev shortcut: /admin redirects to secret admin path
+  if (isLegacyAdminPath && isLocalDev) {
+    return <Navigate to={SECRET_ADMIN_PATH} replace />;
+  }
+
+  // Specialized Restricted Access Deterrence on public production domain
   if (isLegacyAdminPath && !isAdminHost) {
     return <RestrictedAccessWarning />;
   }
 
-  // MODE A: ADMIN-ONLY DEPLOYMENT (DEDICATED SUBDOMAIN OR DOMAIN)
-  if (DEPLOY_TARGET === 'ADMIN' || isAdminHost) {
+  // MODE A: ADMIN-ONLY DEPLOYMENT (DEDICATED SUBDOMAIN, STANDALONE PWA, OR VITE_DEPLOY_TARGET=ADMIN)
+  if (DEPLOY_TARGET === 'ADMIN' || isAdminHost || isStandalone) {
     if (!adminUser) {
       return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
     }

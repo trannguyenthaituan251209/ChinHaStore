@@ -20,14 +20,22 @@ import {
   Italic,
   Heading2,
   Link as LinkIcon,
-  Tag
+  Tag,
+  Bell,
+  Volume2,
+  VolumeX,
+  Smartphone,
+  Mail,
+  Info
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import Papa from 'papaparse';
 import { adminService } from '../../services/adminService';
+import { notificationService } from '../../services/notificationService';
 import '../../pages/AdminDashboard.css';
+import '../../pages/AdminDashboard_notifs.css';
 
 const DatabaseModifier = ({ showStatus }) => {
   const [activeTab, setActiveTab] = useState('camera'); // 'camera', 'customer', 'booking', 'accessory'
@@ -110,20 +118,30 @@ const DatabaseModifier = ({ showStatus }) => {
     pickup_time_shift_b: '14:00',
     return_time_shift_b: '21:00'
   });
+  const [emailSettings, setEmailSettings] = useState(null);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  // Notification Preferences State for Settings tab
+  const [notifSound, setNotifSound] = useState(() => notificationService.isSoundEnabled());
+  const [notifPermission, setNotifPermission] = useState(() => notificationService.getPermission());
+  const [isIOS] = useState(() => notificationService.isIOS());
+  const [isStandalone] = useState(() => notificationService.isStandalone());
+  const [showIosGuide, setShowIosGuide] = useState(false);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [cameras, customers, bookings, accessories, settings] = await Promise.all([
+      const [cameras, customers, bookings, accessories, settings, emailCfg] = await Promise.all([
         adminService.getAllProducts(),
         adminService.getAllCustomers(),
         adminService.getAllBookings(),
         adminService.getAllAccessories().catch(() => []), // Fallback if table doesn't exist yet
-        adminService.getSiteSettings()
+        adminService.getSiteSettings(),
+        adminService.getEmailSettings().catch(() => null)
       ]);
       setData({ cameras, customers, bookings, accessories });
       if (settings) setSiteSettings(settings);
+      if (emailCfg) setEmailSettings(emailCfg);
     } catch (err) {
       console.error(err);
       setError('Lỗi khi tải dữ liệu từ máy chủ.');
@@ -622,6 +640,180 @@ const DatabaseModifier = ({ showStatus }) => {
                     <div className="form-group">
                       <label style={{fontWeight: 'bold', marginBottom: '8px'}}>Giờ Trả Máy (Ca Chiều - Thuê 6H)</label>
                       <input type="time" value={siteSettings.return_time_shift_b} onChange={e => setSiteSettings({...siteSettings, return_time_shift_b: e.target.value})} style={{padding: '10px', borderRadius: '4px', border: '1px solid #ccc', width: '100%'}} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* BROWSER & IPHONE PUSH NOTIFICATIONS SETTINGS */}
+                <div className="notif-settings-card">
+                  <div className="notif-settings-header">
+                    <div className="notif-settings-title">
+                      <Bell size={22} style={{ color: '#10b981' }} />
+                      <div>
+                        <h4>Thông Báo Đơn Hàng Mới (Browser & Web App iPhone)</h4>
+                        <p>Nhận chuông và thông báo tức thì trên điện thoại khi có khách đặt thuê máy mới thay vì kiểm tra email.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="notif-grid-cols">
+                    {/* Device Status Box */}
+                    <div className="notif-info-box">
+                      <h5><Smartphone size={16} /> Trạng Thái Thiết Bị Hiện Tại</h5>
+                      <div className="notif-meta-list">
+                        <div className="notif-meta-item">
+                          <span>Quyền thông báo:</span>
+                          <span className={`notif-perm-badge ${notifPermission === 'granted' ? 'active' : notifPermission === 'unsupported' ? 'unsupported' : 'inactive'}`}>
+                            {notifPermission === 'granted' ? '🟢 Đã cho phép' : notifPermission === 'denied' ? '🔴 Đã tắt/chặn' : '🟡 Chưa kích hoạt'}
+                          </span>
+                        </div>
+                        <div className="notif-meta-item">
+                          <span>Loại thiết bị:</span>
+                          <strong>{isIOS ? 'iPhone / iPad (Apple iOS)' : 'Máy tính / Android'}</strong>
+                        </div>
+                        <div className="notif-meta-item">
+                          <span>Chế độ chạy:</span>
+                          <strong>{isStandalone ? '📱 Web App độc lập (PWA)' : '🌐 Trình duyệt Safari/Web'}</strong>
+                        </div>
+                        <div className="notif-meta-item">
+                          <span>Hỗ trợ Web Push:</span>
+                          <strong>{notificationService.isSupported() ? '✅ Có hỗ trợ' : '❌ Không hỗ trợ'}</strong>
+                        </div>
+                      </div>
+
+                      {isIOS && !isStandalone && (
+                        <div className="ios-guide-tip" style={{ marginTop: '12px' }}>
+                          💡 <strong>Dành riêng cho iPhone:</strong> Apple yêu cầu bạn nhấn <em>Chia sẻ ⎋</em> -&gt; chọn <em>Thêm vào MH chính</em> để có thể nhận thông báo đẩy trên màn hình khóa.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Controls & Actions Box */}
+                    <div className="notif-controls-box">
+                      <div className="notif-switch-item">
+                        <div className="notif-switch-info">
+                          <strong>Âm thanh chuông báo đơn mới</strong>
+                          <span>Phát âm thanh chuông ngân nga (Crystal Chime) khi có đơn mới</span>
+                        </div>
+                        <label className="switch-slim">
+                          <input
+                            type="checkbox"
+                            checked={notifSound}
+                            onChange={(e) => {
+                              const next = e.target.checked;
+                              setNotifSound(next);
+                              notificationService.setSoundEnabled(next);
+                              if (next) {
+                                notificationService.unlockAudio();
+                                notificationService.playChime();
+                              }
+                            }}
+                          />
+                          <span className="slider"></span>
+                        </label>
+                      </div>
+
+                      {/* Admin Email Notification Toggle */}
+                      {emailSettings?.admin_notice && (
+                        <div className="notif-switch-item">
+                          <div className="notif-switch-info">
+                            <strong>Gửi Email thông báo đơn cho Admin</strong>
+                            <span>{emailSettings.admin_notice.enabled ? 'Đang gửi email về ' + (emailSettings.admin_notice.recipient || 'admin') : 'Đã tắt (Chỉ nhận thông báo qua ứng dụng)'}</span>
+                          </div>
+                          <label className="switch-slim">
+                            <input
+                              type="checkbox"
+                              checked={emailSettings.admin_notice.enabled}
+                              onChange={async (e) => {
+                                const nextVal = e.target.checked;
+                                const updatedCfg = {
+                                  ...emailSettings,
+                                  admin_notice: {
+                                    ...emailSettings.admin_notice,
+                                    enabled: nextVal
+                                  }
+                                };
+                                setEmailSettings(updatedCfg);
+                                try {
+                                  await adminService.updateEmailSettings(updatedCfg);
+                                  showStatus(`Đã ${nextVal ? 'bật' : 'tắt'} gửi email thông báo đơn cho Admin.`, 'success');
+                                } catch (err) {
+                                  showStatus('Lỗi khi cập nhật cấu hình email: ' + err.message, 'error');
+                                }
+                              }}
+                            />
+                            <span className="slider"></span>
+                          </label>
+                        </div>
+                      )}
+
+                      <div className="notif-buttons-row">
+                        {notifPermission !== 'granted' ? (
+                          <button
+                            type="button"
+                            className="btn-add-manual"
+                            style={{ background: '#10b981', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                            onClick={async () => {
+                              try {
+                                const res = await notificationService.requestPermission();
+                                setNotifPermission(res.permission);
+                                if (res.isIOSBrowser) {
+                                  setShowIosGuide(true);
+                                } else if (res.permission === 'granted') {
+                                  showStatus('Đã kích hoạt thông báo thành công!', 'success');
+                                } else {
+                                  showStatus('Chưa thể kích hoạt: ' + res.permission, 'error');
+                                }
+                              } catch (e) {
+                                showStatus(e.message, 'error');
+                              }
+                            }}
+                          >
+                            <Bell size={16} /> BẬT THÔNG BÁO THIẾT BỊ
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn-add-manual"
+                            style={{ background: '#0284c7', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                            onClick={async () => {
+                              try {
+                                notificationService.unlockAudio();
+                                await notificationService.testNotification();
+                                showStatus('Đã gửi thông báo đơn hàng mẫu! Hãy kiểm tra màn hình và chuông.', 'success');
+                              } catch (e) {
+                                showStatus(e.message, 'error');
+                              }
+                            }}
+                          >
+                            <Bell size={16} /> GỬI THỬ THÔNG BÁO MẪU
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          className="btn-cancel"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                          onClick={() => {
+                            notificationService.unlockAudio();
+                            notificationService.playChime();
+                            showStatus('Đang phát chuông thử nghiệm...', 'success');
+                          }}
+                        >
+                          <Volume2 size={16} /> THỬ CHUÔNG
+                        </button>
+
+                        {isIOS && (
+                          <button
+                            type="button"
+                            className="btn-cancel"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                            onClick={() => setShowIosGuide(true)}
+                          >
+                            <Smartphone size={16} /> HƯỚNG DẪN IPHONE
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1345,6 +1537,48 @@ const DatabaseModifier = ({ showStatus }) => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showIosGuide && (
+        <div className="admin-modal-overlay" onClick={() => setShowIosGuide(false)}>
+          <div className="ios-guide-modal animate-in" onClick={e => e.stopPropagation()}>
+            <div className="ios-guide-header">
+              <h3><Smartphone size={22} /> Cài Đặt Thông Báo Trên iPhone</h3>
+              <button className="close-btn" onClick={() => setShowIosGuide(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '24px', cursor: 'pointer' }}>×</button>
+            </div>
+            <div className="ios-guide-body">
+              <div className="ios-guide-step">
+                <div className="step-number">1</div>
+                <div className="step-text">
+                  <h4>Mở Safari & Nhấn nút Chia sẻ</h4>
+                  <p>Ở thanh công cụ dưới cùng của Safari trên iPhone, chạm vào biểu tượng <span className="step-badge">Chia sẻ ⎋</span> (ô vuông có mũi tên lên).</p>
+                </div>
+              </div>
+              <div className="ios-guide-step">
+                <div className="step-number">2</div>
+                <div className="step-text">
+                  <h4>Thêm vào Màn hình chính</h4>
+                  <p>Cuộn xuống trong danh sách hành động và chọn dòng <span className="step-badge">Thêm vào MH chính</span> (Add to Home Screen), rồi nhấn <strong>Thêm</strong> ở góc trên bên phải.</p>
+                </div>
+              </div>
+              <div className="ios-guide-step">
+                <div className="step-number">3</div>
+                <div className="step-text">
+                  <h4>Mở Web App & Bật Thông Báo</h4>
+                  <p>Mở biểu tượng <strong>Quản Lý ChinHa</strong> từ màn hình chính iPhone để nhận chuông và thông báo đơn mới tức thì.</p>
+                </div>
+              </div>
+              <div className="ios-guide-tip">
+                💡 <strong>Tiêu chuẩn Apple:</strong> Từ iOS 16.4+, Apple chỉ cho phép website gửi thông báo đẩy khi đã được Thêm vào Màn hình chính dưới dạng Web App độc lập (PWA).
+              </div>
+            </div>
+            <div className="ios-guide-footer">
+              <button className="btn-ios-guide-close" onClick={() => setShowIosGuide(false)}>
+                Tôi đã hiểu
+              </button>
             </div>
           </div>
         </div>

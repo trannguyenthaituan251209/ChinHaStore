@@ -15,13 +15,22 @@ import {
   X,
   BookOpen,
   ShieldCheck,
-  Fingerprint
+  Fingerprint,
+  Volume2,
+  VolumeX,
+  Smartphone,
+  Share,
+  PlusCircle,
+  Clock,
+  Zap,
+  Send
 } from 'lucide-react';
 import BookingManager from '../components/admin/BookingManager';
 import DatabaseModifier from '../components/admin/DatabaseModifier';
 import ReportCenter from '../components/admin/ReportCenter';
 import BlogManager from '../components/admin/BlogManager';
 import { adminService } from '../services/adminService';
+import { notificationService } from '../services/notificationService';
 import { supabase } from '../utils/supabase';
 import { BarChart, Bar, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, LabelList } from 'recharts';
 import './AdminDashboard.css';
@@ -39,6 +48,106 @@ const AdminDashboard = ({ onLogout }) => {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Push Notification & Sound Preferences
+  const [pushPermission, setPushPermission] = useState(() => notificationService.getPermission());
+  const [soundEnabled, setSoundEnabled] = useState(() => notificationService.isSoundEnabled());
+  const [isIOS] = useState(() => notificationService.isIOS());
+  const [isStandalone] = useState(() => notificationService.isStandalone());
+  const [showIosGuideModal, setShowIosGuideModal] = useState(false);
+  const [dismissTopBanner, setDismissTopBanner] = useState(() => {
+    return typeof sessionStorage !== 'undefined' && sessionStorage.getItem('chin_dismiss_notif_banner') === 'true';
+  });
+
+  const handleEnableNotifications = async () => {
+    try {
+      const res = await notificationService.requestPermission();
+      setPushPermission(res.permission);
+      if (res.isIOSBrowser) {
+        setShowIosGuideModal(true);
+      } else if (res.permission === 'granted') {
+        showStatus('Đã kích hoạt thông báo trên thiết bị! Bạn sẽ nhận được chuông và thông báo tức thì khi có đơn mới.', 'success');
+      } else if (res.permission === 'denied') {
+        showStatus('Bạn đã từ chối quyền thông báo. Hãy bật lại trong cài đặt trình duyệt của thiết bị.', 'error');
+      }
+    } catch (err) {
+      console.error('Lỗi khi bật thông báo:', err);
+      showStatus(err.message || 'Không thể kích hoạt thông báo.', 'error');
+    }
+  };
+
+  const handleTestNotification = async (type = 'pending') => {
+    try {
+      notificationService.unlockAudio();
+      await notificationService.testNotification(type);
+      setPushPermission(notificationService.getPermission());
+      const label = type === 'confirmed' ? '⚡ Chốt đơn tự động (Đã thanh toán)' : '⏳ Chờ xác nhận (Chưa thanh toán)';
+      showStatus(`Đã phát chuông và gửi mẫu thông báo [${label}]!`, 'success');
+    } catch (err) {
+      console.warn('Test notification warning:', err);
+      showStatus(err.message || 'Chưa bật quyền thông báo.', 'error');
+    }
+  };
+
+  const handleCreateDatabaseTestBooking = async (targetStatus = 'Pending') => {
+    try {
+      notificationService.unlockAudio();
+      const label = targetStatus === 'Confirmed' ? '⚡ Chốt tự động (Đã TT SePay)' : '⏳ Chờ xác nhận (Chưa TT)';
+      showStatus(`Đang tạo đơn test [${label}] vào Database Supabase...`, 'info');
+      const result = await adminService.createTestBooking(targetStatus);
+      showStatus(`Đã tạo đơn test #${result.booking?.booking_id || 'TEST'} [${label}] vào Database thành công!`, 'success');
+    } catch (err) {
+      console.error('Lỗi khi tạo đơn test:', err);
+      showStatus('Lỗi khi tạo đơn test: ' + (err.message || 'Kiểm tra kết nối DB'), 'error');
+    }
+  };
+
+  const handleSendRemotePushTest = async (type = 'pending') => {
+    try {
+      const label = type === 'confirmed' ? '⚡ Chốt tự động' : '⏳ Chờ duyệt';
+      showStatus(`Đang gửi Remote Push [${label}] qua Apple APNs... Bạn hãy vuốt thoát app hoặc khóa màn hình iPhone để xem!`, 'info');
+      const res = await notificationService.sendRemotePushTest(type);
+      if (res && res.sentCount > 0) {
+        showStatus(`Đã gửi Remote Push thành công tới ${res.sentCount} thiết bị iPhone/Web! Hãy kiểm tra màn hình khóa.`, 'success');
+      } else {
+        showStatus(res?.message || 'Chưa có thiết bị nào trong push_subscriptions. Hãy bật lại thông báo trên iPhone PWA để lưu token.', 'info');
+      }
+    } catch (err) {
+      console.error('Remote push test error:', err);
+      showStatus('Lỗi khi gửi Remote Push: ' + (err.message || 'Kiểm tra Edge Function'), 'error');
+    }
+  };
+
+  const handleToggleSound = () => {
+    const nextVal = !soundEnabled;
+    setSoundEnabled(nextVal);
+    notificationService.setSoundEnabled(nextVal);
+    if (nextVal) {
+      notificationService.unlockAudio();
+      notificationService.playChime();
+    }
+  };
+
+  // Service Worker Message Listener (Handles click on push notification to navigate)
+  React.useEffect(() => {
+    const handleSwMessage = (event) => {
+      if (event.data?.type === 'NOTIFICATION_NAVIGATE_BOOKING') {
+        setActiveTab('manager');
+        if (event.data.bookingId) {
+          setSearchQuery(event.data.bookingId);
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', handleSwMessage);
+    }
+    return () => {
+      if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleSwMessage);
+      }
+    };
+  }, []);
 
   // Security Passkey Modal
   const [showSecurityModal, setShowSecurityModal] = useState(false);
@@ -149,51 +258,201 @@ const AdminDashboard = ({ onLogout }) => {
     }
   }, [activeTab]);
 
-  // Real-time Listening
-  React.useEffect(() => {
-    console.log('Admin: Attaching Real-time Listener...');
+  // Map to track known booking IDs and their statuses to prevent double alerts
+  // and to detect transitions from 'Pending' -> 'Confirmed' (when SePay payment arrives)
+  const knownBookingsMapRef = React.useRef(new Map());
+  const isPollerInitializedRef = React.useRef(false);
 
+  // Core handler when a new or updated booking is detected from any source (Polling, Broadcast, CDC)
+  const handleDetectedBooking = React.useCallback(async (booking, extraMeta = {}) => {
+    if (!booking || !booking.id) return;
+    const bId = String(booking.id);
+    const currentStatus = booking.status || 'Pending';
+    const isConfirmed = currentStatus === 'Confirmed' || extraMeta?.isConfirmed === true;
+
+    const previousStatus = knownBookingsMapRef.current.get(bId);
+
+    // Case 1: Already processed with this exact status -> Skip
+    if (previousStatus === currentStatus) {
+      return;
+    }
+
+    // Case 2: Transition from Pending -> Confirmed (Customer paid via SePay!)
+    // Case 3: Brand new booking (not in map yet)
+    const isStatusTransitionToConfirmed = previousStatus === 'Pending' && isConfirmed;
+    const isNewBooking = !previousStatus;
+
+    if (!isNewBooking && !isStatusTransitionToConfirmed) {
+      // Just record updated status (e.g. from Confirmed -> Renting) without re-alerting
+      knownBookingsMapRef.current.set(bId, currentStatus);
+      return;
+    }
+
+    // Record latest status in map
+    knownBookingsMapRef.current.set(bId, currentStatus);
+
+    console.log(`🛎️ Admin: Phát hiện ${isConfirmed ? 'CHỐT ĐƠN TỰ ĐỘNG (ĐÃ TT)' : 'ĐƠN CHỜ XÁC NHẬN'}!`, booking);
+
+    try {
+      const merged = { ...booking, ...extraMeta, status: currentStatus };
+      const info = await notificationService.notifyNewBooking(merged, { isConfirmed });
+
+      const customerDesc = info?.customerName ? `Khách: ${info.customerName}` : '';
+      const productDesc = info?.productName ? ` • ${info.productName}` : '';
+      const notification = {
+        id: Date.now() + Math.random(),
+        type: isConfirmed ? 'confirmed' : 'pending',
+        isConfirmed: isConfirmed,
+        title: isConfirmed ? '⚡ CHỐT TỰ ĐỘNG (ĐÃ THANH TOÁN)' : '⏳ CHỜ XÁC NHẬN',
+        message: `Mã đơn #${booking.booking_id || bId.slice(0, 8)}${customerDesc ? ': ' + customerDesc : ''}${productDesc}`,
+        time: new Date().toLocaleTimeString('vi-VN'),
+        bookingId: booking.id
+      };
+
+      setNotifications(prev => [notification, ...prev].slice(0, 20));
+      setUnreadCount(prev => prev + 1);
+    } catch (err) {
+      console.warn('Notification trigger warning:', err);
+      const notification = {
+        id: Date.now() + Math.random(),
+        type: isConfirmed ? 'confirmed' : 'pending',
+        isConfirmed: isConfirmed,
+        title: isConfirmed ? '⚡ CHỐT TỰ ĐỘNG (ĐÃ THANH TOÁN)' : '⏳ CHỜ XÁC NHẬN',
+        message: `Mã đơn #${booking.booking_id || bId.slice(0, 8)} vừa được cập nhật.`,
+        time: new Date().toLocaleTimeString('vi-VN'),
+        bookingId: booking.id
+      };
+      setNotifications(prev => [notification, ...prev].slice(0, 20));
+      setUnreadCount(prev => prev + 1);
+    }
+
+    // Refresh stats if in dashboard tab
+    fetchStats();
+  }, []);
+
+  // Real-time Listening & Smart Polling (Dual-channel Redundancy)
+  React.useEffect(() => {
+    console.log('Admin: Khởi tạo hệ thống Real-time & Smart Poller...');
+
+    // 1. Initial seed: Load existing latest bookings so we don't alert for past bookings
+    const seedExistingBookings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('bookings')
+          .select('id, status, created_at')
+          .order('created_at', { ascending: false })
+          .limit(30);
+
+        if (!error && data) {
+          data.forEach(b => {
+            if (b.id) knownBookingsMapRef.current.set(String(b.id), b.status || 'Pending');
+          });
+        }
+      } catch (e) {
+        console.warn('Seed existing bookings warning:', e);
+      } finally {
+        isPollerInitializedRef.current = true;
+      }
+    };
+
+    seedExistingBookings();
+
+    // 2. Real-time Subscription: Broadcast Channel + Postgres CDC
     const channel = supabase
-      .channel('realtime_bookings')
+      .channel('chin_realtime_orders')
+      // A. Broadcast Channel (Instant, works without database replication)
+      .on('broadcast', { event: 'new_booking' }, (payload) => {
+        console.log('⚡ Broadcast new_booking received:', payload);
+        const b = payload.payload?.booking || payload.payload;
+        if (b) {
+          handleDetectedBooking(b, payload.payload);
+        }
+      })
+      .on('broadcast', { event: 'order_confirmed' }, (payload) => {
+        console.log('⚡ Broadcast order_confirmed received:', payload);
+        const b = payload.payload?.booking || payload.payload;
+        if (b) {
+          handleDetectedBooking({ ...b, status: 'Confirmed' }, { ...payload.payload, isConfirmed: true });
+        }
+      })
+      // B. Postgres CDC Changes (If replication is enabled in Supabase)
       .on('postgres_changes', {
-        event: '*',
+        event: 'INSERT',
         schema: 'public',
         table: 'bookings'
       }, (payload) => {
-        console.log('⚡ ANY Booking Event Received:', payload);
-        const newBooking = payload.new;
-
-        // Only trigger notification on INSERT
-        if (payload.eventType === 'INSERT') {
-          const notification = {
-            id: Date.now(),
-            title: 'Đơn hàng mới!',
-            message: `Mã đơn #${newBooking.booking_id} vừa được tạo.`,
-            time: new Date().toLocaleTimeString('vi-VN'),
-            bookingId: newBooking.id
-          };
-
-          setNotifications(prev => [notification, ...prev].slice(0, 5));
-          setUnreadCount(prev => prev + 1);
+        console.log('⚡ Postgres CDC INSERT received:', payload);
+        if (payload.new) {
+          handleDetectedBooking(payload.new);
         }
-
-        // Refresh stats for ANY change (Insert/Update/Delete) to keep Dashboard fresh
-        if (activeTab === 'dashboard') {
-          fetchStats();
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'bookings'
+      }, (payload) => {
+        console.log('⚡ Postgres CDC UPDATE received:', payload);
+        if (payload.new) {
+          handleDetectedBooking(payload.new);
         }
       })
       .subscribe((status) => {
-        console.log('📡 Real-time Subscription Status:', status);
-        if (status === 'CHANNEL_ERROR') {
-          console.error(' Supabase Real-time Error: Check if Replication is enabled for table "bookings"');
-        }
+        console.log('📡 Orders channel subscription status:', status);
       });
 
+    // 3. Smart Polling Fallback (Polls every 8s)
+    // Ensures notifications fire even if Realtime replication is disabled, or orders come from old storefront
+    const pollForNewBookings = async () => {
+      if (!isPollerInitializedRef.current) return;
+
+      try {
+        const { data: latestBookings, error } = await supabase
+          .from('bookings')
+          .select('id, booking_id, customer_id, product_id, total_price, status, created_at, source, is_seen')
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (error || !latestBookings) return;
+
+        // Check for any unseen booking OR pending -> confirmed transition
+        for (const b of latestBookings) {
+          const bId = String(b.id);
+          const prevStatus = knownBookingsMapRef.current.get(bId);
+          if (!prevStatus || (prevStatus === 'Pending' && b.status === 'Confirmed')) {
+            console.log('🔍 Smart Poller phát hiện sự kiện đơn hàng:', b.booking_id, b.status);
+            await handleDetectedBooking(b);
+          }
+        }
+      } catch (pollErr) {
+        console.warn('Smart Poller error:', pollErr);
+      }
+    };
+
+    const pollInterval = setInterval(pollForNewBookings, 8000);
+
+    // 4. iOS Safari / Tab Wakeup Handler
+    // When iPhone screen is turned back on or user returns to PWA, immediately poll!
+    const handleVisibilityOrFocus = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        pollForNewBookings();
+      }
+    };
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+      window.addEventListener('focus', handleVisibilityOrFocus);
+    }
+
     return () => {
-      console.log('Admin: Detaching Real-time Listener...');
+      console.log('Admin: Dọn dẹp Real-time & Poller...');
+      clearInterval(pollInterval);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+        window.removeEventListener('focus', handleVisibilityOrFocus);
+      }
       supabase.removeChannel(channel);
     };
-  }, [activeTab]);
+  }, [handleDetectedBooking]);
 
   const navItems = [
     { id: 'dashboard', label: 'Tổng Quan', icon: LayoutDashboard },
@@ -343,6 +602,39 @@ const AdminDashboard = ({ onLogout }) => {
             </button>
           </div>
         )}
+        {pushPermission !== 'granted' && !dismissTopBanner && (
+          <div className="notif-top-banner animate-in">
+            <div className="notif-top-banner-content">
+              <Bell size={18} style={{ color: '#34d399', flexShrink: 0 }} />
+              <div>
+                <span>
+                  <strong>Thông báo đơn mới:</strong> {isIOS && !isStandalone ? 'Cài đặt Web App trên iPhone để nhận chuông và banner tức thì thay vì check email!' : 'Bật thông báo trên thiết bị để nhận chuông khi có khách thuê máy.'}
+                </span>
+              </div>
+            </div>
+            <div className="notif-top-banner-actions">
+              {isIOS && !isStandalone ? (
+                <button className="btn-banner-enable" onClick={() => setShowIosGuideModal(true)}>
+                  Cách cài đặt
+                </button>
+              ) : (
+                <button className="btn-banner-enable" onClick={handleEnableNotifications}>
+                  Bật ngay
+                </button>
+              )}
+              <button
+                className="btn-banner-dismiss"
+                onClick={() => {
+                  setDismissTopBanner(true);
+                  sessionStorage.setItem('chin_dismiss_notif_banner', 'true');
+                }}
+                title="Đóng banner"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        )}
         <header className="admin-header">
           <div className="header-search">
             <Search size={18} />
@@ -356,25 +648,14 @@ const AdminDashboard = ({ onLogout }) => {
             />
           </div>
           <div className="header-actions">
-            {/* Diagnostic Ping for testing Real-time */}
+            {/* Quick Test Order Button (Inserts real pending order into Supabase DB) */}
             <button
-              className="icon-btn debug-ping"
-              title="Test Real-time Signal"
-              onClick={async () => {
-                console.log('Admin: Sending Test Ping...');
-                try {
-                  await supabase.from('bookings').insert({
-                    customer_name: 'TEST REALTIME',
-                    phone: '000000000',
-                    product_id: 'any',
-                    status: 'Pending',
-                    total_price: 0,
-                    source: 'DEBUG_PING'
-                  });
-                } catch (e) { console.error('Ping error:', e); }
-              }}
+              className="icon-btn"
+              title="Tạo đơn hàng test thực tế vào Database"
+              onClick={handleCreateDatabaseTestBooking}
+              style={{ color: '#10b981' }}
             >
-              <LogOut size={16} transform="rotate(180)" />
+              <PlusCircle size={18} />
             </button>
 
             <div className="notification-wrapper">
@@ -395,14 +676,138 @@ const AdminDashboard = ({ onLogout }) => {
                     <h4>Thông báo mới</h4>
                     <button onClick={() => setNotifications([])}>Xóa hết</button>
                   </div>
+
+                  {/* Push Notification Device Status & Controls Card */}
+                  <div className={`notif-perm-card ${pushPermission === 'granted' ? 'granted' : ''}`}>
+                    <div className="notif-perm-status">
+                      <span>Thông báo thiết bị</span>
+                      <span className={`notif-perm-badge ${pushPermission === 'granted' ? 'active' : pushPermission === 'unsupported' ? 'unsupported' : 'inactive'}`}>
+                        {pushPermission === 'granted' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                        {pushPermission === 'granted' ? 'Đang bật' : pushPermission === 'denied' ? 'Đã tắt' : 'Chưa bật'}
+                      </span>
+                    </div>
+
+                    {pushPermission !== 'granted' && (
+                      <p className="notif-perm-desc">
+                        {isIOS && !isStandalone
+                          ? 'Cài đặt app trên iPhone để nhận chuông và banner khi có đơn mới thay vì check email.'
+                          : 'Bật thông báo để nhận chuông và banner tức thì khi có khách đặt thuê máy.'}
+                      </p>
+                    )}
+
+                    <div className="notif-perm-actions">
+                      {pushPermission === 'granted' ? (
+                        <>
+                          <div className="notif-test-section-title">Thử nghiệm 2 mẫu thông báo:</div>
+                          <div className="notif-btn-row">
+                            <button
+                              className="btn-notif-action secondary btn-type-pending"
+                              onClick={() => handleTestNotification('pending')}
+                              title="Thử mẫu thông báo Đơn chờ xác nhận (Chưa thanh toán)"
+                            >
+                              <Clock size={12} /> ⏳ Thử: Chờ duyệt
+                            </button>
+                            <button
+                              className="btn-notif-action secondary btn-type-confirmed"
+                              onClick={() => handleTestNotification('confirmed')}
+                              title="Thử mẫu thông báo Chốt đơn tự động (Đã thanh toán SePay)"
+                            >
+                              <Zap size={12} /> ⚡ Thử: Chốt tự động
+                            </button>
+                          </div>
+
+                          <div className="notif-test-section-title" style={{ marginTop: '8px' }}>Chèn đơn test vào Database:</div>
+                          <div className="notif-btn-row">
+                            <button
+                              className="btn-notif-action secondary btn-type-pending"
+                              onClick={() => handleCreateDatabaseTestBooking('Pending')}
+                              title="Tạo đơn thật trạng thái Pending vào Database"
+                            >
+                              <PlusCircle size={12} /> DB: Chờ duyệt
+                            </button>
+                            <button
+                              className="btn-notif-action secondary btn-type-confirmed"
+                              onClick={() => handleCreateDatabaseTestBooking('Confirmed')}
+                              title="Tạo đơn thật trạng thái Confirmed vào Database"
+                            >
+                              <PlusCircle size={12} /> DB: Đã thanh toán
+                            </button>
+                          </div>
+
+                          <div className="notif-test-section-title" style={{ marginTop: '8px' }}>☁️ Remote Push khi thoát app / khóa màn hình:</div>
+                          <div className="notif-btn-row">
+                            <button
+                              className="btn-notif-action secondary btn-type-pending"
+                              onClick={() => handleSendRemotePushTest('pending')}
+                              title="Bắn Remote Push Apple APNs: Đơn chờ duyệt (Hãy khóa màn hình để kiểm tra)"
+                            >
+                              <Send size={12} /> ☁️ Push: Chờ duyệt
+                            </button>
+                            <button
+                              className="btn-notif-action secondary btn-type-confirmed"
+                              onClick={() => handleSendRemotePushTest('confirmed')}
+                              title="Bắn Remote Push Apple APNs: Chốt tự động (Hãy khóa màn hình để kiểm tra)"
+                            >
+                              <Send size={12} /> ☁️ Push: Đã TT
+                            </button>
+                          </div>
+
+                          <button
+                            className={`sound-toggle-btn ${soundEnabled ? 'on' : ''}`}
+                            onClick={handleToggleSound}
+                            title="Bật/Tắt âm thanh chuông"
+                            style={{ marginTop: '8px', width: '100%' }}
+                          >
+                            {soundEnabled ? <Volume2 size={12} /> : <VolumeX size={12} />}
+                            {soundEnabled ? 'Chuông thông báo: Bật' : 'Chuông thông báo: Tắt'}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {isIOS && !isStandalone ? (
+                            <button
+                              className="btn-notif-action primary"
+                              onClick={() => { setShowNotifications(false); setShowIosGuideModal(true); }}
+                            >
+                              <Smartphone size={12} /> Hướng dẫn iPhone
+                            </button>
+                          ) : (
+                            <button
+                              className="btn-notif-action primary"
+                              onClick={handleEnableNotifications}
+                            >
+                              <Bell size={12} /> Bật thông báo ngay
+                            </button>
+                          )}
+                          <button
+                            className="btn-notif-action secondary"
+                            onClick={() => handleTestNotification('pending')}
+                            title="Phát thử âm thanh chuông"
+                          >
+                            <Volume2 size={12} /> Thử chuông
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="notif-list">
                     {notifications.length === 0 ? (
                       <p className="no-notif">Chưa có thông báo mới.</p>
                     ) : (
                       notifications.map(n => (
-                        <div key={n.id} className="notif-item" onClick={() => { setActiveTab('manager'); setShowNotifications(false); }}>
+                        <div
+                          key={n.id}
+                          className={`notif-item ${n.isConfirmed ? 'is-confirmed' : 'is-pending'}`}
+                          onClick={() => { setActiveTab('manager'); setShowNotifications(false); }}
+                        >
                           <div className="notif-content">
-                            <strong>{n.title}</strong>
+                            <div className="notif-title-row">
+                              <strong>{n.title}</strong>
+                              <span className={`notif-badge-tag ${n.isConfirmed ? 'badge-confirmed' : 'badge-pending'}`}>
+                                {n.isConfirmed ? 'ĐÃ THANH TOÁN' : 'CHỜ DUYỆT'}
+                              </span>
+                            </div>
                             <p>{n.message}</p>
                             <small>{n.time}</small>
                           </div>
@@ -480,6 +885,49 @@ const AdminDashboard = ({ onLogout }) => {
                     </button>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* iOS PWA Installation Guide Modal */}
+        {showIosGuideModal && (
+          <div className="modal-overlay" onClick={() => setShowIosGuideModal(false)}>
+            <div className="ios-guide-modal animate-in" onClick={e => e.stopPropagation()}>
+              <div className="ios-guide-header">
+                <h3><Smartphone size={22} /> Cài Đặt Thông Báo Trên iPhone</h3>
+                <button className="close-btn" onClick={() => setShowIosGuideModal(false)}><X size={20} /></button>
+              </div>
+              <div className="ios-guide-body">
+                <div className="ios-guide-step">
+                  <div className="step-number">1</div>
+                  <div className="step-text">
+                    <h4>Mở Safari & Nhấn nút Chia sẻ</h4>
+                    <p>Ở thanh công cụ dưới cùng của trình duyệt Safari trên iPhone, chạm vào biểu tượng <span className="step-badge">Chia sẻ ⎋</span> (hình ô vuông có mũi tên hướng lên).</p>
+                  </div>
+                </div>
+                <div className="ios-guide-step">
+                  <div className="step-number">2</div>
+                  <div className="step-text">
+                    <h4>Thêm vào Màn hình chính</h4>
+                    <p>Cuộn xuống trong danh sách hành động và chọn dòng <span className="step-badge">Thêm vào MH chính</span> (Add to Home Screen), sau đó nhấn <strong>Thêm</strong> ở góc trên bên phải.</p>
+                  </div>
+                </div>
+                <div className="ios-guide-step">
+                  <div className="step-number">3</div>
+                  <div className="step-text">
+                    <h4>Mở Web App & Bật Thông Báo</h4>
+                    <p>Mở biểu tượng <strong>Quản Lý ChinHa</strong> vừa tạo trên màn hình chính iPhone. Hệ thống sẽ phát chuông và gửi thông báo màn hình khóa ngay khi có đơn mới mà không cần check email!</p>
+                  </div>
+                </div>
+                <div className="ios-guide-tip">
+                  💡 <strong>Tiêu chuẩn Apple:</strong> Từ iOS 16.4+, Apple chỉ cho phép website gửi thông báo đẩy khi đã được Thêm vào Màn hình chính dưới dạng Web App độc lập (PWA).
+                </div>
+              </div>
+              <div className="ios-guide-footer">
+                <button className="btn-ios-guide-close" onClick={() => setShowIosGuideModal(false)}>
+                  Tôi đã hiểu
+                </button>
               </div>
             </div>
           </div>

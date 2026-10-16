@@ -605,19 +605,28 @@ const BookingPage = () => {
     }
   };
 
+  const isDevEnv = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.startsWith('192.168.') ||
+    window.location.hostname.startsWith('10.') ||
+    window.location.hostname.endsWith('.local')
+  );
+
   const handleFinalSubmit = async () => {
     if (!cusName || !cusPhone) {
       alert('Vui lòng điền đầy đủ Họ tên và Số điện thoại');
       return;
     }
-    if (!captchaToken) {
+    const tokenToSend = captchaToken || (isDevEnv ? 'dev_bypass_token' : '');
+    if (!tokenToSend) {
       alert('Vui lòng xác thực bạn không phải là robot');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const created = await adminService.createSecureBooking(captchaToken, {
+      const created = await adminService.createSecureBooking(tokenToSend, {
         customerName: cusName,
         phone: cusPhone,
         email: cusEmail,
@@ -1179,29 +1188,40 @@ const BookingPage = () => {
                         </span>
                       </label>
 
-                      <div className="captcha-wrapper" style={{ margin: '15px 0', display: 'flex', justifyContent: 'center', minHeight: '65px' }}>
+                      <div className="captcha-wrapper" style={{ margin: '15px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '65px' }}>
                         {step === 2 && !showLocalPrompt && !showRemotePrompt && isPolicyAccepted && (
-                          <Turnstile
-                            ref={turnstileRef}
-                            siteKey="0x4AAAAAADKQ-kplunorEsim"
-                            onSuccess={(token) => setCaptchaToken(token)}
-                            onError={(err) => {
-                              console.error('Turnstile Error:', err);
-                              setCaptchaToken('');
-                            }}
-                            onExpire={() => {
-                              console.warn('Turnstile Expired, resetting...');
-                              setCaptchaToken('');
-                            }}
-                            retry="auto"
-                            refreshExpired="auto"
-                          />
+                          <>
+                            <Turnstile
+                              ref={turnstileRef}
+                              siteKey="0x4AAAAAADKQ-kplunorEsim"
+                              onSuccess={(token) => setCaptchaToken(token)}
+                              onError={(err) => {
+                                console.warn('Turnstile Error (Local/LAN):', err);
+                                if (isDevEnv) {
+                                  setCaptchaToken('dev_bypass_token');
+                                } else {
+                                  setCaptchaToken('');
+                                }
+                              }}
+                              onExpire={() => {
+                                console.warn('Turnstile Expired, resetting...');
+                                if (!isDevEnv) setCaptchaToken('');
+                              }}
+                              retry="auto"
+                              refreshExpired="auto"
+                            />
+                            {isDevEnv && (
+                              <div style={{ marginTop: '8px', fontSize: '12px', color: '#4f46e5', background: '#eef2ff', padding: '5px 12px', borderRadius: '6px', textAlign: 'center' }}>
+                                🛠️ <strong>Chế độ Dev / IP Local:</strong> Bỏ qua Turnstile để bạn thoải mái test đặt đơn trên mạng LAN.
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
 
                       <button
-                        className={`btn-confirm-booking ${(!isPolicyAccepted || !captchaToken) ? 'disabled' : ''}`}
-                        disabled={isSubmitting || !isPolicyAccepted || !captchaToken}
+                        className={`btn-confirm-booking ${(!isPolicyAccepted || (!captchaToken && !isDevEnv)) ? 'disabled' : ''}`}
+                        disabled={isSubmitting || !isPolicyAccepted || (!captchaToken && !isDevEnv)}
                         onClick={handleFinalSubmit}
                       >
                         {isSubmitting ? 'ĐANG GỬI...' : 'XÁC NHẬN ĐẶT LỊCH'}

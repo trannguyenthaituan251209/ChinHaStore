@@ -604,6 +604,20 @@ export const adminService = {
    * Create a new secure booking (Validates Captcha first).
    */
   async createSecureBooking(captchaToken, bookingData) {
+    const isDevEnv = typeof window !== 'undefined' && (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname.startsWith('192.168.') ||
+      window.location.hostname.startsWith('10.') ||
+      window.location.hostname.endsWith('.local')
+    );
+
+    // In local dev / LAN testing, allow bypassing Turnstile verification
+    if (isDevEnv && (captchaToken === 'dev_bypass_token' || !captchaToken)) {
+      console.log('🛠️ Bỏ qua xác thực Cloudflare Turnstile trong môi trường Dev/LAN để test đặt đơn');
+      return this.createBooking(bookingData);
+    }
+
     // 1. Verify captcha token via Edge Function
     const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-turnstile', {
       body: { token: captchaToken }
@@ -676,7 +690,154 @@ export const adminService = {
 
     this.sendBookingEmails(emailData, product, bookingData.email, bookingData.breakdown);
 
+    // --- REALTIME BROADCAST TO ALL ADMIN SESSIONS ---
+    try {
+      const channel = supabase.channel('chin_realtime_orders');
+      channel.send({
+        type: 'broadcast',
+        event: 'new_booking',
+        payload: {
+          booking: data,
+          customerName: bookingData.customerName,
+          phone: bookingData.phone,
+          productName: product?.name || '',
+          total_price: bookingData.total_price
+        }
+      });
+    } catch (bcErr) {
+      console.warn('Realtime broadcast dispatch warning:', bcErr);
+    }
+
+    // --- TRIGGER REMOTE PUSH NOTIFICATION (WAKES UP IPHONE VIA APNS) ---
+    try {
+      supabase.functions.invoke('send-push-notification', {
+        body: {
+          type: bookingData.status === 'Confirmed' ? 'confirmed' : 'pending',
+          booking: data,
+          customerName: bookingData.customerName,
+          phone: bookingData.phone,
+          productName: product?.name || '',
+          total_price: bookingData.total_price
+        }
+      }).catch((e) => console.warn('Remote push invoke background warning:', e));
+    } catch (pushErr) {
+      console.warn('send-push-notification invoke warning:', pushErr);
+    }
+
     return data;
+  },
+
+  /**
+   * Create a simulated test booking directly in database to test real-world notifications
+   * Supports targetStatus: 'Pending' (Chờ xác nhận) or 'Confirmed' (Chốt đơn tự động)
+   */
+  async createTestBooking(targetStatus = 'Pending') {
+    // 1. Find any active product
+    const { data: prods, error: pErr } = await supabase
+      .from('products')
+      .select('id, name')
+      .limit(1);
+
+    if (pErr || !prods || prods.length === 0) {
+      throw new Error('Không tìm thấy sản phẩm nào trong database để tạo đơn test.');
+    }
+    const product = prods[0];
+
+    // 2. Find any unit for this product or any unit
+    let unitId = null;
+    const { data: units } = await supabase
+      .from('inventory_units')
+      .select('id')
+      .eq('product_id', product.id)
+      .limit(1);
+
+    if (units && units.length > 0) {
+      unitId = units[0].id;
+    } else {
+      const { data: anyUnit } = await supabase.from('inventory_units').select('id').limit(1);
+      unitId = anyUnit?.[0]?.id || null;
+    }
+
+    if (!unitId) {
+      throw new Error('Chưa có thiết bị nào trong kho (inventory_units) để gán cho đơn test.');
+    }
+
+    const isConfirmed = targetStatus === 'Confirmed';
+    const testCustomerName = isConfirmed ? 'Khách Test SePay (Đã CK)' : 'Khách Test Chờ Duyệt (Chưa TT)';
+
+    // 3. Ensure test customer exists
+    const customerId = await this.getOrCreateCustomer({
+      phone: '0842204207',
+      full_name: testCustomerName,
+      email: 'test@chinhastore.vn',
+      city: 'Hà Nội',
+      social: 'Facebook'
+    });
+
+    const now = new Date();
+    const startTime = now.toISOString();
+    const endTime = new Date(now.getTime() + 86400000).toISOString();
+    const bookingCode = 'TEST-' + Math.floor(1000 + Math.random() * 9000);
+
+    // 4. Insert real booking
+    const { data: newBooking, error: insErr } = await supabase
+      .from('bookings')
+      .insert({
+        booking_id: bookingCode,
+        customer_id: customerId,
+        product_id: product.id,
+        unit_id: unitId,
+        start_time: startTime,
+        end_time: endTime,
+        rental_type: 'DAY',
+        deposit_type: 'standard',
+        total_price: isConfirmed ? 550000 : 350000,
+        source: 'Website',
+        status: targetStatus,
+        is_seen: false
+      })
+      .select()
+      .single();
+
+    if (insErr) throw insErr;
+
+    // 5. Broadcast immediately
+    try {
+      const channel = supabase.channel('chin_realtime_orders');
+      channel.send({
+        type: 'broadcast',
+        event: isConfirmed ? 'order_confirmed' : 'new_booking',
+        payload: {
+          booking: newBooking,
+          customerName: testCustomerName,
+          phone: '0842204207',
+          productName: product.name,
+          total_price: isConfirmed ? 550000 : 350000,
+          isConfirmed: isConfirmed
+        }
+      });
+    } catch (bcErr) {
+      console.warn('Realtime test broadcast warning:', bcErr);
+    }
+
+    // 6. Trigger Remote Push (Wakes up Apple iOS lock screen)
+    try {
+      supabase.functions.invoke('send-push-notification', {
+        body: {
+          type: isConfirmed ? 'confirmed' : 'pending',
+          booking: newBooking,
+          customerName: testCustomerName,
+          phone: '0842204207',
+          productName: product.name,
+          total_price: isConfirmed ? 550000 : 350000,
+          isConfirmed: isConfirmed
+        }
+      }).catch((e) => console.warn('Remote push test invoke warning:', e));
+    } catch (e) {
+      console.warn('send-push-notification invoke warning:', e);
+    }
+
+    return { booking: newBooking, productName: product.name, isConfirmed };
   },
 
 
@@ -1395,21 +1556,8 @@ export const adminService = {
         return result;
       };
 
-      // 1. Send Admin Notification
-      if (config.admin_notice.enabled) {
-        const adminSubject = replaceAll(config.admin_notice.subject);
-        const adminTo = (config.admin_notice.recipient && config.admin_notice.recipient.trim()) || 'manhichin.chinhastore@gmail.com';
-
-        await emailjs.send(
-          import.meta.env.VITE_EMAILJS_SERVICE_ID,
-          import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-          {
-            ...templateData,
-            subject: adminSubject,
-            to_email: adminTo
-          }
-        );
-      }
+      // 1. Admin Notification via Email is disabled (Replaced by PWA Web Push Notifications)
+      // Only customer invoice is sent via EmailJS.
 
       // 2. Send Customer Invoice
       const customerTo = cusEmail ? cusEmail.trim() : '';

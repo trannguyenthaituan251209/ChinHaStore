@@ -82,8 +82,25 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Failed to update booking' }), { status: 500 })
     }
 
-    console.log(`Successfully confirmed booking ${bookingId}`)
-    return new Response(JSON.stringify({ success: true, message: `Booking ${bookingId} confirmed` }), {
+    // Broadcast payment confirmation to Realtime channel
+    try {
+      const realtimeChannel = supabase.channel('chin_realtime_orders')
+      await realtimeChannel.send({
+        type: 'broadcast',
+        event: 'order_confirmed',
+        payload: {
+          booking: { ...booking, status: 'Confirmed' },
+          booking_id: bookingIdCode,
+          amount: amount,
+          isAutoConfirmed: true
+        }
+      })
+    } catch (bcErr) {
+      console.warn("Realtime broadcast in webhook failed:", bcErr)
+    }
+
+    console.log(`Successfully confirmed booking ${bookingIdCode}`)
+    return new Response(JSON.stringify({ success: true, message: `Booking ${bookingIdCode} confirmed` }), {
       headers: { 'Content-Type': 'application/json' },
       status: 200,
     })

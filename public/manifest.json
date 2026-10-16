@@ -1,7 +1,9 @@
 {
   "name": "ChinHaStore Official",
   "short_name": "Quản lý ChinHa",
-  "start_url": "/",
+  "id": "/quanly-chinha-trungtam",
+  "start_url": "/quanly-chinha-trungtam",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
