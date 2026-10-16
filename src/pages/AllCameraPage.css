@@ -1,12 +1,20 @@
 .all-camera-page {
   padding-top: 2rem;
-  background-color: #FAFAFA;
+  padding-bottom: 4rem;
+  /* Hoạ tiết phủ Warm Cream 88% bên trên, không ảnh hưởng nav/footer */
+  background-color: #EAE7D6;
+  background-image:
+    linear-gradient(rgba(234, 231, 214, 0.68), rgba(234, 231, 214, 0.68)),
+    url("/assets/camera-pattern.png");
+  background-repeat: repeat;
+  background-size: auto, 900px;
   min-height: 100vh;
 }
 
+
 .catalog-header-bar {
-  background-color: #FFF;
-  border-bottom: 1px solid #EEE;
+  background-color: lab(91.46% -1.88 8.62);
+  /* Warm Cream header bar */
   padding: 2rem 0;
   margin-bottom: 3rem;
 }
@@ -27,15 +35,17 @@
 }
 
 .catalog-title {
-  font-size: 2.2rem;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-family: 'iCielCrocante', serif;
+  font-size: 3rem;
+  font-weight: normal; /* iCiel Crocante là display font, giữ weight tự nhiên */
   letter-spacing: 2px;
-  color: #000;
+  text-align: center;
+  color : #5d5d5d
 }
 
 .catalog-title span {
-  color: #CC2B5E;
+  color: #5D7B6F;
+  /* Deep Sage accent */
   font-size: 1.2rem;
   margin-left: 0.5rem;
   opacity: 0.8;
@@ -51,8 +61,9 @@
 /* Sidebar Filters */
 /* Sidebar Filters */
 .catalog-sidebar {
-  background-color: #FFF;
-  border: 1px solid #000;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(93, 123, 111, 0.22);
+  /* Mint Green border */
   border-radius: var(--radius-lg, 16px);
   padding: 1.8rem;
   position: sticky;
@@ -74,28 +85,34 @@
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 1.5px;
+  color: #5D7B6F;
+  /* Deep Sage label */
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  border-bottom: 1px solid #EEEEEE;
+  border-bottom: 1px solid rgba(93, 123, 111, 0.22);
+  /* Mint divider */
   padding-bottom: 0.75rem;
 }
 
 .search-box-vip input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid #E0E0E0;
+  border: 1px solid rgba(93, 123, 111, 0.22);
+  /* Mint border */
   border-radius: var(--radius-md, 12px);
   font-size: 0.9rem;
   box-sizing: border-box;
+  background-color: #FAFAF8;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .search-box-vip input:focus {
   outline: none;
-  border-color: #000;
-  box-shadow: 0 0 0 1px #000;
+  border-color: #5D7B6F;
+  /* Deep Sage focus */
+  box-shadow: 0 0 0 1px #5D7B6F;
 }
 
 .filter-list {
@@ -108,10 +125,11 @@
   text-align: left;
   background: transparent;
   border: none;
-  border-radius: 9999px; /* Bo tròn 2 đầu dạng pill thanh thoát */
+  border-radius: 9999px;
+  /* Bo tròn 2 đầu dạng pill */
   padding: 0.6rem 1rem;
   font-size: 0.88rem;
-  color: #555;
+  color: #4a5c56;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
@@ -120,15 +138,18 @@
 }
 
 .filter-list button:hover {
-  color: #000;
-  background-color: rgba(0, 0, 0, 0.04); /* Lớp phủ nhẹ khi hover */
+  color: #5D7B6F;
+  /* Deep Sage text */
+  background-color: rgba(93, 123, 111, 0.08);
+  /* Sage overlay nhẹ */
 }
 
-/* Thuộc tính đang active: lớp overlay nhẹ phủ lên, 2 đầu bo tròn hoàn toàn */
+/* Active: Sage overlay rõ hơn, text đậm */
 .filter-list button.active {
-  color: #000;
+  color: #5D7B6F;
   font-weight: 700;
-  background-color: rgba(0, 0, 0, 0.08); /* Lớp overlay xám mờ nhẹ thanh lịch */
+  background-color: rgba(93, 123, 111, 0.15);
+  /* Sage overlay */
   border: none;
 }
 
@@ -138,9 +159,10 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  background-color: #FFF;
+  background-color: #FFFFFF;
   padding: 1rem 1.25rem;
-  border: 1px solid #E0E0E0;
+  border: 1px solid rgba(93, 123, 111, 0.22);
+  /* Mint border */
   border-radius: var(--radius-md, 12px);
 }
 
@@ -160,9 +182,10 @@
 }
 
 .view-modes button.active {
-  border-color: #000;
-  color: #000;
-  background-color: #FAFAFA;
+  border-color: #5D7B6F;
+  /* Deep Sage active */
+  color: #5D7B6F;
+  background-color: rgba(93, 123, 111, 0.08);
 }
 
 .sort-box {
@@ -224,8 +247,9 @@
 .catalog-loading .spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #F3F3F3;
-  border-top: 4px solid #000;
+  border: 4px solid #EAE7D6;
+  border-top: 4px solid #5D7B6F;
+  /* Deep Sage spinner */
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -237,8 +261,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsiveness Extensions */

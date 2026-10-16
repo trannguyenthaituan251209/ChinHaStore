@@ -1,6 +1,6 @@
 .navbar {
-  background-color: var(--color-bg-white);
-  border-bottom: 1px solid var(--color-border);
+  background-color: #EAE7D6; /* Warm Cream — brand background */
+  border-bottom: 1px solid rgba(93, 123, 111, 0.22); /* Mint Green divider */
   padding: 1rem 0;
   width: 100%;
   position: fixed;
@@ -149,7 +149,7 @@
     /* Below navbar */
     left: 0;
     width: 100%;
-    background-color: var(--color-bg-body);
+    background-color: #EAE7D6; /* Warm Cream dropdown */
     padding: 2rem 0;
     transform: none;
     /* Overwrite previous transform */

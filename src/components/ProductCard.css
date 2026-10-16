@@ -12,10 +12,10 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Hover: tắt viền đen, sáng cam dày hơn, không nhảy không phình to */
+/* Hover: tắt viền đen, sáng sage dày hơn, không nhảy không phình to */
 .product-card-vip-centered:hover {
-  border-color: #f19747;
-  box-shadow: 0 0 0 1px #f19747; /* Tăng độ dày viền thành 2px sáng cam mà không xê dịch layout */
+  border-color: #5D7B6F; /* Deep Sage */
+  box-shadow: 0 0 0 1px #5D7B6F; /* Tăng độ dày viền thành 2px sage mà không xê dịch layout */
 }
 
 /* Image wrapper: tràn viền nửa trên */
@@ -165,11 +165,11 @@
   font-weight: 700;
 }
 
-/* Giá: màu chủ đạo (#7A6629 / var(--color-primary)) */
+/* Giá: màu chủ đạo Deep Sage */
 .product-card-price {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #7A6629;
+  color: #5D7B6F; /* Deep Sage */
   height: 1.4rem;
   margin-bottom: 0.8rem;
 }
@@ -210,8 +210,8 @@
   text-align: center;
   transition: opacity 0.2s ease;
   box-sizing: border-box;
-  background-color: #f19747;
-  color: #000000;
+  background-color: #5D7B6F; /* Deep Sage CTA */
+  color: #FFFFFF;
   border: none;
 }
 

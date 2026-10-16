@@ -33,6 +33,14 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'iCielCrocante';
+  src: url("/assets/Font iCiel/iCiel Crocante.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --color-bg-body: #FFFFFF; /* Tối giản: Nền trắng sạch */
   --color-bg-white: #ffffff;
