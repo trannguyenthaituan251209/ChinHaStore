@@ -1028,8 +1028,8 @@ body {
     text-transform: uppercase;
 }
 
-.form-group input,
-.form-group select {
+.admin-dashboard .form-group input,
+.admin-dashboard .form-group select {
     padding: 0.8rem;
     border: 1px solid #E2E2E2;
     border-radius: 0;
@@ -1039,7 +1039,7 @@ body {
     background-color: #FFF;
 }
 
-.form-group input:focus {
+.admin-dashboard .form-group input:focus {
     outline: none;
     border-color: var(--color-admin-accent);
 }
@@ -1135,8 +1135,8 @@ body {
     display: block;
 }
 
-.form-group input,
-.form-group select {
+.admin-dashboard .form-group input,
+.admin-dashboard .form-group select {
     width: 100%;
     padding: 0.7rem;
     border: 1px solid #E2E2E2;
@@ -1148,7 +1148,7 @@ body {
     background-color: #FFF;
 }
 
-.form-group input:focus {
+.admin-dashboard .form-group input:focus {
     border-color: #000;
     outline: none;
 }

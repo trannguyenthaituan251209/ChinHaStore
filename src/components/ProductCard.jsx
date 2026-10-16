@@ -22,18 +22,28 @@ const ProductCard = ({ product, onClick, monthlyCount = 0, isHot = false }) => {
         />
         {isHot && (
           <div className="hot-badge">
-            <span className="fire-icon">🔥</span>
             <span>HOT THÁNG</span>
           </div>
         )}
+
+        {/* Hover/Tap Overlay on Image Area only */}
+        <div className="product-image-overlay">
+          <Link 
+            to={`/camera/${product.slug || product.id}`} 
+            className="btn-overlay-info"
+            onClick={(e) => e.stopPropagation()}
+          >
+            TÌM HIỂU THÊM
+          </Link>
+        </div>
       </div>
       
       <div className="product-card-content">
         <h3 className="product-card-name">{product.name}</h3>
         
         <div className="product-card-rating">
-          <span className="stars">★★★★★</span>
-          <span className="rating-num">{product.rating || '5.0'}</span>
+          <span className="rating-label">Đánh giá:</span>
+          <span className="rating-num">{product.rating ? `${product.rating}/5` : '5.0/5'}</span>
         </div>
         
         <div className="product-card-price">
@@ -42,7 +52,6 @@ const ProductCard = ({ product, onClick, monthlyCount = 0, isHot = false }) => {
 
         {monthlyCount > 0 && (
           <div className="product-card-stats">
-            <span className="monthly-indicator"></span>
             Đã có {monthlyCount} lượt thuê tháng này
           </div>
         )}
@@ -50,9 +59,6 @@ const ProductCard = ({ product, onClick, monthlyCount = 0, isHot = false }) => {
         <div className="product-card-actions-stacked">
           <Link to={`/dat-lich?id=${product.id}`} className="btn-buy-vip" onClick={handleClick}>
             CHỌN THUÊ
-          </Link>
-          <Link to={`/camera/${product.slug || product.id}`} className="btn-info-vip">
-            TÌM HIỂU THÊM
           </Link>
         </div>
       </div>
