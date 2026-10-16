@@ -508,22 +508,38 @@ class NotificationService {
       console.warn('Lỗi khi lấy thông tin bổ sung đơn hàng:', e);
     }
 
-    // 3. Build Distinct Notification Content based on 2 templates
-    let title = '';
-    let body = '';
-    const customerText = customerName ? `${customerName}${customerPhone ? ` (${customerPhone})` : ''}` : 'Khách hàng';
-    const productText = productName ? ` • ${productName}` : '';
-    const priceText = booking.total_price ? ` • ${formatPrice(booking.total_price)}` : '';
+    // Format date string helper
+    const formatDate = (val) => {
+      if (!val) return '';
+      try {
+        const d = new Date(val);
+        if (isNaN(d.getTime())) return String(val);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
+      } catch {
+        return String(val);
+      }
+    };
 
-    if (isConfirmed) {
-      // TEMPLATE 1: CHỐT ĐƠN TỰ ĐỘNG (ĐÃ THANH TOÁN QUA SEPAY)
-      title = `CHỐT TỰ ĐỘNG: #${bookingCode}`;
-      body = `ĐÃ THANH TOÁN (SePay) • ${customerText}${productText}${priceText}\nĐơn đã chốt tự động. Chạm để xem và chuẩn bị máy giao khách!`;
-    } else {
-      // TEMPLATE 2: CHỜ XÁC NHẬN (CHƯA THANH TOÁN)
-      title = `CHỜ XÁC NHẬN: #${bookingCode}`;
-      body = `CHƯA THANH TOÁN • ${customerText}${productText}${priceText}\nChạm để mở và liên hệ khách xác nhận đơn thuê!`;
-    }
+    const startTimeRaw = booking.start_time || booking.start_date || options?.start_time;
+    const endTimeRaw = booking.end_time || booking.end_date || options?.end_time;
+    const dateRangeText = (startTimeRaw && endTimeRaw)
+      ? `${formatDate(startTimeRaw)} - ${formatDate(endTimeRaw)}`
+      : (startTimeRaw ? formatDate(startTimeRaw) : 'Chưa cập nhật');
+
+    // 3. Build Notification Content based on user's exact template
+    const title = 'Có đơn thuê máy ảnh mới ChinHaStore';
+    const statusHeader = isConfirmed ? 'CHỐT ĐƠN TỰ ĐỘNG' : 'CHỜ XÁC NHẬN';
+    const paymentStatus = isConfirmed ? 'Đã thanh toán' : 'Chưa thanh toán';
+    const customerDisplayName = customerName || 'Khách hàng mới';
+    const productDisplayName = productName || 'Thiết bị máy ảnh';
+    const totalPriceText = booking.total_price ? formatPrice(booking.total_price) : (options?.total_price ? formatPrice(options.total_price) : '0 đ');
+
+    const body = `[${statusHeader}]\n[#${bookingCode}]\n[${paymentStatus}]\nTên khách hàng: ${customerDisplayName}\nLoại máy: ${productDisplayName}\nThời gian thuê: ${dateRangeText}\nTổng tiền thuê: ${totalPriceText}\nChạm vào để mở đơn thuê này`;
 
     if (isPermitted) {
       await this.showNotification(title, {
@@ -541,8 +557,8 @@ class NotificationService {
       title,
       body,
       bookingCode,
-      customerName,
-      productName,
+      customerName: customerDisplayName,
+      productName: productDisplayName,
       isConfirmed
     };
   }
@@ -568,23 +584,24 @@ class NotificationService {
       }
     }
 
-    if (type === 'confirmed') {
-      return await this.showNotification('⚡ CHỐT TỰ ĐỘNG: #TEST-888', {
-        body: 'ĐÃ THANH TOÁN (SePay) • Mẫn Hi Chin (0842204207) • Canon EOS R50 • 450.000 đ\nKhách đã chuyển khoản SePay thành công. Đơn hàng tự động chốt!',
-        tag: 'test-confirmed-' + Date.now(),
-        data: {
-          url: window.location.origin + '/quanly-chinha-trungtam?tab=manager'
-        }
-      });
-    } else {
-      return await this.showNotification('⏳ CHỜ XÁC NHẬN: #TEST-889', {
-        body: 'CHƯA THANH TOÁN • Mẫn Hi Chin (0842204207) • Sony A7 IV • 650.000 đ\nKhách chọn thanh toán sau. Chờ nhân viên liên hệ xác nhận!',
-        tag: 'test-pending-' + Date.now(),
-        data: {
-          url: window.location.origin + '/quanly-chinha-trungtam?tab=manager'
-        }
-      });
-    }
+    const isConfirmed = type === 'confirmed';
+    const statusHeader = isConfirmed ? 'CHỐT ĐƠN TỰ ĐỘNG' : 'CHỜ XÁC NHẬN';
+    const paymentStatus = isConfirmed ? 'Đã thanh toán (SePay)' : 'Chưa thanh toán';
+    const testCode = isConfirmed ? 'TEST-888' : 'TEST-889';
+    const customerName = 'Mẫn Hi Chin (0842204207)';
+    const productName = isConfirmed ? 'Canon EOS R50' : 'Sony A7 IV';
+    const totalPrice = isConfirmed ? '450.000 đ' : '650.000 đ';
+    const rentalPeriod = '16/10/2026 08:00 - 18/10/2026 18:00';
+
+    const testBody = `[${statusHeader}]\n[#${testCode}]\n[${paymentStatus}]\nTên khách hàng: ${customerName}\nLoại máy: ${productName}\nThời gian thuê: ${rentalPeriod}\nTổng tiền thuê: ${totalPrice}\nChạm vào để mở đơn thuê này`;
+
+    return await this.showNotification('Có đơn thuê máy ảnh mới ChinHaStore', {
+      body: testBody,
+      tag: `test-${type}-` + Date.now(),
+      data: {
+        url: window.location.origin + '/quanly-chinha-trungtam?tab=manager'
+      }
+    });
   }
 }
 

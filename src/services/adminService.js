@@ -701,7 +701,9 @@ export const adminService = {
           customerName: bookingData.customerName,
           phone: bookingData.phone,
           productName: product?.name || '',
-          total_price: bookingData.total_price
+          total_price: bookingData.total_price,
+          start_time: data?.start_time || bookingData.start_time,
+          end_time: data?.end_time || bookingData.end_time
         }
       });
     } catch (bcErr) {
@@ -717,7 +719,9 @@ export const adminService = {
           customerName: bookingData.customerName,
           phone: bookingData.phone,
           productName: product?.name || '',
-          total_price: bookingData.total_price
+          total_price: bookingData.total_price,
+          start_time: data?.start_time || bookingData.start_time,
+          end_time: data?.end_time || bookingData.end_time
         }
       }).catch((e) => console.warn('Remote push invoke background warning:', e));
     } catch (pushErr) {
@@ -813,7 +817,9 @@ export const adminService = {
           phone: '0842204207',
           productName: product.name,
           total_price: isConfirmed ? 550000 : 350000,
-          isConfirmed: isConfirmed
+          isConfirmed: isConfirmed,
+          start_time: startTime,
+          end_time: endTime
         }
       });
     } catch (bcErr) {
@@ -830,7 +836,9 @@ export const adminService = {
           phone: '0842204207',
           productName: product.name,
           total_price: isConfirmed ? 550000 : 350000,
-          isConfirmed: isConfirmed
+          isConfirmed: isConfirmed,
+          start_time: startTime,
+          end_time: endTime
         }
       }).catch((e) => console.warn('Remote push test invoke warning:', e));
     } catch (e) {

@@ -53,19 +53,40 @@ serve(async (req: Request) => {
       return new Intl.NumberFormat('vi-VN').format(num) + ' đ'
     }
 
-    const price = body.total_price || booking.total_price
-    const priceText = price ? ` • ${formatPrice(price)}` : ''
-    const customerText = body.customerName ? `Khách: ${body.customerName}${body.phone ? ` (${body.phone})` : ''}` : 'Khách đặt trên Website'
-    const productText = body.productName ? ` • ${body.productName}` : ''
-
-    if (!title || !message) {
-      if (isConfirmed) {
-        title = `⚡ CHỐT TỰ ĐỘNG: #${bookingCode}`
-        message = `✅ ĐÃ THANH TOÁN (SePay) • ${customerText}${productText}${priceText}\nĐơn đã chốt tự động. Chạm để xem và chuẩn bị máy!`
-      } else {
-        title = `⏳ CHỜ XÁC NHẬN: #${bookingCode}`
-        message = `⚠️ CHƯA THANH TOÁN • ${customerText}${productText}${priceText}\nChạm để mở và liên hệ khách xác nhận đơn!`
+    const formatDate = (val: any) => {
+      if (!val) return ''
+      try {
+        const d = new Date(val)
+        if (isNaN(d.getTime())) return String(val)
+        const day = String(d.getDate()).padStart(2, '0')
+        const month = String(d.getMonth() + 1).padStart(2, '0')
+        const year = d.getFullYear()
+        const hours = String(d.getHours()).padStart(2, '0')
+        const minutes = String(d.getMinutes()).padStart(2, '0')
+        return `${day}/${month}/${year} ${hours}:${minutes}`
+      } catch {
+        return String(val)
       }
+    }
+
+    const startTimeRaw = body.start_time || booking.start_time || booking.start_date
+    const endTimeRaw = body.end_time || booking.end_time || booking.end_date
+    const dateRangeText = (startTimeRaw && endTimeRaw)
+      ? `${formatDate(startTimeRaw)} - ${formatDate(endTimeRaw)}`
+      : (startTimeRaw ? formatDate(startTimeRaw) : 'Chưa cập nhật')
+
+    const statusHeader = isConfirmed ? 'CHỐT ĐƠN TỰ ĐỘNG' : 'CHỜ XÁC NHẬN'
+    const paymentStatus = isConfirmed ? 'Đã thanh toán (SePay)' : 'Chưa thanh toán'
+    const customerDisplayName = body.customerName ? `${body.customerName}${body.phone ? ` (${body.phone})` : ''}` : 'Khách hàng mới'
+    const productDisplayName = body.productName || 'Thiết bị máy ảnh'
+    const totalPriceText = formatPrice(body.total_price || booking.total_price || 0)
+
+    if (!title) {
+      title = 'Có đơn thuê máy ảnh mới ChinHaStore'
+    }
+
+    if (!message) {
+      message = `[${statusHeader}]\n[#${bookingCode}]\n[${paymentStatus}]\nTên khách hàng: ${customerDisplayName}\nLoại máy: ${productDisplayName}\nThời gian thuê: ${dateRangeText}\nTổng tiền thuê: ${totalPriceText}\nChạm vào để mở đơn thuê này`
     }
 
     // 2. Fetch push subscriptions from Supabase
