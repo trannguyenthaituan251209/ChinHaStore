@@ -1825,18 +1825,7 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery, initialBookin
             if (onClearInitialBookingSlug) onClearInitialBookingSlug();
           }}
           onEdit={(b) => handleEdit(b)}
-          onDelete={(b) => handleDelete(b)}
           onOpenBill={(b) => handleBillView(b)}
-          onStatusUpdated={async (newStatus) => {
-            // Update local state
-            setDetailBooking(prev => prev ? { ...prev, status: newStatus } : null);
-            if (activeSubtab === 'past') {
-              await fetchHistoryPage(historyPage);
-            } else {
-              await reloadBookings();
-            }
-          }}
-          showStatus={showStatus}
         />
       )}
 

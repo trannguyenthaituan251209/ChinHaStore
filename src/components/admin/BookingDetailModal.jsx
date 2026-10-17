@@ -3,34 +3,22 @@ import {
   X, 
   Copy, 
   Check, 
-  ExternalLink, 
   Phone, 
-  Calendar, 
   Camera, 
   User, 
   MapPin, 
-  Clock, 
-  ShieldCheck, 
   FileText, 
-  Edit3, 
-  Trash2, 
-  CheckCircle, 
-  AlertCircle 
+  Edit3 
 } from 'lucide-react';
-import { adminService } from '../../services/adminService';
 import './BookingDetailModal.css';
 
 const BookingDetailModal = ({ 
   booking, 
   onClose, 
   onEdit, 
-  onDelete, 
-  onOpenBill, 
-  onStatusUpdated,
-  showStatus 
+  onOpenBill 
 }) => {
   const [copied, setCopied] = useState(false);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   if (!booking) return null;
 
@@ -47,44 +35,24 @@ const BookingDetailModal = ({
     }
   };
 
-  const handleQuickStatusChange = async (newStatus) => {
-    try {
-      setUpdatingStatus(true);
-      await adminService.updateBookingStatus(booking.id, newStatus);
-      if (showStatus) {
-        showStatus(`Đã cập nhật trạng thái đơn #${bookingCode} sang [${newStatus}]`, 'success');
-      }
-      if (onStatusUpdated) {
-        onStatusUpdated(newStatus);
-      }
-    } catch (err) {
-      console.error('Lỗi cập nhật trạng thái:', err);
-      if (showStatus) {
-        showStatus('Lỗi: ' + (err.message || 'Không thể cập nhật trạng thái'), 'error');
-      }
-    } finally {
-      setUpdatingStatus(false);
-    }
-  };
-
-  const getStatusBadge = (status) => {
+  const getStatusDotInfo = (status) => {
     switch (status) {
       case 'Pending':
-        return { label: 'Chờ xác nhận', className: 'status-pending' };
+        return { title: 'Chờ xác nhận', dotClass: 'dot-pending' };
       case 'Confirmed':
-        return { label: 'Đã chốt lịch', className: 'status-confirmed' };
+        return { title: 'Đã chốt lịch', dotClass: 'dot-confirmed' };
       case 'Renting':
-        return { label: 'Đang thuê', className: 'status-renting' };
+        return { title: 'Đang thuê', dotClass: 'dot-renting' };
       case 'Returned':
-        return { label: 'Đã hoàn thành', className: 'status-returned' };
+        return { title: 'Đã hoàn thành', dotClass: 'dot-returned' };
       case 'Cancelled':
-        return { label: 'Đã hủy', className: 'status-cancelled' };
+        return { title: 'Đã hủy', dotClass: 'dot-cancelled' };
       default:
-        return { label: status || 'Không rõ', className: 'status-default' };
+        return { title: status || 'Không rõ', dotClass: 'dot-default' };
     }
   };
 
-  const statusBadge = getStatusBadge(booking.status);
+  const statusDot = getStatusDotInfo(booking.status);
 
   return (
     <div className="admin-modal-overlay" onClick={onClose}>
@@ -98,9 +66,12 @@ const BookingDetailModal = ({
             <div className="booking-detail-code-row">
               <span className="booking-detail-id-label">MÃ ĐƠN:</span>
               <h2 className="booking-detail-code">#{bookingCode}</h2>
-              <span className={`booking-detail-badge ${statusBadge.className}`}>
-                {statusBadge.label}
-              </span>
+              {/* Dot màu trạng thái thay thế cho badge chữ */}
+              <span 
+                className={`booking-status-dot ${statusDot.dotClass}`} 
+                title={`Trạng thái: ${statusDot.title}`}
+                aria-label={`Trạng thái: ${statusDot.title}`}
+              />
               {booking.source && (
                 <span className="booking-detail-source">
                   {booking.source}
@@ -133,53 +104,6 @@ const BookingDetailModal = ({
             <X size={20} />
           </button>
         </header>
-
-        {/* STATUS QUICK CONTROL BAR */}
-        <div className="booking-detail-status-bar">
-          <span className="status-bar-label">ĐỔI TRẠNG THÁI:</span>
-          <div className="status-bar-actions">
-            {booking.status !== 'Confirmed' && (
-              <button 
-                type="button" 
-                disabled={updatingStatus}
-                onClick={() => handleQuickStatusChange('Confirmed')}
-                className="btn-status-pill pill-confirmed"
-              >
-                Chốt lịch
-              </button>
-            )}
-            {booking.status !== 'Renting' && (
-              <button 
-                type="button" 
-                disabled={updatingStatus}
-                onClick={() => handleQuickStatusChange('Renting')}
-                className="btn-status-pill pill-renting"
-              >
-                Giao máy (Đang thuê)
-              </button>
-            )}
-            {booking.status !== 'Returned' && (
-              <button 
-                type="button" 
-                disabled={updatingStatus}
-                onClick={() => handleQuickStatusChange('Returned')}
-                className="btn-status-pill pill-returned"
-              >
-                Hoàn thành
-              </button>
-            )}
-            {booking.status !== 'Cancelled' && (
-              <button 
-                type="button" 
-                disabled={updatingStatus}
-                onClick={() => handleQuickStatusChange('Cancelled')}
-                className="btn-status-pill pill-cancelled"
-              >
-                Hủy đơn
-              </button>
-            )}
-          </div>
-        </div>
 
         {/* BODY CONTENT - GRID SECTIONS */}
         <div className="booking-detail-body custom-scrollbar">
@@ -305,18 +229,7 @@ const BookingDetailModal = ({
 
         {/* FOOTER ACTIONS */}
         <footer className="booking-detail-footer">
-          <div className="footer-left-actions">
-            {onDelete && (
-              <button 
-                type="button" 
-                className="btn-detail-action btn-detail-delete"
-                onClick={() => { onClose(); onDelete(booking); }}
-              >
-                <Trash2 size={15} /> Xóa đơn
-              </button>
-            )}
-          </div>
-          <div className="footer-right-actions">
+          <div className="footer-actions-group">
             {onEdit && (
               <button 
                 type="button" 
@@ -332,7 +245,7 @@ const BookingDetailModal = ({
                 className="btn-detail-action btn-detail-bill"
                 onClick={() => { onClose(); onOpenBill(booking); }}
               >
-                <FileText size={15} /> Hóa đơn (In/Tải ảnh)
+                <FileText size={15} /> Hóa đơn
               </button>
             )}
             <button 
