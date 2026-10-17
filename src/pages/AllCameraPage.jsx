@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Search, Filter, ArrowUpDown, ChevronRight, LayoutGrid, List } from 'lucide-react';
+import { Search, Filter, ArrowUpDown, ChevronRight, LayoutGrid, List, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { adminService } from '../services/adminService';
 import ProductCard from '../components/ProductCard';
 import './AllCameraPage.css';
@@ -15,7 +15,9 @@ const AllCameraPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedBrand, setSelectedBrand] = useState('All');
-  const [sortOrder, setSortOrder] = useState('default'); // default, price-asc, price-desc, rating-desc
+  const [sortOrder, setSortOrder] = useState('default');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -83,6 +85,15 @@ const AllCameraPage = () => {
     return result;
   }, [products, searchTerm, selectedCategory, selectedBrand, sortOrder]);
 
+  // Đếm số filter đang active (để hiển thị badge khi collapsed)
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (searchTerm) count++;
+    if (selectedCategory !== 'All') count++;
+    if (selectedBrand !== 'All') count++;
+    return count;
+  }, [searchTerm, selectedCategory, selectedBrand]);
+
   if (loading) return (
     <div className="catalog-loading">
       <div className="spinner"></div>
@@ -140,59 +151,99 @@ const AllCameraPage = () => {
 
       <div className="container catalog-container">
         {/* Sidebar Filters */}
-        <aside className="catalog-sidebar">
-          <div className="sidebar-section">
-            <h3><Search size={16} /> TÌM KIẾM</h3>
-            <div className="search-box-vip">
-              <input
-                type="text"
-                placeholder="Tìm tên máy, dòng máy..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+        <aside className={`catalog-sidebar ${filterOpen ? 'filter-open' : 'filter-closed'}`}>
+
+          {/* Mobile toggle bar — hit area toàn bộ thanh */}
+          <button
+            className="filter-toggle-bar"
+            onClick={() => setFilterOpen(prev => !prev)}
+            aria-expanded={filterOpen}
+            aria-label="Mở/đóng bộ lọc"
+          >
+            <span className="filter-toggle-left">
+              <SlidersHorizontal size={16} />
+              <span>BỘ LỌC</span>
+              {activeFilterCount > 0 && (
+                <span className="filter-badge">{activeFilterCount}</span>
+              )}
+            </span>
+            <ChevronDown
+              size={18}
+              className={`filter-chevron ${filterOpen ? 'rotated' : ''}`}
+            />
+          </button>
+
+          {/* Nội dung filter — ẩn/hiện với animation */}
+          <div className="filter-content">
+            <div className="sidebar-section">
+              <h3><Search size={16} /> TÌM KIẾM</h3>
+              <div className="search-box-vip">
+                <input
+                  type="text"
+                  placeholder="Tìm tên máy, dòng máy..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="sidebar-section">
+              <h3><Filter size={16} /> PHÂN LOẠI</h3>
+              <div className="filter-list">
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    className={selectedCategory === cat ? 'active' : ''}
+                    onClick={() => setSelectedCategory(cat)}
+                  >
+                    {cat === 'All' ? 'Tất cả dòng máy' : cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="sidebar-section">
+              <h3>THƯƠNG HIỆU</h3>
+              <div className="filter-list">
+                {brands.map(brand => (
+                  <button
+                    key={brand}
+                    className={selectedBrand === brand ? 'active' : ''}
+                    onClick={() => setSelectedBrand(brand)}
+                  >
+                    {brand === 'All' ? 'Tất cả thương hiệu' : brand}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="sidebar-section">
-            <h3><Filter size={16} /> PHÂN LOẠI</h3>
-            <div className="filter-list">
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  className={selectedCategory === cat ? 'active' : ''}
-                  onClick={() => setSelectedCategory(cat)}
-                >
-                  {cat === 'All' ? 'Tất cả dòng máy' : cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="sidebar-section">
-            <h3>THƯƠNG HIỆU</h3>
-            <div className="filter-list">
-              {brands.map(brand => (
-                <button
-                  key={brand}
-                  className={selectedBrand === brand ? 'active' : ''}
-                  onClick={() => setSelectedBrand(brand)}
-                >
-                  {brand === 'All' ? 'Tất cả thương hiệu' : brand}
-                </button>
-              ))}
-            </div>
-          </div>
         </aside>
 
         {/* Main Content */}
         <main className="catalog-content">
           <div className="catalog-controls">
+            {/* View mode toggle */}
             <div className="view-modes">
-              <button className="active"><LayoutGrid size={18} /></button>
-              <button><List size={18} /></button>
+              <button
+                className={viewMode === 'grid' ? 'active' : ''}
+                onClick={() => setViewMode('grid')}
+                title="Dạng lưới"
+              >
+                <LayoutGrid size={17} />
+              </button>
+              <button
+                className={viewMode === 'list' ? 'active' : ''}
+                onClick={() => setViewMode('list')}
+                title="Dạng danh sách"
+              >
+                <List size={17} />
+              </button>
             </div>
+
+            {/* Sort */}
             <div className="sort-box">
-              <ArrowUpDown size={16} />
+              <ArrowUpDown size={15} />
               <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
                 <option value="default">Sắp xếp mặc định</option>
                 <option value="price-asc">Giá thấp đến cao</option>
@@ -203,13 +254,14 @@ const AllCameraPage = () => {
           </div>
 
           {filteredProducts.length > 0 ? (
-            <div className="catalog-grid">
+            <div className={viewMode === 'grid' ? 'catalog-grid' : 'catalog-list'}>
               {filteredProducts.map(product => (
                 <ProductCard
                   key={product.id}
                   product={product}
                   monthlyCount={stats.counts[product.id] || 0}
                   isHot={stats.hotProductId === product.id}
+                  viewMode={viewMode}
                 />
               ))}
             </div>

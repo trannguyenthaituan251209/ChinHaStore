@@ -36,11 +36,13 @@
 
 .catalog-title {
   font-family: 'iCielCrocante', serif;
-  font-size: 3rem;
-  font-weight: normal; /* iCiel Crocante là display font, giữ weight tự nhiên */
-  letter-spacing: 2px;
+  /* Fluid typography: 1.4rem (mobile nhỏ) → scale theo vw → 3rem (desktop) */
+  font-size: clamp(1.4rem, 3.5vw, 3rem);
+  font-weight: normal;
+  letter-spacing: clamp(0.5px, 0.2vw, 2px); /* Letter-spacing cũng scale theo */
   text-align: center;
-  color : #5d5d5d
+  color: #5d5d5d;
+  line-height: 1.3; /* Đảm bảo wrap đẹp trên mobile */
 }
 
 .catalog-title span {
@@ -158,58 +160,191 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   background-color: #FFFFFF;
-  padding: 1rem 1.25rem;
+  padding: 0.6rem 0.75rem 0.6rem 1rem;
   border: 1px solid rgba(93, 123, 111, 0.22);
-  /* Mint border */
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(--radius-lg, 16px); /* Bo góc giống filter sidebar */
 }
 
+/* View mode toggle — pill group */
 .view-modes {
   display: flex;
-  gap: 0.5rem;
+  gap: 0;
+  background-color: rgba(93, 123, 111, 0.08);
+  border-radius: 9999px;
+  padding: 3px;
 }
 
 .view-modes button {
   background: none;
-  border: 1px solid #DDD;
-  border-radius: 8px;
-  padding: 0.5rem;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.4rem 0.75rem;
   cursor: pointer;
-  color: #999;
+  color: #5D7B6F;
+  opacity: 0.5;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
 }
 
 .view-modes button.active {
-  border-color: #5D7B6F;
-  /* Deep Sage active */
-  color: #5D7B6F;
-  background-color: rgba(93, 123, 111, 0.08);
+  background-color: #5D7B6F;
+  color: #FFFFFF;
+  opacity: 1;
 }
 
+/* Sort box */
 .sort-box {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.5rem;
   font-size: 0.85rem;
-  color: #666;
+  color: #5D7B6F;
 }
 
 .sort-box select {
-  padding: 0.5rem 1rem;
-  border: 1px solid #DDD;
-  border-radius: 8px;
-  background-color: #FFF;
-  font-size: 0.85rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(93, 123, 111, 0.25);
+  border-radius: 9999px;
+  background-color: #FFFFFF;
+  font-size: 0.82rem;
+  color: #3d5c52;
   cursor: pointer;
+  outline: none;
+  appearance: auto;
 }
 
-/* Product Card Centered Layout Grid */
+.sort-box select:focus {
+  border-color: #5D7B6F;
+  box-shadow: 0 0 0 1px #5D7B6F;
+}
+
+/* Product Card Grid */
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.5rem;
+}
+
+/* Product List View */
+.catalog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.product-list-row {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  align-items: center;
+  gap: 1.25rem;
+  background-color: #FFFFFF;
+  border: 1px solid #000;
+  border-radius: var(--radius-lg, 16px);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  padding-right: 1.25rem;
+}
+
+.product-list-row:hover {
+  border-color: #5D7B6F;
+  box-shadow: 0 0 0 1px #5D7B6F;
+}
+
+/* Ảnh thumbnail */
+.list-row-image {
+  display: block;
+  width: 110px;
+  height: 100px;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.list-row-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Thông tin giữa */
+.list-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.9rem 0;
+  min-width: 0;
+}
+
+.list-row-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-row-rating {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.list-row-rating strong {
+  color: #5D7B6F;
+  font-weight: 700;
+}
+
+.list-row-stats {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* Cột giá + CTA */
+.list-row-price-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.list-row-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #5D7B6F;
+  white-space: nowrap;
+}
+
+.list-row-price small {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: #888;
+}
+
+.btn-buy-vip.list-row-cta {
+  background-color: #5D7B6F; /* Deep Sage — đồng bộ grid card */
+  color: #FFFFFF;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  border-radius: var(--radius-md, 12px);
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  transition: opacity 0.2s ease;
+}
+
+.btn-buy-vip.list-row-cta:hover {
+  opacity: 0.88;
 }
 
 /* Empty State */
@@ -283,22 +418,102 @@
     grid-template-columns: 1fr;
   }
 
+  /* Sidebar: collapsed by default on mobile */
   .catalog-sidebar {
     position: static;
+    padding: 0;
+    /* overflow: hidden removed — để filter-content tự clip, không clip cả sidebar */
+  }
+
+  /* Toggle bar: full-width tap target, luôn hiển thị */
+  .filter-toggle-bar {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    padding: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #5D7B6F;
+    text-transform: uppercase;
+    min-height: 52px; /* Touch-friendly hit area */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .filter-toggle-bar:active {
+    background-color: rgba(93, 123, 111, 0.06);
+  }
+
+  .filter-toggle-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  /* Badge số filter đang active */
+  .filter-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background-color: #5D7B6F;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 9999px;
+  }
+
+  /* Chevron xoay khi mở */
+  .filter-chevron {
+    transition: transform 0.3s ease;
+    color: #5D7B6F;
+    flex-shrink: 0;
+  }
+  .filter-chevron.rotated {
+    transform: rotate(180deg);
+  }
+
+  /* Nội dung filter: animate bằng max-height */
+  .filter-content {
+    max-height: 0;
+    overflow: hidden; /* Clip animation ở đây thay vì trên sidebar */
+    transition: max-height 0.35s ease, padding 0.3s ease;
+    padding: 0 1.25rem;
+  }
+
+  .filter-open .filter-content {
+    max-height: 1200px; /* Đủ lớn cho mọi số lượng brand/category */
+    padding: 0 1.25rem 1.5rem; /* Bottom 1.5rem tránh dính viền */
   }
 
   .sidebar-section {
-    flex: 1;
-    min-width: 200px;
-    margin-bottom: 0;
+    flex: unset;
+    min-width: unset;
+    margin-bottom: 1.5rem;
   }
 
   .catalog-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+  }
+}
+
+/* Desktop: ẩn toggle bar, luôn hiển thị filter-content bình thường */
+@media (min-width: 1024px) {
+  .filter-toggle-bar {
+    display: none;
+  }
+
+  .filter-content {
+    display: contents; /* Transparent wrapper — không ảnh hưởng layout */
+  }
+
+  .filter-badge {
+    display: none;
   }
 }
