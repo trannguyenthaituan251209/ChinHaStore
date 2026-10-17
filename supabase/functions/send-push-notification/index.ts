@@ -122,7 +122,7 @@ serve(async (req: Request) => {
       body: message,
       tag: tag || `booking-${isConfirmed ? 'confirmed' : 'pending'}-${bookingId || Date.now()}`,
       data: {
-        url: `/quanly-chinha-trungtam?tab=manager${bookingId ? `&booking_id=${bookingId}` : ''}`,
+        url: `/quanly-chinha-trungtam?tab=manager${bookingId ? `&booking=${bookingId}&booking_id=${bookingId}` : ''}`,
         bookingId: bookingId,
         isConfirmed: isConfirmed
       }

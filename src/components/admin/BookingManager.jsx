@@ -1,20 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   PlusCircle, 
   Edit3, 
   Trash2, 
-  FileText,
-  Clock,
-  RefreshCcw,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  CalendarDays
+  FileText, 
+  Eye,
+  Clock, 
+  RefreshCcw, 
+  CheckCircle, 
+  ChevronLeft, 
+  ChevronRight, 
+  CalendarDays 
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { supabase } from '../../utils/supabase';
 import html2canvas from 'html2canvas';
+import BookingDetailModal from './BookingDetailModal';
 import '../../pages/AdminDashboard.css';
 
 const InteractiveCalendar = ({ data, selectedDate, onSelectDate }) => {
@@ -85,13 +87,15 @@ const InteractiveCalendar = ({ data, selectedDate, onSelectDate }) => {
   );
 };
 
-const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
+const BookingManager = ({ showStatus, searchQuery, setSearchQuery, initialBookingSlug, onClearInitialBookingSlug }) => {
   const [activeSubtab, setActiveSubtab] = useState('renting'); // 'renting', 'future', 'past', 'bills'
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBillOpen, setIsBillOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [detailBooking, setDetailBooking] = useState(null);
   const [depositProperty, setDepositProperty] = useState('CĂN CƯỚC CÔNG DÂN');
   const [discountAmount, setDiscountAmount] = useState('0');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -321,6 +325,43 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
       supabase.removeChannel(channel);
     };
   }, [activeSubtab, historyPage]);
+
+  // Handle URL / Push notification direct slug navigation
+  useEffect(() => {
+    if (!initialBookingSlug) return;
+    
+    let isMounted = true;
+    const loadTargetBooking = async () => {
+      // First check if already in loaded data
+      const cleanSlug = String(initialBookingSlug).trim().toLowerCase();
+      const existing = data.find(b => 
+        (b.booking_id && String(b.booking_id).toLowerCase() === cleanSlug) ||
+        (b.id && String(b.id).toLowerCase() === cleanSlug)
+      );
+
+      if (existing) {
+        setDetailBooking(existing);
+        setIsDetailOpen(true);
+        return;
+      }
+
+      // Otherwise fetch directly via adminService
+      try {
+        const found = await adminService.getBookingById(initialBookingSlug);
+        if (isMounted && found) {
+          setDetailBooking(found);
+          setIsDetailOpen(true);
+        } else if (isMounted) {
+          showStatus(`Không tìm thấy đơn thuê với mã "${initialBookingSlug}"`, 'error');
+        }
+      } catch (err) {
+        console.error('Error finding booking by slug:', err);
+      }
+    };
+
+    loadTargetBooking();
+    return () => { isMounted = false; };
+  }, [initialBookingSlug, data]);
 
   // SERVER-SIDE SEARCH WITH DEBOUNCE
   React.useEffect(() => {
@@ -1103,6 +1144,9 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                       </td>
                       <td><strong>{b.totalPrice} VNĐ</strong></td>
                       <td>
+                        <button className="action-btn view" onClick={() => { setDetailBooking(b); setIsDetailOpen(true); }} title="Xem chi tiết đơn">
+                          <Eye size={16} />
+                        </button>
                         <button className="action-btn tick" onClick={() => handleMarkAsSeen(b.id)} title="Đánh dấu đã xem">
                           <CheckCircle size={18} style={{color: '#28a745'}} />
                         </button>
@@ -1180,6 +1224,9 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
                   </td>
                   <td><strong>{b.totalPrice} VNĐ</strong></td>
                   <td>
+                    <button className="action-btn view" onClick={() => { setDetailBooking(b); setIsDetailOpen(true); }} title="Xem chi tiết đơn">
+                      <Eye size={16} />
+                    </button>
                     {activeSubtab === 'bills' && (
                       <button className="btn-bill-view" onClick={() => handleBillView(b)}>
                         <FileText size={14} />
@@ -1766,6 +1813,31 @@ const BookingManager = ({ showStatus, searchQuery, setSearchQuery }) => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Booking Detail Full Information Banner Modal */}
+      {isDetailOpen && detailBooking && (
+        <BookingDetailModal 
+          booking={detailBooking}
+          onClose={() => {
+            setIsDetailOpen(false);
+            setDetailBooking(null);
+            if (onClearInitialBookingSlug) onClearInitialBookingSlug();
+          }}
+          onEdit={(b) => handleEdit(b)}
+          onDelete={(b) => handleDelete(b)}
+          onOpenBill={(b) => handleBillView(b)}
+          onStatusUpdated={async (newStatus) => {
+            // Update local state
+            setDetailBooking(prev => prev ? { ...prev, status: newStatus } : null);
+            if (activeSubtab === 'past') {
+              await fetchHistoryPage(historyPage);
+            } else {
+              await reloadBookings();
+            }
+          }}
+          showStatus={showStatus}
+        />
       )}
 
     </div>

@@ -63,6 +63,10 @@ self.addEventListener('notificationclick', (event) => {
           client.url.includes('tab=manager')
         ) {
           client.focus();
+          // Update URL in open client if needed
+          if ('navigate' in client && targetUrl) {
+            client.navigate(targetUrl);
+          }
           client.postMessage({
             type: 'NOTIFICATION_NAVIGATE_BOOKING',
             bookingId: bookingId,

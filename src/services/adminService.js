@@ -1189,13 +1189,62 @@ export const adminService = {
   },
 
   async getBookingById(id) {
-    const { data, error } = await supabase
+    if (!id) return null;
+    const cleanId = String(id).trim();
+    // Check if it's a UUID or custom booking_id
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanId);
+    
+    let query = supabase
       .from('bookings')
-      .select('*')
-      .eq('booking_id', id)
-      .single();
+      .select(`
+        *,
+        customers (full_name, phone, city),
+        products (name, image_url, price1Day, price6h, price2Days, price3Days, price4DaysPlus),
+        inventory_units (serial_number)
+      `);
+
+    if (isUUID) {
+      query = query.eq('id', cleanId);
+    } else {
+      query = query.eq('booking_id', cleanId);
+    }
+
+    const { data, error } = await query.maybeSingle();
     if (error) throw error;
-    return data;
+    if (!data) return null;
+
+    const format = (d) => d ? new Date(d).toLocaleString('vi-VN', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+      timeZone: 'Asia/Ho_Chi_Minh'
+    }).replace(' ', ' - ') : 'N/A';
+
+    return {
+      id: data.id,
+      customerName: data.customers?.full_name || 'Khách lẻ',
+      phone: data.customers?.phone || '',
+      productName: data.products?.name || 'Sản phẩm',
+      productImage: data.products?.image_url || null,
+      unitName: data.inventory_units?.serial_number || 'N/A',
+      startDate: format(data.start_time),
+      endDate: format(data.end_time),
+      totalPrice: new Intl.NumberFormat('vi-VN').format(data.total_price),
+      source: data.source || 'Website',
+      status: data.status,
+      rentalType: data.rental_type,
+      start_time: data.start_time,
+      end_time: data.end_time,
+      customer_id: data.customer_id,
+      product_id: data.product_id,
+      unit_id: data.unit_id,
+      deposit_type: data.deposit_type || 'standard',
+      city: data.city || data.customers?.city || '',
+      is_seen: data.is_seen,
+      booking_id: data.booking_id,
+      optional_accessories: data.optional_accessories || [],
+      created_at: data.created_at,
+      invoice_versions: data.invoice_versions || []
+    };
   },
 
   async getReportData() {

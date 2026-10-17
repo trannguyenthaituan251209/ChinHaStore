@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   CalendarCheck,
@@ -37,7 +38,19 @@ import './AdminDashboard.css';
 import './AdminDashboard_notifs.css';
 
 const AdminDashboard = ({ onLogout }) => {
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard', 'manager', 'modify', 'report'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+
+  // Extract initial tab & initial booking slug from URL params or path
+  const urlTab = searchParams.get('tab');
+  const urlBooking = searchParams.get('booking') || searchParams.get('booking_id');
+
+  const [activeTab, setActiveTab] = useState(() => {
+    if (urlTab) return urlTab;
+    if (urlBooking) return 'manager';
+    return 'dashboard';
+  });
+  const [initialBookingSlug, setInitialBookingSlug] = useState(() => urlBooking || null);
   const [showRevenue, setShowRevenue] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState(null);
@@ -129,12 +142,14 @@ const AdminDashboard = ({ onLogout }) => {
   };
 
   // Service Worker Message Listener (Handles click on push notification to navigate)
-  React.useEffect(() => {
+  useEffect(() => {
     const handleSwMessage = (event) => {
       if (event.data?.type === 'NOTIFICATION_NAVIGATE_BOOKING') {
         setActiveTab('manager');
-        if (event.data.bookingId) {
-          setSearchQuery(event.data.bookingId);
+        const targetBookingId = event.data.bookingId || (event.data.url ? new URL(event.data.url, window.location.origin).searchParams.get('booking_id') : null);
+        if (targetBookingId) {
+          setInitialBookingSlug(targetBookingId);
+          setSearchQuery(targetBookingId);
         }
       }
     };
@@ -935,7 +950,15 @@ const AdminDashboard = ({ onLogout }) => {
 
         <main className="admin-content">
           {activeTab === 'dashboard' && renderDashboard()}
-          {activeTab === 'manager' && <BookingManager showStatus={showStatus} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />}
+          {activeTab === 'manager' && (
+            <BookingManager 
+              showStatus={showStatus} 
+              searchQuery={searchQuery} 
+              setSearchQuery={setSearchQuery} 
+              initialBookingSlug={initialBookingSlug}
+              onClearInitialBookingSlug={() => setInitialBookingSlug(null)}
+            />
+          )}
           {activeTab === 'blog' && <BlogManager showStatus={showStatus} />}
           {activeTab === 'modify' && <DatabaseModifier showStatus={showStatus} />}
           {activeTab === 'report' && <ReportCenter showStatus={showStatus} />}

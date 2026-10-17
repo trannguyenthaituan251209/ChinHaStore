@@ -542,12 +542,13 @@ class NotificationService {
     const body = `[${statusHeader}]\n[#${bookingCode}]\n[${paymentStatus}]\nTên khách hàng: ${customerDisplayName}\nLoại máy: ${productDisplayName}\nThời gian thuê: ${dateRangeText}\nTổng tiền thuê: ${totalPriceText}\nChạm vào để mở đơn thuê này`;
 
     if (isPermitted) {
+      const slug = booking.booking_id || booking.id || '';
       await this.showNotification(title, {
         body: body,
         tag: `booking-${notificationType}-${booking.id || Date.now()}`,
         data: {
-          url: `${window.location.origin}/quanly-chinha-trungtam?tab=manager&booking_id=${booking.id || ''}`,
-          bookingId: booking.id,
+          url: `${window.location.origin}/quanly-chinha-trungtam?tab=manager&booking=${slug}`,
+          bookingId: slug,
           status: booking.status
         }
       });
