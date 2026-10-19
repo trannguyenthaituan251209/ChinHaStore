@@ -13,6 +13,7 @@ import ProductDetail from './pages/ProductDetail';
 import { adminService } from './services/adminService';
 import { analyticsService } from './services/analyticsService';
 import PolicyPage from './pages/PolicyPage';
+import NotFoundPage from './pages/NotFoundPage';
 import AppLock from './components/admin/AppLock';
 
 import './index.css';
@@ -240,8 +241,8 @@ function App() {
           } 
         />
         
-        {/* Default fallback for main storefront */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Public storefront fallback */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       {!isAdminMode && <Footer />}
     </div>

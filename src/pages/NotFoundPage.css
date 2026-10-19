@@ -1,0 +1,87 @@
+.not-found-page {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  place-items: center;
+  padding: 3rem 1.5rem 5rem;
+  background-color: #EAE7D6;
+  background-image:
+    linear-gradient(rgba(234, 231, 214, 0.78), rgba(234, 231, 214, 0.78)),
+    url("/assets/camera-pattern.png");
+  background-repeat: repeat;
+  background-size: auto, 900px;
+}
+
+.not-found-content {
+  width: min(100%, 680px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.not-found-mascot {
+  width: min(100%, 390px);
+  max-height: 390px;
+  object-fit: contain;
+  margin-bottom: 0.25rem;
+}
+
+.not-found-code {
+  color: #5D7B6F;
+  font-size: clamp(3.5rem, 10vw, 6.25rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.not-found-content h1 {
+  margin-top: 1rem;
+  color: #3D453F;
+  font-family: 'iCielCrocante', 'Product Sans', sans-serif;
+  font-size: clamp(1.7rem, 4vw, 2.65rem);
+  font-weight: normal;
+  line-height: 1.25;
+}
+
+.not-found-message {
+  max-width: 520px;
+  margin-top: 0.8rem;
+  color: #666;
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.7;
+}
+
+.not-found-home-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: 1.75rem;
+  padding: 0.75rem 1.6rem;
+  border-radius: 9999px;
+  background: #5D7B6F;
+  color: #fff;
+  font-weight: 700;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.not-found-home-link:hover {
+  background: #496458;
+  transform: translateY(-2px);
+}
+
+.not-found-home-link:focus-visible {
+  outline: 3px solid #7A6629;
+  outline-offset: 4px;
+}
+
+@media (max-width: 600px) {
+  .not-found-page {
+    min-height: calc(100vh - 72px);
+    padding: 2rem 1.25rem 4rem;
+  }
+
+  .not-found-mascot {
+    width: min(86vw, 330px);
+  }
+}

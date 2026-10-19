@@ -1361,6 +1361,16 @@ const BookingPage = () => {
 
         {step === 3 && (paymentOption === 'wait' || isPaymentConfirmed) && (
           <div className="ticket-container animate-in">
+            {isPaymentConfirmed && (
+              <div className="booking-success-mascot" role="status" aria-live="polite">
+                <img
+                  src="/assets/successfully.png"
+                  alt="Ong thợ ảnh vui mừng cầm phiếu xác nhận đặt thuê"
+                />
+                <h2>Đặt thuê thành công!</h2>
+                <p>Tiền cọc đã được xác nhận — khung giờ thuê của bạn đã được giữ.</p>
+              </div>
+            )}
             <div className="booking-ticket" id="main-ticket-view">
               <div className="ticket-header">
                 <h1>PHIẾU THANH TOÁN GIỮ LỊCH</h1>
