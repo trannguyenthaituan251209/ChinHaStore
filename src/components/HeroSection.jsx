@@ -39,7 +39,7 @@ const HeroSection = () => {
           />
           
           <SplitText
-            text="HÃY ĐỂ CHÚNG TÔI GIÚP BẠN VIẾT LÊN"
+            text="THUÊ MÁY ẢNH TẠI BUÔN MA THUỘT"
             className="hero-title"
             delay={40}
             duration={1.2}
@@ -63,7 +63,7 @@ const HeroSection = () => {
           />
           
           <SplitText
-            text="Nền tảng cho thuê máy ảnh chuyên nghiệp, nhanh chóng và tiện lợi. ChinHaStore, hỗ trợ ưu đãi học sinh sinh viên. Giá tốt nhất thị trường."
+            text="Xem máy đang có, tham khảo giá thuê theo thời lượng và đặt lịch trực tuyến. Hỗ trợ giao nhận theo khu vực phục vụ tại Đắk Lắk."
             className="hero-description"
             delay={10}
             duration={1}

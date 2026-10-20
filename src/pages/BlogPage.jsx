@@ -33,19 +33,27 @@ const BlogPage = () => {
 
   if (loading) {
     return (
-      <div className="blog-page-loading">
-        <div className="spinner"></div>
-        <p>ĐANG TẢI CẨM NANG...</p>
-      </div>
+      <>
+        <Helmet>
+          <title>Cẩm Nang Nhiếp Ảnh | Blog ChinHaStore</title>
+          <link rel="canonical" href="https://chinhastore.com/blog" />
+          <meta name="description" content="Cẩm nang chụp ảnh, hướng dẫn chọn thiết bị và kinh nghiệm thuê máy ảnh tại Buôn Ma Thuột." />
+        </Helmet>
+        <div className="blog-page-loading">
+          <div className="spinner"></div>
+          <p>ĐANG TẢI CẨM NANG...</p>
+        </div>
+      </>
     );
   }
 
   return (
     <div className="blog-page">
       <Helmet>
-        <title>Cẩm Nang Nhiếp Ảnh | Blog ChinHaStore - BMT</title>
-        <meta name="description" content="Khám phá mẹo chụp ảnh, review máy ảnh và địa điểm check-in đẹp tại Buôn Ma Thuột (BMT). Cẩm nang nhiếp ảnh chuyên nghiệp cho cộng đồng Đắk Lắk." />
-        <meta name="keywords" content="kinh nghiệm chụp ảnh bmt, review máy ảnh bmt, địa điểm chụp ảnh buôn ma thuột, cẩm nang nhiếp ảnh bmt, thuê máy ảnh bmt blog" />
+        <title>Cẩm Nang Nhiếp Ảnh | Blog ChinHaStore</title>
+        <link rel="canonical" href="https://chinhastore.com/blog" />
+        <meta name="description" content="Cẩm nang chụp ảnh, hướng dẫn chọn thiết bị và kinh nghiệm thuê máy ảnh tại Buôn Ma Thuột." />
+        <meta name="robots" content={posts.length ? 'index, follow' : 'noindex, follow'} />
       </Helmet>
 
       <div className="catalog-header-bar">

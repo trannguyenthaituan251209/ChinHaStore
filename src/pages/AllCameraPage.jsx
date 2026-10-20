@@ -104,38 +104,9 @@ const AllCameraPage = () => {
   return (
     <div className="all-camera-page animate-in">
       <Helmet>
-        <title>Kho Máy Ảnh | Thuê Máy Ảnh Buôn Ma Thuột - ChinHaStore</title>
+        <title>Bảng Giá Thuê Máy Ảnh tại Buôn Ma Thuột | ChinHaStore</title>
         <link rel="canonical" href="https://chinhastore.com/all-camera" />
-        <meta name="description" content="Khám phá kho máy ảnh tại Buôn Ma Thuột (BMT). Thuê Canon EOS R50, Ricoh GR IV, Fujifilm X100VI và nhiều dòng máy hot khác. Bảng giá thuê máy ảnh tốt nhất BMT." />
-        <meta name="keywords" content="kho máy ảnh bmt, thuê canon r50 bmt, thuê fujifilm bmt, giá thuê máy ảnh buôn ma thuột, thuê máy ảnh fujifilm bmt" />
-
-        {/* JSON-LD Product List Schema */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "ItemList",
-            "itemListElement": products.slice(0, 15).map((p, index) => ({
-              "@type": "ListItem",
-              "position": index + 1,
-              "item": {
-                "@type": "Product",
-                "name": p.name,
-                "image": p.image_url,
-                "description": `Dịch vụ cho thuê ${p.name} uy tín tại Buôn Ma Thuột.`,
-                "offers": {
-                  "@type": "Offer",
-                  "price": p.price_1day?.toString().replace(/\./g, '') || "0",
-                  "priceCurrency": "VND",
-                  "availability": "https://schema.org/InStock",
-                  "seller": {
-                    "@type": "LocalBusiness",
-                    "name": "ChinHaStore"
-                  }
-                }
-              }
-            }))
-          })}
-        </script>
+        <meta name="description" content="Xem máy ảnh và giá thuê theo thời lượng tại Buôn Ma Thuột. So sánh các thiết bị đang có, xem thông tin từng máy và gửi yêu cầu đặt lịch trực tuyến." />
       </Helmet>
       {/* Breadcrumb / Top Bar */}
       <div className="catalog-header-bar">
@@ -145,7 +116,7 @@ const AllCameraPage = () => {
             <ChevronRight size={14} />
             <span>Kho máy ảnh</span>
           </div>
-          <h1 className="catalog-title">Tận hưởng tối đa với kho thiết bị đa dạng đang chờ bạn khám phá</h1>
+          <h1 className="catalog-title">Máy ảnh và bảng giá thuê tại Buôn Ma Thuột</h1>
         </div>
       </div>
 

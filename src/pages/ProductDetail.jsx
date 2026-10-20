@@ -54,14 +54,23 @@ const ProductDetail = () => {
 
     if (!product) {
         return (
-            <div className="container" style={{ padding: '10rem 2rem', textAlign: 'center' }}>
-                <h2>Sản phẩm không tồn tại hoặc đã ngừng kinh doanh</h2>
-                <Link to="/all-camera" className="btn-save" style={{ marginTop: '2rem', display: 'inline-block' }}>Quay lại kho máy</Link>
-            </div>
+            <>
+                <Helmet>
+                    <title>Không tìm thấy thiết bị | ChinHaStore</title>
+                    <meta name="robots" content="noindex, follow" />
+                </Helmet>
+                <div className="container" style={{ padding: '10rem 2rem', textAlign: 'center' }}>
+                    <h1>Sản phẩm không tồn tại hoặc đã ngừng kinh doanh</h1>
+                    <Link to="/all-camera" className="btn-save" style={{ marginTop: '2rem', display: 'inline-block' }}>Quay lại kho máy</Link>
+                </div>
+            </>
         );
     }
 
-    const formattedPrice = new Intl.NumberFormat('vi-VN').format(product.price1Day || 0);
+    const toPriceNumber = value => Number(
+        typeof value === 'string' ? value.replace(/\./g, '').replace(/[^\d]/g, '') : value
+    ) || 0;
+    const formattedPrice = new Intl.NumberFormat('vi-VN').format(toPriceNumber(product.price1Day));
 
     // Prepare gallery images
     const gallery = [product.image || product.image_url, ...(product.gallery_images || [])].filter(Boolean);
@@ -91,10 +100,11 @@ const ProductDetail = () => {
     return (
         <>
             <Helmet>
-                <title>Thuê {seoName} Buôn Ma Thuột | {product.category} - ChinHaStore</title>
-                <meta name="description" content={`Dịch vụ cho thuê ${seoName} (${product.name}) uy tín tại Buôn Ma Thuột (BMT). ${product.videoRes || ''} ${product.sensor || ''}. Giá thuê tốt nhất BMT, thủ tục đơn giản.`} />
+                <title>Thuê {seoName} tại Buôn Ma Thuột | ChinHaStore</title>
+                <meta name="description" content={`Giá thuê ${product.name} tại Buôn Ma Thuột từ ${formattedPrice}đ/ngày. Xem thông số, combo đi kèm và các gói thuê theo thời lượng tại ChinHaStore.`} />
+                <meta name="robots" content={product.status === 'active' ? 'index, follow' : 'noindex, follow'} />
                 <meta name="keywords" content={`thuê ${seoName} bmt, thuê ${seoName} buôn ma thuột, thuê máy ảnh bmt, thuê ${product.name} bmt, thuê máy ảnh ${brand ? brand.toLowerCase() : 'giá rẻ'} bmt, ${brand}`} />
-                <link rel="canonical" href={`https://chinhastore.com/camera/${product.slug}`} />
+                <link rel="canonical" href={`https://chinhastore.com/camera/${product.slug || product.id}`} />
             </Helmet>
 
             <div className="product-detail-page animate-in">
@@ -105,7 +115,7 @@ const ProductDetail = () => {
                 <header className="product-detail-header">
                     <h1 className="product-detail-main-title">{product.display_title || product.name}</h1>
                     <div className="product-detail-meta">
-                        <span className="author">Thai Tuan, {new Date().toLocaleDateString('vi-VN')}</span>
+                        <span className="author">Thông tin máy và giá thuê</span>
                     </div>
                 </header>
 
@@ -203,7 +213,7 @@ const ProductDetail = () => {
                                     </div>
                                     <div className="d-price-row highlight">
                                         <span className="d-time">1 Ngày</span>
-                                        <span className="d-val">{product.price1Day ? new Intl.NumberFormat('vi-VN').format(product.price1Day) + 'đ' : 'Liên hệ'}</span>
+                                        <span className="d-val">{product.price1Day ? formattedPrice + 'đ' : 'Liên hệ'}</span>
                                     </div>
                                     <div className="d-price-row">
                                         <span className="d-time">2 Ngày</span>

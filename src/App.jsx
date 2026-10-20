@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import HomePage from './pages/HomePage';
-import BookingPage from './pages/BookingPage';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminLogin from './pages/AdminLogin';
-import AllCameraPage from './pages/AllCameraPage';
-import BlogPage from './pages/BlogPage';
-import BlogPostDetail from './pages/BlogPostDetail';
-import ProductDetail from './pages/ProductDetail';
+const HomePage = lazy(() => import('./pages/HomePage'));
+const BookingPage = lazy(() => import('./pages/BookingPage'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const AllCameraPage = lazy(() => import('./pages/AllCameraPage'));
+const BlogPage = lazy(() => import('./pages/BlogPage'));
+const BlogPostDetail = lazy(() => import('./pages/BlogPostDetail'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 import { adminService } from './services/adminService';
 import { analyticsService } from './services/analyticsService';
-import PolicyPage from './pages/PolicyPage';
-import NotFoundPage from './pages/NotFoundPage';
+const PolicyPage = lazy(() => import('./pages/PolicyPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 import AppLock from './components/admin/AppLock';
 
 import './index.css';
@@ -175,8 +175,9 @@ function App() {
     setAdminUser(null);
   };
 
-  // Skip rendering until session is verified
-  if (authLoading) {
+  // Public storefront content should not wait on the admin session check.
+  const needsAuthResolution = isAdminMode || isLegacyAdminPath;
+  if (authLoading && needsAuthResolution) {
     return (
       <div className="admin-loading-page">
         <div className="spinner"></div>
@@ -198,10 +199,15 @@ function App() {
   // MODE A: ADMIN-ONLY DEPLOYMENT (DEDICATED SUBDOMAIN, STANDALONE PWA, OR VITE_DEPLOY_TARGET=ADMIN)
   if (DEPLOY_TARGET === 'ADMIN' || isAdminHost || isStandalone) {
     if (!adminUser) {
-      return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
+      return (
+        <Suspense fallback={<div className="admin-loading-page"><span>Đang tải trang đăng nhập...</span></div>}>
+          <AdminLogin onLoginSuccess={handleLoginSuccess} />
+        </Suspense>
+      );
     }
 
     return (
+      <Suspense fallback={<div className="admin-loading-page"><span>Đang tải trang quản trị...</span></div>}>
       <div className="app admin-mode">
         <AppLock>
           <Routes>
@@ -211,6 +217,7 @@ function App() {
           </Routes>
         </AppLock>
       </div>
+      </Suspense>
     );
   }
 
@@ -218,32 +225,34 @@ function App() {
   return (
     <div className="app storefront-mode">
       {!isAdminMode && <Navbar />}
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/dat-lich" element={<BookingPage />} />
-        <Route path="/all-camera" element={<AllCameraPage />} />
-        <Route path="/blog" element={<BlogPage />} />
-        <Route path="/blog/:slug" element={<BlogPostDetail />} />
-        <Route path="/camera/:slug" element={<ProductDetail />} />
-        <Route path="/chinh-sach" element={<PolicyPage />} />
-        
-        {/* Protected Secret Route on public domain */}
-        <Route 
-          path={`${SECRET_ADMIN_PATH}/*`} 
-          element={
-            adminUser ? (
-              <AppLock>
-                <AdminDashboard onLogout={handleLogout} />
-              </AppLock>
-            ) : (
-              <AdminLogin onLoginSuccess={handleLoginSuccess} />
-            )
-          } 
-        />
-        
-        {/* Public storefront fallback */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      <Suspense fallback={<div className="catalog-loading"><span>Đang tải nội dung...</span></div>}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/dat-lich" element={<BookingPage />} />
+          <Route path="/all-camera" element={<AllCameraPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogPostDetail />} />
+          <Route path="/camera/:slug" element={<ProductDetail />} />
+          <Route path="/chinh-sach" element={<PolicyPage />} />
+
+          {/* Protected Secret Route on public domain */}
+          <Route
+            path={`${SECRET_ADMIN_PATH}/*`}
+            element={
+              adminUser ? (
+                <AppLock>
+                  <AdminDashboard onLogout={handleLogout} />
+                </AppLock>
+              ) : (
+                <AdminLogin onLoginSuccess={handleLoginSuccess} />
+              )
+            }
+          />
+
+          {/* Public storefront fallback */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
       {!isAdminMode && <Footer />}
     </div>
   );

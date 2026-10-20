@@ -11,6 +11,7 @@ const PolicyPage = () => {
     <div className="policy-page animate-in">
       <Helmet>
         <title>Chính Sách & Điều Khoản | ChinHaStore</title>
+        <link rel="canonical" href="https://chinhastore.com/chinh-sach" />
         <meta name="description" content="Chính sách thuê máy, điều khoản dịch vụ và bảo mật thông tin tại ChinHaStore." />
       </Helmet>
 
@@ -58,8 +59,8 @@ const PolicyPage = () => {
 
               <h3>Quy trình giao nhận</h3>
               <ul>
-                <li><strong>Nhận tại cửa hàng:</strong> 23 Lê Thánh Tông, Buôn Ma Thuột.</li>
-                <li><strong>Giao tận nơi:</strong> Hỗ trợ giao tận địa chỉ yêu cầu (có tính phí vận chuyển).</li>
+                <li><strong>Giao và nhận máy:</strong> ChinHaStore trao đổi với khách hàng để thống nhất địa chỉ và thời gian giao nhận trong khu vực phục vụ.</li>
+                <li><strong>Chi phí vận chuyển:</strong> Được trao đổi và xác nhận trước khi hoàn tất đặt lịch.</li>
                 <li>Khách hàng có trách nhiệm kiểm tra tình trạng thiết bị (ngoại hình, chức năng) tại thời điểm bàn giao.</li>
               </ul>
             </section>
@@ -93,7 +94,7 @@ const PolicyPage = () => {
               <ul>
                 <li>Sử dụng thiết bị đúng mục đích, không tự ý tháo lắp, sửa chữa.</li>
                 <li>Bảo quản thiết bị cẩn thận, tránh va đập, rơi vỡ hoặc vào nước.</li>
-                <li>Hoàn trả thiết bị đúng thời gian và địa điểm đã thỏa thuận.</li>
+                <li>Hoàn trả thiết bị đúng thời gian và địa điểm giao nhận đã thống nhất.</li>
               </ul>
 
               <h3>Trách nhiệm bồi thường</h3>

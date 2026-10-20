@@ -8,6 +8,7 @@ const NotFoundPage = () => (
     <Helmet>
       <title>Không tìm thấy trang | ChinHaStore</title>
       <meta name="description" content="Trang bạn đang tìm không tồn tại hoặc đã được di chuyển." />
+      <meta name="robots" content="noindex, follow" />
     </Helmet>
 
     <section className="not-found-content" aria-labelledby="not-found-title">

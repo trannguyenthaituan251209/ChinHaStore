@@ -57,7 +57,7 @@ const HowItWorks = () => {
         
         <div className="section-header dark-header">
           <h2 className="section-title">
-            Nền tảng cho thuê máy ảnh số <span className="highlight-number">#1</span>
+            Đặt thuê máy ảnh trực tuyến
           </h2>
           <p className="section-subtitle">
             Không cần chờ đợi reply tin nhắn, kiểm tra lịch trống và đặt trực tiếp ngay website
@@ -73,7 +73,7 @@ const HowItWorks = () => {
           <div className="timeline-item left">
             <div className="timeline-content">
               <h3>Lựa chọn thiết bị & thời gian nhận</h3>
-              <p>Chọn máy bạn yêu thích, chọn ngày bạn muốn nhận và chọn phụ kiện bạn muốn thuê cùng</p>
+              <p>Chọn thiết bị và thời gian thuê phù hợp, sau đó gửi yêu cầu đặt lịch trên website.</p>
             </div>
             <div className="timeline-connector"></div>
             <div className="timeline-circle">1</div>
@@ -85,7 +85,7 @@ const HowItWorks = () => {
             <div className="timeline-connector"></div>
             <div className="timeline-content">
               <h3>Xác nhận thông tin thanh toán</h3>
-              <p>Cung cấp phương thức liên lạc và chọn hình thức nhận/trả máy tiện lợi nhất cho bạn. Mọi dữ liệu đều được bảo mật</p>
+              <p>Để lại thông tin liên hệ và địa chỉ giao nhận. ChinHaStore sẽ trao đổi để thống nhất thời gian và chi phí vận chuyển.</p>
             </div>
           </div>
 
@@ -93,7 +93,7 @@ const HowItWorks = () => {
           <div className="timeline-item left">
             <div className="timeline-content">
               <h3>Nhận máy và trải nghiệm</h3>
-              <p>Hệ thống sẽ xuất biên nhận để thanh toán cọc giữ lịch, sau khi xác nhận thanh toán, bạn chỉ việc nhận máy và tận hưởng khoảng khắc riêng bạn</p>
+              <p>Sau khi thống nhất thông tin và hoàn tất khoản cọc, lịch thuê được xác nhận để chuẩn bị giao máy cho bạn.</p>
             </div>
             <div className="timeline-connector"></div>
             <div className="timeline-circle">3</div>

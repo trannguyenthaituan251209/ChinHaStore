@@ -30,7 +30,6 @@ const BookingPage = () => {
   const [cusEmail, setCusEmail] = useState('');
   const [cusCity, setCusCity] = useState('Buôn Ma Thuột');
   const [cusAddress, setCusAddress] = useState('');
-  const [receiveMethod, setReceiveMethod] = useState('store'); // 'store' or 'delivery'
   const [cusSocial, setCusSocial] = useState('');
   const [cusDepositType, setCusDepositType] = useState('standard');
 
@@ -146,7 +145,6 @@ const BookingPage = () => {
           if (d.cusAddress) setCusAddress(d.cusAddress);
           if (d.cusSocial) setCusSocial(d.cusSocial);
           if (d.cusDepositType) setCusDepositType(d.cusDepositType);
-          if (d.receiveMethod) setReceiveMethod(d.receiveMethod);
 
           // Decide if we should show the prompt for FULL session recovery (Camera/Dates/Step)
           if (initialId && d.selectedCamera !== initialId) {
@@ -168,7 +166,7 @@ const BookingPage = () => {
 
     const draftData = {
       selectedCamera, startDate, endDate, rentalType, shiftType,
-      cusName, cusPhone, cusEmail, cusCity, cusAddress, receiveMethod, cusSocial, cusDepositType,
+      cusName, cusPhone, cusEmail, cusCity, cusAddress, cusSocial, cusDepositType,
       step
     };
 
@@ -183,7 +181,7 @@ const BookingPage = () => {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [hasInitialized, selectedCamera, startDate, endDate, rentalType, shiftType, cusName, cusPhone, cusEmail, cusCity, cusAddress, receiveMethod, cusSocial, cusDepositType, step, showLocalPrompt, showRemotePrompt]);
+  }, [hasInitialized, selectedCamera, startDate, endDate, rentalType, shiftType, cusName, cusPhone, cusEmail, cusCity, cusAddress, cusSocial, cusDepositType, step, showLocalPrompt, showRemotePrompt]);
 
   // 3. CHECK FOR REMOTE DRAFT WHEN PHONE IS ENTERED
   useEffect(() => {
@@ -215,7 +213,6 @@ const BookingPage = () => {
     if (d.cusEmail) setCusEmail(d.cusEmail);
     if (d.cusCity) setCusCity(d.cusCity);
     if (d.cusAddress) setCusAddress(d.cusAddress);
-    if (d.receiveMethod) setReceiveMethod(d.receiveMethod);
     if (d.cusSocial) setCusSocial(d.cusSocial);
     if (d.cusDepositType) setCusDepositType(d.cusDepositType);
     if (d.step && Number(d.step) < 3) {
@@ -630,11 +627,9 @@ const BookingPage = () => {
         customerName: cusName,
         phone: cusPhone,
         email: cusEmail,
-        city: receiveMethod === 'store'
-          ? 'Nhận tại cửa hàng (23 Lê Thánh Tông)'
-          : (wardName && distName && provName
-            ? `${cusAddress ? cusAddress + ', ' : ''}${wardName}, ${distName}, ${provName}`
-            : (cusAddress ? `${cusAddress}, ${cusCity}` : cusCity)),
+        city: wardName && distName && provName
+          ? `${cusAddress ? cusAddress + ', ' : ''}${wardName}, ${distName}, ${provName}`
+          : (cusAddress ? `${cusAddress}, ${cusCity}` : cusCity),
         social: cusSocial,
         product_id: selectedCamera,
         start_time: startDate + 'T' + (rentalType === 'SHIFT' ? (shiftType === 'A' ? `${siteSettings.pickup_time_shift_a}:00` : `${siteSettings.pickup_time_shift_b}:00`) : (rentalType === 'DAY' ? `${siteSettings.pickup_time_day}:00` : `${siteSettings.pickup_time_night}:00`)),
@@ -764,8 +759,8 @@ const BookingPage = () => {
       <Helmet>
         <title>Đặt Lịch Thuê Máy | Thuê Máy Ảnh Buôn Ma Thuột - ChinHaStore</title>
         <link rel="canonical" href="https://chinhastore.com/dat-lich" />
-        <meta name="description" content="Đặt lịch thuê máy ảnh nhanh chóng tại Buôn Ma Thuột (BMT). Thuê Canon EOS R50, Fujifilm, Ricoh luôn sẵn sàng. Thủ tục đơn giản, hỗ trợ 24/7. LH: 0842204207." />
-        <meta name="keywords" content="đặt lịch thuê máy ảnh bmt, thuê canon r50 buôn ma thuột, thủ tục thuê máy ảnh bmt, thuê máy ảnh bmt online" />
+        <meta name="robots" content="noindex, follow" />
+        <meta name="description" content="Gửi yêu cầu thuê máy ảnh tại Buôn Ma Thuột và cung cấp địa chỉ giao nhận để ChinHaStore xác nhận lịch với bạn." />
       </Helmet>
       {/* Success Notification Bar */}
       {step === 3 && showSuccessNotice && (
@@ -1039,43 +1034,7 @@ const BookingPage = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>HÌNH THỨC NHẬN MÁY</label>
-                    <div className="receive-method-selector">
-                      <button
-                        className={`method-box ${receiveMethod === 'store' ? 'active' : ''}`}
-                        onClick={() => setReceiveMethod('store')}
-                      >
-                        Nhận tại cửa hàng
-                      </button>
-                      <button
-                        className={`method-box ${receiveMethod === 'delivery' ? 'active' : ''}`}
-                        onClick={() => setReceiveMethod('delivery')}
-                      >
-                        Giao tận nơi
-                        <p style={{ display: 'block', fontSize: '0.7rem', color: 'rgba(174, 174, 174, 1)', marginTop: '2px' }}>(Có tính phí)</p>
-                      </button>
-                    </div>
-                  </div>
-
-                  {receiveMethod === 'store' ? (
-                    <div className="form-group store-address-box">
-                      <label>ĐỊA CHỈ CỬA HÀNG</label>
-                      <div className="store-address-content">
-                        <p>23 Lê Thánh Tông, Phường Buôn Ma Thuột, Tỉnh Đắk Lắk</p>
-                        <a
-                          href="https://maps.app.goo.gl/jNToF7Fc4keUdDkBA"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="map-link-btn"
-                          title="Xem trên Google Maps"
-                        >
-                          Xem bản đồ
-                        </a>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="form-group">
-                      <label>ĐỊA CHỈ NHẬN MÁY</label>
+                      <label>ĐỊA CHỈ GIAO / NHẬN MÁY</label>
                       <div className="address-dropdowns" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginBottom: '0.8rem' }}>
                         <select className="address-select" value={selProvCode} onChange={handleProvinceChange}>
                           <option value="">Chọn Tỉnh/Thành</option>
@@ -1097,10 +1056,9 @@ const BookingPage = () => {
                         onChange={(e) => setCusAddress(e.target.value)}
                       />
                       <small className="form-notice">
-                        * Phí giao hàng tính theo ứng dụng (Grab/Be/XanhSM) và do khách hàng thanh toán trực tiếp.
+                        * ChinHaStore sẽ xác nhận thời gian và phương án giao nhận trực tiếp. Phí vận chuyển được trao đổi trước với khách hàng.
                       </small>
-                    </div>
-                  )}
+                  </div>
 
                   <div className="form-group">
                     <label>Mạng xã hội (Facebook/Zalo)</label>
@@ -1391,7 +1349,7 @@ const BookingPage = () => {
                   <div className="ticket-section">
                     <div className="ticket-label">Nhận Máy Tại</div>
                     <div className="ticket-value">
-                      {receiveMethod === 'store' ? 'Cửa hàng (23 Lê Thánh Tông)' : (cusAddress || cusCity)}
+                      {cusAddress || [wardName, distName, provName].filter(Boolean).join(', ') || cusCity}
                     </div>
                   </div>
                   <div className="ticket-section">
@@ -1533,7 +1491,7 @@ const BookingPage = () => {
                 <div className="bill-v2-customer-section">
                   <p>Khách hàng: {cusName.toUpperCase()}</p>
                   <p>SĐT: {cusPhone}</p>
-                  <p>Nhận máy: {receiveMethod === 'store' ? 'Tại cửa hàng (23 Lê Thánh Tông)' : `Giao tận nơi (${(wardName && distName && provName ? `${cusAddress ? cusAddress + ', ' : ''}${wardName}, ${distName}, ${provName}` : (cusAddress ? `${cusAddress}, ${cusCity}` : cusCity))})`}</p>
+                  <p>Giao / nhận máy: {`${cusAddress ? `${cusAddress}, ` : ''}${[wardName, distName, provName].filter(Boolean).join(', ') || cusCity}`}</p>
                   <p>Hình thức cọc: {cusDepositType === 'standard' ? 'Cơ bản' : 'Tài sản (CCCD + Tài sản tương đương)'}</p>
                 </div>
                 <hr className="bill-v2-divider" />

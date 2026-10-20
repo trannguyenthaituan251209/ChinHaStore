@@ -41,10 +41,16 @@ const BlogPostDetail = () => {
 
   if (!post) {
     return (
-      <div className="container error-container">
-        <h2>Bài viết không tồn tại</h2>
-        <Link to="/blog">Quay lại cẩm nang</Link>
-      </div>
+      <>
+        <Helmet>
+          <title>Không tìm thấy bài viết | ChinHaStore</title>
+          <meta name="robots" content="noindex, follow" />
+        </Helmet>
+        <div className="container error-container">
+          <h1>Bài viết không tồn tại</h1>
+          <Link to="/blog">Quay lại cẩm nang</Link>
+        </div>
+      </>
     );
   }
 
