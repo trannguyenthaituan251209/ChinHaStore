@@ -61,17 +61,6 @@
   text-transform: uppercase;
 }
 
-.hero-story-text {
-  color: var(--color-primary); /* #7A6629 */
-  font-family: 'PhotographSignature', cursive;
-  font-size: 6vw; /* Fluid typography */
-  line-height: 0.6;
-  margin-top: -3vw; /* Kéo lên sát đuôi chữ LÊN hơn */
-  margin-bottom: 3rem;
-  margin-left: 10%; /* Đẩy mạnh sang phải để nối tiếp chữ LÊN */
-  transform: rotate(-3deg);
-}
-
 .hero-description {
   color: var(--color-primary);
   font-size: 1.1vw;
@@ -133,7 +122,6 @@
 @media (max-width: 1024px) {
   .hero-welcome { font-size: 1.5vw; }
   .hero-title { font-size: 3.5vw; }
-  .hero-story-text { font-size: 7.5vw; margin-top: -4vw; margin-left: 30%; }
   .hero-description { font-size: 1.5vw; }
   .btn-hero-cta { font-size: 1.5vw; }
   .btn-hero-secondary { font-size: 1.5vw; }
@@ -162,13 +150,6 @@
   .hero-title {
     font-size: 6.5vw;
     margin-bottom: 2vw;
-  }
-
-  .hero-story-text {
-    font-size: 15vw;
-    margin-left: 15%;
-    margin-top: -5vw;
-    margin-bottom: 9vw;
   }
 
   .hero-description {

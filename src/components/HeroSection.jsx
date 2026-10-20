@@ -51,18 +51,6 @@ const HeroSection = () => {
           />
           
           <SplitText
-            text="Câu chuyện"
-            className="hero-story-text"
-            delay={80}
-            duration={1.5}
-            ease="power3.out"
-            splitType="lines"
-            from={{ opacity: 0, y: 40 }}
-            to={{ opacity: 1, y: 0 }}
-            tag="div"
-          />
-          
-          <SplitText
             text="Xem máy đang có, tham khảo giá thuê theo thời lượng và đặt lịch trực tuyến. Hỗ trợ giao nhận theo khu vực phục vụ tại Đắk Lắk."
             className="hero-description"
             delay={10}
