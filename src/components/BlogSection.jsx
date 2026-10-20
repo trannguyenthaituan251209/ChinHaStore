@@ -11,7 +11,7 @@ const BlogSection = () => {
   useEffect(() => {
     const fetchLatest = async () => {
       try {
-        const data = await blogService.getLatestPosts(3);
+        const data = await blogService.getLatestGuides(3);
         setPosts(data);
       } catch (err) {
         console.error('Failed to fetch blog posts:', err);
@@ -31,7 +31,7 @@ const BlogSection = () => {
         <div className="section-header">
           <h2 className="section-title">CẨM NANG NHIẾP ẢNH</h2>
           <p className="section-subtitle">
-            Khám phá các bí kíp chụp ảnh, review thiết bị và tin tức mới nhất từ ChinHaStore
+            Khám phá hướng dẫn chụp ảnh, cách sử dụng thiết bị và kinh nghiệm từ ChinHaStore
           </p>
         </div>
 

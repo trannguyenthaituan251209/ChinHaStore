@@ -59,11 +59,14 @@ const BlogPostDetail = () => {
     month: 'long',
     year: 'numeric'
   });
+  const isAnnouncement = post.content_type === 'announcement';
+  const contentTypeLabel = isAnnouncement ? 'Thông báo' : 'Cẩm nang';
+  const contentListUrl = isAnnouncement ? '/blog?type=announcement' : '/blog?type=guide';
 
   return (
     <div className="blog-post-detail animate-in">
       <Helmet>
-        <title>{post.title} | Blog ChinHaStore</title>
+        <title>{post.title} | {contentTypeLabel} ChinHaStore</title>
         <meta name="description" content={post.excerpt || post.title} />
         <link rel="canonical" href={`https://chinhastore.com/blog/${post.slug}`} />
       </Helmet>
@@ -72,8 +75,8 @@ const BlogPostDetail = () => {
         <div className="detail-hero-overlay"></div>
         <img src={post.thumbnail_url} alt={post.title} className="detail-hero-bg" />
         <div className="container detail-hero-content">
-          <Link to="/blog" className="back-link">
-            <ChevronLeft size={18} /> Quay lại cẩm năng
+          <Link to={contentListUrl} className="back-link">
+            <ChevronLeft size={18} /> Quay lại {contentTypeLabel.toLowerCase()}
           </Link>
           <h1 className="post-title-main">{post.title}</h1>
           <div className="post-meta-main">

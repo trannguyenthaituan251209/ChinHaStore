@@ -1247,6 +1247,19 @@ export const adminService = {
     };
   },
 
+  async getBookingStatus(bookingId) {
+    if (!bookingId) return null;
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('status')
+      .eq('booking_id', String(bookingId).trim())
+      .maybeSingle();
+
+    if (error) throw error;
+    return data?.status || null;
+  },
+
   async getReportData() {
     // 1. All Bookings for aggregation
     const { data: bookings, error: bErr } = await supabase

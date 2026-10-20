@@ -66,6 +66,26 @@ serve(async (req) => {
       return new Response(JSON.stringify({ message: 'Booking not found' }), { status: 404 })
     }
 
+    const startTime = new Date(booking.start_time).getTime()
+    const endTime = new Date(booking.end_time).getTime()
+    const rentalDays = Math.ceil(Math.abs(endTime - startTime) / (24 * 60 * 60 * 1000))
+    const depositPercent = rentalDays >= 2 && rentalDays <= 5 ? 50 : 100
+    const expectedDeposit = Math.round(Number(booking.total_price) * depositPercent / 100)
+    const receivedAmount = Number(amount)
+
+    if (!Number.isFinite(receivedAmount) || receivedAmount !== expectedDeposit) {
+      console.warn(`Payment amount mismatch for booking ${bookingIdCode}: received ${amount}, expected ${expectedDeposit}`)
+      return new Response(JSON.stringify({
+        success: true,
+        confirmed: false,
+        message: 'Payment amount does not match the required booking deposit',
+        expectedAmount: expectedDeposit,
+      }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+
     // Check if it's already confirmed
     if (booking.status === 'Confirmed') {
       return new Response(JSON.stringify({ message: 'Booking already confirmed' }), { status: 200 })

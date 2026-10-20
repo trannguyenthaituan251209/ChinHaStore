@@ -11,18 +11,18 @@ const BlogCard = ({ post }) => {
   });
 
   return (
-    <Link to={`/blog/${post.slug}`} className="blog-card animate-in">
+    <Link to={`/blog/${post.slug}`} className="blog-card">
       <div className="blog-card-image">
         <img 
           src={post.thumbnail_url || 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=2070&auto=format&fit=crop'} 
           alt={post.title} 
         />
-        <div className="blog-card-overlay">
-          <span>Đọc bài viết ➔</span>
-        </div>
       </div>
       
       <div className="blog-card-content">
+        <span className="blog-card-type">
+          {post.content_type === 'announcement' ? 'Thông báo' : 'Cẩm nang'}
+        </span>
         <div className="blog-card-meta">
           <span><Calendar size={14} /> {formattedDate}</span>
           <span><User size={14} /> ChinHaStore</span>

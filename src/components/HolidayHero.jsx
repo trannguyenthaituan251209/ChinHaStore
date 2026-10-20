@@ -9,88 +9,151 @@ import './HolidayHero.css';
 const HolidayHero = () => {
     const navigate = useNavigate();
     const [topProducts, setTopProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-    const [links, setLinks] = useState({ 
-        hero: '/blog',
-        main: '/blog', 
-        sub1: '/blog', 
-        sub2: '/blog' 
-    });
-    
-    const [posters, setPosters] = useState({
-        hero: 'https://imghosting.in/host/s8w6ja',
-        heroMobile: 'https://imghosting.in/host/xxrvhy',
-        main: 'https://imghosting.in/host/u3qx25',
-        sub1: 'https://imghosting.in/host/wvnixs',
-        sub2: 'https://imghosting.in/host/vpxfuq'
-    });
-
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth <= 768);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    const [loadingProducts, setLoadingProducts] = useState(true);
+    const [announcements, setAnnouncements] = useState([]);
+    const [guides, setGuides] = useState([]);
+    const [feedLoading, setFeedLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                const [rentals, banners] = await Promise.all([
-                    adminService.getTopRentals(),
-                    blogService.getBanners()
-                ]);
-                setTopProducts(rentals.slice(0, 4));
-                
-                // Map banners by slot assignment
-                if (banners && banners.length > 0) {
-                    const posterLinks = { main: '/blog', sub1: '/blog', sub2: '/blog' };
-                    // Keep a copy of default posters to fall back to if needed, but update if dynamically assigned
-                    const updatedPosters = { ...posters };
-                    
-                    // Reverse the array so newer banners (which are first) overwrite older ones
-                    [...banners].reverse().forEach(b => {
-                        if (b.banner_slot && b.banner_slot in posterLinks) {
-                            posterLinks[b.banner_slot] = `/blog/${b.slug}`;
-                            // Update the image if it has one
-                            if (b.thumbnail_url) {
-                                updatedPosters[b.banner_slot] = b.thumbnail_url;
-                            }
-                        }
-                    });
-                    setLinks(posterLinks);
-                    setPosters(updatedPosters);
-                }
-            } catch (err) {
-                console.error('Failed to fetch holiday data:', err);
-            } finally {
-                setLoading(false);
+            const [rentalsResult, announcementsResult, guidesResult] = await Promise.allSettled([
+                adminService.getTopRentals(),
+                blogService.getHomepageAnnouncements(4),
+                blogService.getLatestGuides(2)
+            ]);
+
+            if (rentalsResult.status === 'fulfilled') {
+                setTopProducts((rentalsResult.value || []).slice(0, 4));
+            } else {
+                console.error('Failed to fetch top rentals:', rentalsResult.reason);
             }
+            setLoadingProducts(false);
+
+            if (announcementsResult.status === 'fulfilled') {
+                setAnnouncements(announcementsResult.value || []);
+            } else {
+                console.error('Failed to fetch homepage announcements:', announcementsResult.reason);
+            }
+            if (guidesResult.status === 'fulfilled') {
+                setGuides(guidesResult.value || []);
+            } else {
+                console.error('Failed to fetch homepage guides:', guidesResult.reason);
+            }
+            setFeedLoading(false);
         };
         fetchData();
     }, []);
+
+    const announcementDate = (post) => post?.created_at
+        ? new Date(post.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+        : '';
+
+    const postSummary = (post, maxLength = 150) => {
+        const source = typeof post?.excerpt === 'string' && post.excerpt
+            ? post.excerpt
+            : typeof post?.content === 'string'
+                ? post.content
+                : '';
+        const plainText = source
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+            .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+            .replace(/[#*_`>~-]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        if (!plainText) return '';
+        return plainText.length > maxLength ? `${plainText.slice(0, maxLength).trim()}…` : plainText;
+    };
 
     return (
         <section className="holiday-hero">
             <div className="container">
 
 
-                {/* TOP SECTION: POSTER LAYOUT 1-2 */}
-                <div className="poster-layout">
-                    <Link to={links.main} className="poster-main">
-                        <img src={posters.main} alt="Main Holiday Promotion" />
-                        <div className="poster-overlay">
-                            <span className="holiday-tag">SỰ KIỆN ĐẠI LỄ 30/4 - 1/5</span>
-                        </div>
-                    </Link>
-                    <div className="poster-subs">
-                        <Link to={links.sub1} className="poster-sub-item">
-                            <img src={posters.sub1} alt="Promotion 1" />
-                        </Link>
-                        <Link to={links.sub2} className="poster-sub-item">
-                            <img src={posters.sub2} alt="Promotion 2" />
-                        </Link>
+                {!feedLoading && (announcements.length > 0 || guides.length > 0) && (
+                    <div className={`home-content-feed ${announcements.length === 0 ? 'home-content-feed--guides-only' : ''} ${guides.length === 0 ? 'home-content-feed--announcements-only' : ''}`}>
+                        {announcements.length > 0 && (
+                            <section className="home-feed-section home-announcements" aria-labelledby="home-announcements-title">
+                                <div className="home-feed-heading">
+                                    <div>
+                                        <p className="home-feed-eyebrow">CẬP NHẬT TỪ CHINHASTORE</p>
+                                        <h2 id="home-announcements-title">Thông báo</h2>
+                                    </div>
+                                    <Link to="/blog?type=announcement" className="home-feed-view-all">Tất cả thông báo</Link>
+                                </div>
+
+                                <Link
+                                    to={`/blog/${announcements[0].slug}`}
+                                    className={`announcement-feature ${announcements[0].thumbnail_url ? '' : 'announcement-feature--text-only'}`}
+                                >
+                                    {announcements[0].thumbnail_url && (
+                                        <div className="announcement-feature-image">
+                                            <img src={announcements[0].thumbnail_url} alt="" />
+                                        </div>
+                                    )}
+                                    <div className="announcement-feature-content">
+                                        <span className="feed-type-label">Thông báo mới nhất</span>
+                                        {announcementDate(announcements[0]) && <time>{announcementDate(announcements[0])}</time>}
+                                        <h3>{announcements[0].title}</h3>
+                                        {announcements[0].excerpt && <p>{announcements[0].excerpt}</p>}
+                                        <span className="feed-text-link">Xem chi tiết</span>
+                                    </div>
+                                </Link>
+
+                                {announcements.length > 1 && (
+                                    <ul className="announcement-list">
+                                        {announcements.slice(1).map((post) => (
+                                            <li key={post.id}>
+                                                <Link to={`/blog/${post.slug}`}>
+                                                    <span className="announcement-list-content">
+                                                        <strong>{post.title}</strong>
+                                                        {postSummary(post, 115) && <span className="announcement-summary">{postSummary(post, 115)}</span>}
+                                                    </span>
+                                                    {announcementDate(post) && <time dateTime={post.created_at}>{announcementDate(post)}</time>}
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </section>
+                        )}
+
+                        {guides.length > 0 && (
+                            <section className="home-feed-section home-guides" aria-labelledby="home-guides-title">
+                                <div className="home-feed-heading">
+                                    <div>
+                                        <p className="home-feed-eyebrow">KIẾN THỨC NHIẾP ẢNH</p>
+                                        <h2 id="home-guides-title">Cẩm nang</h2>
+                                    </div>
+                                    <Link to="/blog?type=guide" className="home-feed-view-all">Tất cả cẩm nang</Link>
+                                </div>
+                                <div className="home-guide-list">
+                                    {guides.map((post) => (
+                                        <Link
+                                            to={`/blog/${post.slug}`}
+                                            className={`home-guide-card ${post.thumbnail_url ? '' : 'home-guide-card--text-only'}`}
+                                            key={post.id}
+                                        >
+                                            {post.thumbnail_url && (
+                                                <div className="home-guide-image">
+                                                    <img src={post.thumbnail_url} alt="" />
+                                                </div>
+                                            )}
+                                            <div className="home-guide-content">
+                                                <h3>{post.title}</h3>
+                                                <div className="home-guide-meta">
+                                                    {announcementDate(post) && <time dateTime={post.created_at}>{announcementDate(post)}</time>}
+                                                    <span>{post.author || 'ChinHaStore'}</span>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
                     </div>
-                </div>
+                )}
 
                 <PromoOsmo />
 
@@ -101,7 +164,7 @@ const HolidayHero = () => {
                     </div>
 
                     <div className="rentals-products">
-                        {loading ? (
+                        {loadingProducts ? (
                             <div className="rentals-loading">
                                 <div className="mini-spinner"></div>
                             </div>

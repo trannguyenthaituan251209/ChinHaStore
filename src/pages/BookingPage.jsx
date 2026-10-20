@@ -343,12 +343,14 @@ const BookingPage = () => {
     if (step === 3 && paymentOption === 'pay' && createdBookingId && !isPaymentConfirmed) {
       interval = setInterval(async () => {
         try {
-          const b = await adminService.getBookingById(createdBookingId);
-          if (b && b.status === 'Confirmed') {
+          const bookingStatus = await adminService.getBookingStatus(createdBookingId);
+          if (bookingStatus === 'Confirmed') {
             setIsPaymentConfirmed(true);
             clearInterval(interval);
           }
-        } catch(e) { }
+        } catch (error) {
+          console.error('Không thể kiểm tra trạng thái thanh toán:', error);
+        }
       }, 3000);
     }
     return () => clearInterval(interval);
@@ -664,7 +666,7 @@ const BookingPage = () => {
   };
 
   const handleCopyAccountNum = () => {
-    navigator.clipboard.writeText('000000407891');
+    navigator.clipboard.writeText('00003565930');
     setIsCopyingAccount(true);
     setTimeout(() => setIsCopyingAccount(false), 2000);
   };
@@ -753,6 +755,12 @@ const BookingPage = () => {
     if (durationDays >= 2 && durationDays <= 5) dPerc = 50;
     calculatedDeposit = Math.round(priceNum * (dPerc / 100));
   }
+  const priceBreakdown = Array.isArray(result?.breakdown) ? result.breakdown : [];
+  const totalRentalAmount = Number(String(result?.price || '').replace(/\D/g, '')) || 0;
+  const depositPercent = result?.days >= 2 && result.days <= 5 ? 50 : 100;
+  const holdDepositAmount = Math.round(totalRentalAmount * depositPercent / 100);
+  const remainingRentalAmount = Math.max(0, totalRentalAmount - holdDepositAmount);
+  const formatCurrency = (amount) => new Intl.NumberFormat('vi-VN').format(amount);
 
   return (
     <div className="booking-page animate-in">
@@ -1113,7 +1121,7 @@ const BookingPage = () => {
                   </div>
 
                   <div className="res-breakdown">
-                    {result.breakdown.map((item, idx) => (
+                    {priceBreakdown.map((item, idx) => (
                       <div key={idx} className="breakdown-line">
                         <span>{item.label}:</span>
                         <span>{item.value} VNĐ</span>
@@ -1331,9 +1339,9 @@ const BookingPage = () => {
             )}
             <div className="booking-ticket" id="main-ticket-view">
               <div className="ticket-header">
-                <h1>PHIẾU THANH TOÁN GIỮ LỊCH</h1>
+                <h1>{isPaymentConfirmed ? 'BIÊN LAI THANH TOÁN' : 'PHIẾU THANH TOÁN GIỮ LỊCH'}</h1>
                 {isPaymentConfirmed ? (
-                  <div style={{display: 'inline-block', background: '#4caf50', color: '#fff', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '8px', boxShadow: '0 2px 8px rgba(76,175,80,0.4)'}}>ĐÃ THANH TOÁN</div>
+                  <div style={{display: 'inline-block', background: '#4caf50', color: '#fff', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '8px'}}>ĐÃ NHẬN CỌC GIỮ LỊCH</div>
                 ) : null}
                 <p style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#000000' }}>Mã yêu cầu: #{createdBookingId || 'PROCESSING'}</p>
                 <p>Vui lòng cung cấp mã này nếu có thắc mắc cần giải đáp</p>
@@ -1372,7 +1380,7 @@ const BookingPage = () => {
 
                 <div className="ticket-section">
                   <div className="ticket-label">Chi tiết giá</div>
-                  {result?.breakdown.map((item, idx) => (
+                  {priceBreakdown.map((item, idx) => (
                     <div key={idx} className="ticket-line">
                       <span className="ticket-label-text">{item.label}</span>
                       <span className="ticket-dots"></span>
@@ -1383,67 +1391,67 @@ const BookingPage = () => {
                 <div className="ticket-divider"></div>
 
                 <div className="ticket-section bank-details-on-ticket">
-                  <div className="ticket-label">Thông tin thanh toán</div>
-                  <div className="bank-info-line">
-                    <span className="bank-info-label">Ngân hàng:</span>
-                    <strong className="bank-info-val">SeaBank</strong>
-                  </div>
-                  <div className="bank-info-line">
-                    <span className="bank-info-label">Số tài khoản:</span>
-                    <div className="account-number-box">
-                      <strong className="bank-info-val">000000407891</strong>
-                      <button className="btn-copy-mini" onClick={handleCopyAccountNum}>
-                        {isCopyingAccount ? 'ĐÃ SAO CHÉP' : 'SAO CHÉP'}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="bank-info-line">
-                    <span className="bank-info-label">Chủ tài khoản:</span>
-                    <strong className="bank-info-val">MAN HI CHIN</strong>
-                  </div>
+                  <div className="ticket-label">{isPaymentConfirmed ? 'Xác nhận thanh toán' : 'Thông tin thanh toán'}</div>
+                  {isPaymentConfirmed ? (
+                    <p className="ticket-value">Đã nhận cọc giữ lịch qua SePay</p>
+                  ) : (
+                    <>
+                      <div className="bank-info-line">
+                        <span className="bank-info-label">Ngân hàng:</span>
+                        <strong className="bank-info-val">TPBank</strong>
+                      </div>
+                      <div className="bank-info-line">
+                        <span className="bank-info-label">Số tài khoản:</span>
+                        <div className="account-number-box">
+                          <strong className="bank-info-val">00003565930</strong>
+                          <button className="btn-copy-mini" onClick={handleCopyAccountNum}>
+                            {isCopyingAccount ? 'ĐÃ SAO CHÉP' : 'SAO CHÉP'}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="bank-info-line">
+                        <span className="bank-info-label">Chủ tài khoản:</span>
+                        <strong className="bank-info-val">MAN HI CHIN</strong>
+                      </div>
+                    </>
+                  )}
                   <div className="notice-box">
-                    <p className="notice-text">ChinHa Store đã nhận được thông tin của bạn. Chúng tôi sẽ liên hệ lại trong vòng 15 phút để xác nhận đơn hàng và chốt lịch khi nhận được thanh toán giữ chỗ của bạn. Nếu sau 15 phút bạn không được liên hệ vui lòng gọi số 0842204207 (Hi Chin) hoặc 0911792003 (Thái Tuấn). Lưu ý: Giờ hoạt động của ChinHaStore là từ 7:30 sáng đến 22:00 hàng ngày </p>
+                    <p className="notice-text">{isPaymentConfirmed
+                      ? 'ChinHaStore đã nhận được tiền cọc giữ lịch và xác nhận khung giờ thuê cho bạn. Số tiền còn lại được thể hiện trong biên lai và sẽ thanh toán theo thỏa thuận khi nhận máy.'
+                      : 'ChinHaStore đã nhận được thông tin đặt thuê của bạn. Vui lòng thanh toán tiền cọc giữ lịch để xác nhận khung giờ. Chúng tôi sẽ liên hệ lại trong vòng 15 phút; nếu chưa nhận được liên hệ, vui lòng gọi 0842204207 (Hi Chin) hoặc 0911792003 (Thái Tuấn). Giờ hoạt động: 7:30–22:00 hàng ngày.'}</p>
                   </div>
                 </div>
 
                 <div className="ticket-divider"></div>
 
-                <div className="ticket-summary-row">
-                  {(() => {
-                    const priceNum = Number(result?.price?.replace(/\./g, '')) || 0;
-                    const durationDays = result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1;
-                    let dPerc = 100;
-                    if (durationDays >= 2 && durationDays <= 5) dPerc = 50;
-                    const dAmount = Math.round(priceNum * (dPerc / 100));
+                <div className={`ticket-summary-row ${isPaymentConfirmed ? 'ticket-summary-row--receipt' : ''}`}>
+                  {!isPaymentConfirmed && (
+                    <div className="ticket-summary-left">
+                      <img
+                        src={`https://qr.sepay.vn/img?bank=TPBank&acc=00003565930&template=compact&amount=${holdDepositAmount}&des=CHINHA%20${createdBookingId}`}
+                        alt="QR Code thanh toán cọc giữ lịch"
+                        className="ticket-summary-qr"
+                      />
+                      <div className="qr-text-small">QUÉT ĐỂ ĐẶT CỌC GIỮ LỊCH</div>
+                    </div>
+                  )}
 
-                    return (
-                      <>
-                        <div className="ticket-summary-left">
-                          <img
-                            src={`https://qr.sepay.vn/img?bank=TPBank&acc=00003565930&template=compact&amount=${dAmount}&des=CHINHA%20${createdBookingId}`}
-                            alt="QR Code"
-                            className="ticket-summary-qr"
-                          />
-                          <div className="qr-text-small">QUÉT ĐỂ ĐẶT CỌC</div>
-                        </div>
-
-                        <div className="ticket-summary-right">
-                          <div className="summary-item">
-                            <span className="summary-label">HÌNH THỨC CỌC</span>
-                            <span className="summary-val">{cusDepositType === 'standard' ? 'CƠ BẢN' : 'TÀI SẢN'}</span>
-                          </div>
-                          <div className="summary-item">
-                            <span className="summary-label">SỐ TIỀN CỌC ({dPerc}%)</span>
-                            <span className="summary-val accent">{new Intl.NumberFormat('vi-VN').format(dAmount)} đ</span>
-                          </div>
-                          <div className="ticket-total-mini">
-                            <div className="ticket-label">TỔNG CỘNG</div>
-                            <div className="ticket-value-total">{result?.price} đ</div>
-                          </div>
-                        </div>
-                      </>
-                    );
-                  })()}
+                  <div className="ticket-summary-right">
+                    <div className="summary-item">
+                      <span className="summary-label">TỔNG TIỀN THUÊ</span>
+                      <span className="summary-val">{formatCurrency(totalRentalAmount)} đ</span>
+                    </div>
+                    <div className="summary-item">
+                      <span className="summary-label">{isPaymentConfirmed ? `ĐÃ THANH TOÁN CỌC GIỮ LỊCH (${depositPercent}%)` : `TIỀN CỌC GIỮ LỊCH (${depositPercent}%)`}</span>
+                      <span className="summary-val accent">{formatCurrency(holdDepositAmount)} đ</span>
+                    </div>
+                    {isPaymentConfirmed && (
+                      <div className="ticket-balance-due">
+                        <span>CÒN PHẢI THANH TOÁN</span>
+                        <strong>{formatCurrency(remainingRentalAmount)} đ</strong>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1454,7 +1462,9 @@ const BookingPage = () => {
               </div>
 
               <div className="ticket-footer">
-                <p>ChinHaStore sẽ liên hệ và nhận cọc để xác nhận lịch thuê.</p>
+                <p>{isPaymentConfirmed
+                  ? 'Biên lai ghi nhận cọc giữ lịch đã thanh toán. Khoản còn lại thanh toán khi nhận máy theo thỏa thuận.'
+                  : 'Thanh toán cọc giữ lịch để ChinHaStore xác nhận và khóa khung giờ thuê.'}</p>
                 <p className="footer-brand">CHINHASTORE.OFFICIAL</p>
               </div>
             </div>
@@ -1464,7 +1474,7 @@ const BookingPage = () => {
               <div className="bill-invoice-v2">
                 <div className="bill-v2-header">
                   <h2>CHINHA STORE</h2>
-                  <p>HÓA ĐƠN THANH TOÁN GIỮ LỊCH</p>
+                  <p>{isPaymentConfirmed ? 'BIÊN LAI THANH TOÁN' : 'HÓA ĐƠN THANH TOÁN GIỮ LỊCH'}</p>
                   <p style={{ fontSize: '0.7rem', fontWeight: 'bold', marginTop: '4px' }}>Mã hợp đồng: #{createdBookingId}</p>
                 </div>
                 <hr className="bill-v2-divider" />
@@ -1492,11 +1502,11 @@ const BookingPage = () => {
                   <p>Khách hàng: {cusName.toUpperCase()}</p>
                   <p>SĐT: {cusPhone}</p>
                   <p>Giao / nhận máy: {`${cusAddress ? `${cusAddress}, ` : ''}${[wardName, distName, provName].filter(Boolean).join(', ') || cusCity}`}</p>
-                  <p>Hình thức cọc: {cusDepositType === 'standard' ? 'Cơ bản' : 'Tài sản (CCCD + Tài sản tương đương)'}</p>
+                  <p>Khoản thanh toán: Cọc giữ lịch</p>
                 </div>
                 <hr className="bill-v2-divider" />
                 <div className="bill-v2-details-section">
-                  {result?.breakdown.map((item, idx) => (
+                  {priceBreakdown.map((item, idx) => (
                     <div key={idx} className="bill-v2-toc-item">
                       <span className="bill-v2-toc-label">{item.label}</span>
                       <div className="bill-v2-toc-dots"></div>
@@ -1506,20 +1516,31 @@ const BookingPage = () => {
                 </div>
                 <div className="bill-v2-total-section">
                   <div className="total-row main-total">
-                    <span>TỔNG CHI PHÍ DỰ KIẾN:</span>
-                    <span style={{ color: '#f60' }}>{result?.price} VNĐ</span>
+                    <span>TỔNG TIỀN THUÊ:</span>
+                    <span style={{ color: '#111' }}>{formatCurrency(totalRentalAmount)} VNĐ</span>
                   </div>
+                  <div className="total-row">
+                    <span>{isPaymentConfirmed ? `ĐÃ NHẬN CỌC GIỮ LỊCH (${depositPercent}%):` : `CỌC GIỮ LỊCH (${depositPercent}%):`}</span>
+                    <span>{formatCurrency(holdDepositAmount)} VNĐ</span>
+                  </div>
+                  {isPaymentConfirmed && (
+                    <div className="total-row main-total">
+                      <span>CÒN PHẢI THANH TOÁN:</span>
+                      <span style={{ color: '#f60' }}>{formatCurrency(remainingRentalAmount)} VNĐ</span>
+                    </div>
+                  )}
                 </div>
-                <div className="bill-v2-qr-section">
-                  <img
-                    src={`https://qr.sepay.vn/img?bank=TPBank&acc=00003565930&template=compact&amount=${Math.round((Number(result?.price?.replace(/\./g, '')) || 0) * ((result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) >= 2 && (result?.breakdown?.filter(i => i.label?.toLowerCase().includes('ngày')).length || 1) <= 5 ? 0.5 : 1))}&des=CHINHA%20${createdBookingId}`}
-                    alt="QR"
-                    style={{ width: '120px', height: '120px', marginBottom: '10px' }}
-                  />
-                  <p style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '5px' }}>THÔNG TIN THANH TOÁN CỌC</p>
-                  <p style={{ fontSize: '0.8rem' }}>SEABANK: 000000407891</p>
-                  <p style={{ fontSize: '0.8rem' }}>CHỦ TK: MAN HI CHIN</p>
-                </div>
+                {!isPaymentConfirmed && (
+                  <div className="bill-v2-qr-section">
+                    <img
+                      src={`https://qr.sepay.vn/img?bank=TPBank&acc=00003565930&template=compact&amount=${holdDepositAmount}&des=CHINHA%20${createdBookingId}`}
+                      alt="QR cọc giữ lịch"
+                      style={{ width: '120px', height: '120px', marginBottom: '10px' }}
+                    />
+                    <p style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '5px' }}>THÔNG TIN THANH TOÁN CỌC GIỮ LỊCH</p>
+                    <p style={{ fontSize: '0.8rem' }}>TPBANK: 00003565930</p>
+                  </div>
+                )}
               </div>
             </div>
 

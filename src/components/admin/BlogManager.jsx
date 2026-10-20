@@ -51,8 +51,7 @@ const BlogManager = ({ showStatus }) => {
       content: '',
       excerpt: '',
       thumbnail_url: '',
-      is_banner: false,
-      banner_slot: '',
+      content_type: 'guide',
       status: 'published'
     });
     setIsEditing(true);
@@ -79,16 +78,10 @@ const BlogManager = ({ showStatus }) => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      // 1. Clean up banner slot if it's not a banner
       let postToSave = { ...currentPost };
-      if (!postToSave.is_banner) {
-        postToSave.banner_slot = null;
-      }
-
-      // 2. Clear conflicts: If this post takes a slot, remove that slot from other posts
-      if (postToSave.is_banner && postToSave.banner_slot) {
-        await blogService.clearBannerSlot(postToSave.banner_slot, postToSave.id);
-      }
+      postToSave.content_type = postToSave.content_type || 'guide';
+      postToSave.is_banner = false;
+      postToSave.banner_slot = null;
 
       if (postToSave.id) {
         await blogService.updatePost(postToSave.id, postToSave);
@@ -146,8 +139,8 @@ const BlogManager = ({ showStatus }) => {
     <div className="blog-manager animate-in">
       <div className="admin-section-header">
         <div className="admin-section-header-content" >
-          <h2>Quản Lý Cẩm Nang</h2>
-          <p>Tạo và chỉnh sửa các bài viết hướng dẫn, tin tức</p>
+          <h2>Quản Lý Bài Viết</h2>
+          <p>Quản lý thông báo và cẩm nang của ChinHaStore</p>
         </div>
         <button className="btn-primary-admin" onClick={handleCreate}>
           <Plus size={18} /> Viết Bài Mới
@@ -168,6 +161,22 @@ const BlogManager = ({ showStatus }) => {
 
           <div className="form-grid">
             <div className="form-main-col">
+              <div className="field-group">
+                <label htmlFor="post-content-type">Loại nội dung</label>
+                <select
+                  id="post-content-type"
+                  value={currentPost.content_type || 'guide'}
+                  onChange={(e) => setCurrentPost({ ...currentPost, content_type: e.target.value })}
+                  required
+                >
+                  <option value="announcement">Thông báo</option>
+                  <option value="guide">Cẩm nang</option>
+                </select>
+                <p className="content-type-help">
+                  Thông báo dành cho cập nhật và ưu đãi; Cẩm nang dành cho bài viết hướng dẫn, kiến thức nhiếp ảnh.
+                </p>
+              </div>
+
               <div className="field-group">
                 <label>Tiêu đề bài viết</label>
                 <input 
@@ -248,34 +257,6 @@ const BlogManager = ({ showStatus }) => {
                 />
               </div>
 
-      <div className="field-group checkbox-group">
-        <label className="checkbox-label">
-          <input 
-            type="checkbox" 
-            checked={currentPost.is_banner}
-            onChange={(e) => setCurrentPost({ ...currentPost, is_banner: e.target.checked })}
-          />
-          <span>Đánh dấu là Banner (Trang chủ)</span>
-        </label>
-      </div>
-
-      {currentPost.is_banner && (
-        <div className="field-group animate-in">
-          <label>Vị trí đặt Banner</label>
-          <select 
-            className="banner-slot-select"
-            value={currentPost.banner_slot || ''}
-            onChange={(e) => setCurrentPost({ ...currentPost, banner_slot: e.target.value })}
-            required={currentPost.is_banner}
-          >
-            <option value="">-- Chọn vị trí --</option>
-            <option value="main">Main Banner (Poster lớn giữa)</option>
-            <option value="sub1">Sub Banner 1 (Phải - Trên)</option>
-            <option value="sub2">Sub Banner 2 (Phải - Dưới)</option>
-          </select>
-        </div>
-      )}
-
               <button type="submit" className="btn-save-post">
                 <Save size={18} /> {currentPost.id ? 'Cập Nhật Bài Viết' : 'Xuất Bản Ngay'}
               </button>
@@ -311,7 +292,9 @@ const BlogManager = ({ showStatus }) => {
                       <span className={`status-badge ${post.status}`}>
                          {post.status === 'published' ? 'Công khai' : 'Bản nháp'}
                       </span>
-                      {post.is_banner && <span className="status-badge banner">Banner</span>}
+                      <span className="content-type-badge">
+                        {post.content_type === 'announcement' ? 'Thông báo' : 'Cẩm nang'}
+                      </span>
                     </div>
                   </td>
                   <td>

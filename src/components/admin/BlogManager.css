@@ -76,6 +76,17 @@
     border-color: #f19747;
 }
 
+.field-group select:focus {
+    border-color: #f19747;
+}
+
+.content-type-help {
+    margin-top: 0.5rem;
+    color: #666;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
 .content-textarea {
     height: 500px;
     resize: vertical;
@@ -226,14 +237,6 @@
 
 .status-badge.published {  color: #1E8E3E; }
 .status-badge.draft { color: #E37400; }
-.status-badge.banner { 
-    background-color: #7a7a7a; 
-    color: #FFF; 
-    padding: 2px 6px;
-    margin-top: 4px;
-    display: inline-block;
-}
-
 .status-badges {
     display: flex;
     flex-direction: column;
@@ -241,42 +244,13 @@
     gap: 4px;
 }
 
-.checkbox-group {
-    background: #F9F9F9;
-    padding: 1rem;
-    border: 1px solid #EEE;
-    margin-top: 1rem;
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    margin-bottom: 0;
-}
-
-.checkbox-label input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-}
-.banner-slot-select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-family: inherit;
-    font-size: 0.9rem;
-    margin-top: 5px;
-    background-color: white;
-    cursor: pointer;
-}
-
-.banner-slot-select:focus {
-    border-color: var(--color-primary);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 77, 0, 0.1);
+.content-type-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    color: #3D5C52;
+    background-color: #EAE7D6;
+    font-size: 0.75rem;
+    font-weight: 700;
 }
 .actions-cell {
     display: flex;

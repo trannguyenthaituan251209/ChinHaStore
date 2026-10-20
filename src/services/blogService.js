@@ -34,6 +34,34 @@ export const blogService = {
     return data;
   },
 
+  // Homepage: latest published notices, newest first.
+  async getHomepageAnnouncements(limit = 4) {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('status', 'published')
+      .eq('content_type', 'announcement')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Homepage: latest published guides, newest first.
+  async getLatestGuides(limit = 2) {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('status', 'published')
+      .eq('content_type', 'guide')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data;
+  },
+
   // Fetch a single post by slug
   async getPostBySlug(slug) {
     const { data, error } = await supabase
