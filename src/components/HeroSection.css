@@ -1,174 +1,187 @@
 .hero {
-  background-color: var(--color-bg-white);
-  padding: 0;
   width: 100%;
+  padding: 0;
+  background-color: #EAE7D6;
 }
 
 .hero-wrapper {
   position: relative;
   width: 100%;
   margin: 0 auto;
-  padding: 0;
+  overflow: hidden;
 }
 
-/* Ảnh nền tĩnh - Tự động định hình chiều cao container */
-.hero-bg {
+.hero-artwork,
+.hero-artwork img {
   display: block;
   width: 100%;
+}
+
+.hero-artwork img {
   height: auto;
-}
-
-.hero-desktop {
-  aspect-ratio: 4269 / 2400;
-  object-fit: cover;
-}
-
-/* Ẩn ảnh mobile trên màn hình máy tính */
-.hero-mobile {
-  display: none;
-  aspect-ratio: 3375 / 6000;
-  object-fit: cover;
 }
 
 .hero-content {
   position: absolute;
-  top: 50%;
-  left: 6%; /* Đẩy vào một chút từ mép trái */
-  transform: translateY(-50%);
-  width: 48%; /* Không lấn sang phần kim cương */
+  top: 17.5%;
+  left: 50%;
+  z-index: 1;
   display: flex;
+  width: min(88%, 1600px);
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  z-index: 5;
-}
-
-.hero-welcome {
-  color: #bcb29c;
-  font-size: 1.1vw; /* Responsive font size */
-  font-family: var(--font-bold);
-  margin-bottom: 0.8rem;
-  letter-spacing: 0.5px;
+  align-items: center;
+  gap: clamp(0.45rem, 0.9vw, 0.85rem);
+  transform: translateX(-50%);
+  text-align: center;
 }
 
 .hero-title {
-  color: #000000;
-  font-size: 2.8vw; /* Fluid typography */
-  font-family: var(--font-bold);
-  line-height: 1.2;
-  margin-bottom: 0.5rem;
-  letter-spacing: -0.5px;
-  text-transform: uppercase;
+  max-width: 100%;
+  margin: 0;
+  color: #7A6629;
+  font-family: 'iCielCrocante', var(--font-bold);
+  font-size: clamp(2rem, 3.3vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: 0;
+  text-wrap: balance;
 }
 
 .hero-description {
-  color: var(--color-primary);
-  font-size: 1.1vw;
-  line-height: 1.5;
-  margin-bottom: 2rem;
+  max-width: 1180px;
+  margin: 0;
+  color: #4A5C56;
   font-family: var(--font-bold);
+  font-size: clamp(1rem, 1.45vw, 1.35rem);
+  line-height: 1.35;
+  text-wrap: balance;
 }
 
 .hero-cta-group {
   display: flex;
-  gap: 15px;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+  gap: clamp(0.55rem, 0.9vw, 0.85rem);
+}
+
+.btn-hero-cta,
+.btn-hero-secondary {
+  display: inline-flex;
+  min-height: clamp(2.5rem, 3.1vw, 3rem);
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.35rem;
+  border: 1px solid #5D7B6F;
+  border-radius: 8px;
+  font-family: var(--font-bold);
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .btn-hero-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #83713f;
-  color: #FFF;
-  padding: 0.8rem 2.2rem;
-  font-size: 1.1vw;
-  font-family: var(--font-bold);
-  text-decoration: none;
-  border: 2px solid transparent; /* Match the border width of the secondary button */
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.btn-hero-cta:hover {
-  background-color: var(--color-primary-hover);
-  color: #FFF;
+  background-color: #5D7B6F;
+  color: #FFFFFF;
 }
 
 .btn-hero-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: transparent;
-  color: #83713f;
-  border: 2px solid #83713f;
-  padding: 0.8rem 2.2rem;
-  font-size: 1.1vw;
-  font-family: var(--font-bold);
-  text-decoration: none;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  background-color: #FFFFFF;
+  color: #5D7B6F;
 }
 
-.btn-hero-secondary:hover {
-  background-color: #83713f;
-  color: #FFF;
+.btn-hero-cta:focus-visible,
+.btn-hero-secondary:focus-visible {
+  outline: 2px solid #2A2A2A;
+  outline-offset: 3px;
 }
 
-/* Tablet Media Query */
-@media (max-width: 1024px) {
-  .hero-welcome { font-size: 1.5vw; }
-  .hero-title { font-size: 3.5vw; }
-  .hero-description { font-size: 1.5vw; }
-  .btn-hero-cta { font-size: 1.5vw; }
-  .btn-hero-secondary { font-size: 1.5vw; }
-}
-
-/* Mobile Media Query (MAX-WIDTH 768px) */
-@media (max-width: 768px) {
-  .hero-desktop { display: none; }
-  .hero-mobile { display: block; }
-
+@media (max-width: 1024px) and (min-width: 768px) {
   .hero-content {
-    top: 25%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    align-items: center;
-    text-align: center;
-  }
-
-  .hero-welcome {
-    padding-top: 16vw;
-    font-size: 3.5vw;
-    margin-bottom: 2vw;
+    top: 14%;
+    width: 92%;
+    gap: 0.4rem;
   }
 
   .hero-title {
-    font-size: 6.5vw;
-    margin-bottom: 2vw;
+    font-size: clamp(1.65rem, 3.3vw, 2.2rem);
   }
 
   .hero-description {
-    font-size: 3.8vw;
-    margin-bottom: 8vw;
+    max-width: 88%;
+    font-size: clamp(0.86rem, 1.5vw, 1rem);
+    line-height: 1.28;
   }
 
   .hero-cta-group {
-    justify-content: center;
-    width: 100%;
+    gap: 0.5rem;
   }
 
-  .btn-hero-cta {
-    font-size: 4vw;
-    padding: 3vw 10vw;
-  }
-
+  .btn-hero-cta,
   .btn-hero-secondary {
-    font-size: 4vw;
-    padding: 2.8vw 8vw;
+    min-height: 2.2rem;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-content {
+    top: 8.5%;
+    width: 90%;
+    gap: 0.35rem;
+  }
+
+  .hero-title {
+    font-size: clamp(1.35rem, 5vw, 1.95rem);
+    line-height: 1.06;
+  }
+
+  .hero-description {
+    max-width: 96%;
+    font-size: clamp(0.76rem, 2.7vw, 0.98rem);
+    line-height: 1.22;
+  }
+
+  .hero-cta-group {
+    gap: 0.35rem;
+  }
+
+  .btn-hero-cta,
+  .btn-hero-secondary {
+    min-height: 2rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    font-size: clamp(0.72rem, 2.65vw, 0.85rem);
+  }
+}
+
+@media (max-width: 430px) {
+  .hero-content {
+    top: 7.8%;
+    width: 92%;
+    gap: 0.25rem;
+  }
+
+  .hero-title {
+    font-size: clamp(1.05rem, 5vw, 1.35rem);
+    line-height: 1.05;
+  }
+
+  .hero-description {
+    max-width: 96%;
+    font-size: clamp(0.7rem, 3.1vw, 0.8rem);
+    line-height: 1.16;
+  }
+
+  .hero-cta-group {
+    gap: 0.25rem;
+  }
+
+  .btn-hero-cta,
+  .btn-hero-secondary {
+    min-height: 1.8rem;
+    padding: 0.3rem 0.48rem;
+    font-size: 0.68rem;
   }
 }

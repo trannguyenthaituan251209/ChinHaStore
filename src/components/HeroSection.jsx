@@ -1,76 +1,43 @@
 import { Link } from 'react-router-dom';
-import SplitText from './SplitText';
 import './HeroSection.css';
 
 const HeroSection = () => {
   return (
-    <section className="hero">
+    <section className="hero" aria-labelledby="home-hero-title">
       <div className="hero-wrapper">
-        {/* Ảnh Desktop */}
-        <img 
-          src="https://imgh.in/host/p0yk5t" 
-          alt="Hero Background Desktop" 
-          className="hero-bg hero-desktop" 
-          width="4269"
-          height="2400"
-        />
-        
-        {/* Ảnh Mobile */}
-        <img 
-          src="https://imgh.in/host/frbzb3" 
-          alt="Hero Background Mobile" 
-          className="hero-bg hero-mobile"
-          width="3375"
-          height="6000"
-        />
+        <picture className="hero-artwork">
+          <source
+            media="(max-width: 767px)"
+            srcSet="/assets/image/hero-section-vertical.png"
+            width="1250"
+            height="2188"
+          />
+          <img
+            src="/assets/image/hero-section-horizontal.png"
+            alt="Minh họa ChinHaStore trên máy tính và điện thoại cùng mascot ong"
+            width="3375"
+            height="2032"
+            fetchPriority="high"
+          />
+        </picture>
 
-        {/* Nội dung chữ & Nút bấm */}
         <div className="hero-content">
-          <SplitText
-            text="Chào mừng bạn đến với ChinHaStore"
-            className="hero-welcome"
-            delay={30}
-            duration={1}
-            ease="power3.out"
-            splitType="lines"
-            from={{ opacity: 0, y: 20 }}
-            to={{ opacity: 1, y: 0 }}
-            tag="p"
-          />
-          
-          <SplitText
-            text="THUÊ MÁY ẢNH TẠI BUÔN MA THUỘT"
-            className="hero-title"
-            delay={40}
-            duration={1.2}
-            ease="power3.out"
-            splitType="lines"
-            from={{ opacity: 0, y: 30 }}
-            to={{ opacity: 1, y: 0 }}
-            tag="h1"
-          />
-          
-          <SplitText
-            text="Xem máy đang có, tham khảo giá thuê theo thời lượng và đặt lịch trực tuyến. Hỗ trợ giao nhận theo khu vực phục vụ tại Đắk Lắk."
-            className="hero-description"
-            delay={10}
-            duration={1}
-            ease="power3.out"
-            splitType="lines"
-            from={{ opacity: 0, y: 15 }}
-            to={{ opacity: 1, y: 0 }}
-            tag="p"
-          />
-          
+          <h1 id="home-hero-title" className="hero-title">
+            Thuê máy ảnh ở Buôn Ma Thuột
+          </h1>
+          <p className="hero-description">
+            Chọn máy cho chuyến đi hay buổi chụp. Xem giá và đặt lịch dễ dàng cùng ChinHaStore.
+          </p>
+
           <div className="hero-cta-group">
-            <button 
-              onClick={() => document.getElementById('needs-recommendation')?.scrollIntoView({ behavior: 'smooth' })} 
+            <button
+              onClick={() => document.getElementById('needs-recommendation')?.scrollIntoView({ behavior: 'smooth' })}
               className="btn-hero-cta"
             >
-              Gợi ý máy cho bạn &raquo;
+              Gợi ý máy cho bạn
             </button>
             <Link to="/all-camera" className="btn-hero-secondary">
-              Kho máy & Bảng giá
+              Kho máy &amp; Bảng giá
             </Link>
           </div>
         </div>
