@@ -83,8 +83,8 @@ const XS10Intro = () => {
           <source
             media="(max-width: 767px)"
             srcSet="/assets/image/JOURNEY/XS10%20(2).png"
-            width="1485"
-            height="2640"
+            width="1080"
+            height="1920"
           />
           {/* Khung ngang WebP cho tablet và desktop (~59KB) */}
           <source
