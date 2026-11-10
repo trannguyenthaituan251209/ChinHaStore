@@ -153,6 +153,102 @@
   letter-spacing: 0.8px;
 }
 
+/* SECTION THEME: DARK (Dành cho XS10 và các section nền tối)
+   - Áp sát đáy 100% (align-items: flex-end) để thân máy ảnh nhô trực tiếp từ dưới lên.
+   - Không phủ lớp đệm đen bao quanh, khung ảnh mở rộng tự nhiên và chạm sát đáy (0px rãnh). */
+.x6-intro-section--dark {
+  background-color: transparent;
+  padding: 0;
+  align-items: flex-end;
+}
+
+.x6-intro-section--dark .x6-intro-wrapper {
+  width: 100%;
+  max-width: 1920px;
+  padding: 0;
+  margin: 0 auto;
+  align-items: flex-end;
+}
+
+.x6-intro-section--dark .x6-intro-artwork {
+  align-items: flex-end;
+  width: 100%;
+}
+
+.x6-intro-section--dark .x6-intro-artwork img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: none;
+  display: block;
+  vertical-align: bottom;
+  margin: 0 auto;
+}
+
+.x6-intro-content--dark .x6-intro-title {
+  color: #ffffff;
+}
+
+.x6-intro-subtitle {
+  margin: 0 0 clamp(0.35rem, 0.6vw, 0.55rem) 0;
+  font-family: var(--font-bold, 'Product Sans', sans-serif);
+  font-size: clamp(1rem, 1.35vw, 1.25rem);
+  font-weight: 700;
+  color: #f5f5f5;
+  line-height: 1.3;
+  letter-spacing: 0.2px;
+}
+
+.x6-intro-content--dark .x6-intro-desc {
+  color: #cccccc;
+}
+
+/* NÚT BẤM CHO SECTION DARK: Nền trắng, chữ đen để tương phản tối đa */
+.x6-intro-btn.x6-intro-btn--light {
+  background-color: #ffffff;
+  color: #1c1c1c;
+}
+
+.x6-intro-btn.x6-intro-btn--light:hover {
+  background-color: #e5e5e5;
+  color: #000000;
+}
+
+.x6-intro-btn.x6-intro-btn--light:active {
+  background-color: #cccccc;
+}
+
+/* MODIFIER: Đặt vị trí đầu 1/3 chiều dọc (cho XS10) */
+.x6-intro-content.x6-intro-content--top-third {
+  left: 50%;
+  top: clamp(1.2rem, 4.2%, 3.2rem);
+  transform: translateX(-50%);
+  width: min(92%, 680px);
+  max-width: 680px;
+  align-items: center;
+  text-align: center;
+}
+
+.x6-intro-content.x6-intro-content--top-third .x6-intro-title {
+  font-size: clamp(1.8rem, 2.7vw, 2.6rem);
+  margin-bottom: clamp(0.25rem, 0.5vw, 0.45rem);
+  line-height: 1.15;
+}
+
+.x6-intro-content.x6-intro-content--top-third .x6-intro-desc {
+  max-width: 580px;
+  font-size: clamp(0.85rem, 1.05vw, 1.02rem);
+  line-height: 1.45;
+  margin-bottom: clamp(0.85rem, 1.3vw, 1.25rem);
+  text-wrap: balance;
+}
+
+.x6-intro-content.x6-intro-content--top-third .x6-intro-btn {
+  padding: clamp(0.6rem, 0.85vw, 0.85rem) clamp(2.2rem, 3vw, 3.2rem);
+  font-size: clamp(0.82rem, 0.9vw, 0.92rem);
+  letter-spacing: 0.8px;
+}
+
 /* KHUNG DỌC (Mobile <= 767px):
    - Căn chỉnh chữ và nút cân đối vừa mắt */
 @media (max-width: 767px) {
@@ -209,5 +305,33 @@
     font-size: 0.82rem;
     letter-spacing: 0.6px;
     width: auto;
+  }
+
+  /* Riêng cho top-third trên mobile (XS10) */
+  .x6-intro-content.x6-intro-content--top-third {
+    top: clamp(1rem, 3.8%, 2rem);
+    width: min(92%, 380px);
+    max-width: 380px;
+  }
+
+  .x6-intro-content.x6-intro-content--top-third .x6-intro-title {
+    font-size: clamp(1.45rem, 5.5vw, 1.85rem);
+    margin-bottom: 0.25rem;
+  }
+
+  .x6-intro-content.x6-intro-content--top-third .x6-intro-subtitle {
+    font-size: clamp(0.85rem, 3.2vw, 0.98rem);
+    margin-bottom: 0.35rem;
+  }
+
+  .x6-intro-content.x6-intro-content--top-third .x6-intro-desc {
+    font-size: clamp(0.78rem, 2.8vw, 0.88rem);
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .x6-intro-content.x6-intro-content--top-third .x6-intro-btn {
+    padding: 0.55rem 2.1rem;
+    font-size: 0.82rem;
   }
 }

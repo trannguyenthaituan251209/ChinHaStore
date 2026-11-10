@@ -30,6 +30,21 @@
   animation: sk-shimmer 1.6s ease-in-out infinite;
 }
 
+.sk-shimmer-dark {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.12) 37%,
+    rgba(255, 255, 255, 0.04) 63%
+  );
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.6s ease-in-out infinite;
+}
+
+.sk-journey-section--dark {
+  background-color: #1c1c1c;
+}
+
 /* Skeleton Root Container: Đảm bảo phủ trọn màn hình và đẩy footer xuống ngay từ đầu */
 .home-page-skeleton {
   width: 100%;

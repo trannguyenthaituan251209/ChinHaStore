@@ -2,8 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './X6Intro.css';
 
-// Đường dẫn route tới thiết bị X6 (có thể thay đổi slug hoặc ID cụ thể theo database)
-const X6_DEVICE_ROUTE = '/camera/insta360-x6';
+// Đường dẫn route tới thiết bị Insta360 X6 trong cơ sở dữ liệu
+const X6_DEVICE_ROUTE = '/camera/insta360-x6-jls';
 
 const X6Intro = () => {
   return (

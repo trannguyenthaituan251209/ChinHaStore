@@ -46,7 +46,17 @@ const HomePageSkeleton = () => {
         </div>
       </div>
 
-      {/* 4. NEWS & ANNOUNCEMENTS SKELETON */}
+      {/* 4. SECTION FUJIFILM XS10 SKELETON (DARK) */}
+      <div className="sk-journey-section sk-journey-section--dark">
+        <div className="sk-journey-center-wrapper">
+          <div className="sk-journey-title sk-shimmer-dark" style={{ width: '55%' }}></div>
+          <div className="sk-journey-line sk-shimmer-dark" style={{ width: '65%' }}></div>
+          <div className="sk-journey-pill sk-shimmer-dark"></div>
+          <div className="sk-journey-center-art sk-shimmer-dark"></div>
+        </div>
+      </div>
+
+      {/* 5. NEWS & ANNOUNCEMENTS SKELETON */}
       <div className="sk-news-section">
         <div className="sk-news-wrapper">
           <div className="sk-news-card sk-shimmer"></div>

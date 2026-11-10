@@ -6,6 +6,7 @@ import FeaturedProducts from '../components/FeaturedProducts';
 import NeedsRecommendation from '../components/NeedsRecommendation';
 import X6Intro from '../components/X6Intro';
 import LunaUltraIntro from '../components/LunaUltraIntro';
+import XS10Intro from '../components/XS10Intro';
 import Commitments from '../components/Commitments';
 import BlogSection from '../components/BlogSection';
 import FinalCTA from '../components/FinalCTA';
@@ -21,6 +22,7 @@ const HomePage = () => {
       <HeroSection />
       <X6Intro />
       <LunaUltraIntro />
+      <XS10Intro />
       <HolidayHero />
       <FeaturedProducts />
       <NeedsRecommendation />

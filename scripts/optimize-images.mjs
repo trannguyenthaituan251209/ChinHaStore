@@ -39,6 +39,18 @@ const tasks = [
     width: 1080,
     quality: 85,
   },
+  {
+    input: 'public/assets/image/JOURNEY/XS10.png',
+    output: 'public/assets/image/JOURNEY/xs10-desktop.webp',
+    width: 1920,
+    quality: 85,
+  },
+  {
+    input: 'public/assets/image/JOURNEY/XS10 (2).png',
+    output: 'public/assets/image/JOURNEY/xs10-mobile.webp',
+    width: 1080,
+    quality: 85,
+  },
 ];
 
 async function run() {

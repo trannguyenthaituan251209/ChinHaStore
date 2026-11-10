@@ -7,8 +7,8 @@ import './X6Intro.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Đường dẫn route tới thiết bị Luna Ultra (mặc định trang đặt lịch)
-const LUNA_DEVICE_ROUTE = '/dat-lich';
+// Đường dẫn route tới thiết bị Insta360 Luna Ultra trong cơ sở dữ liệu
+const LUNA_DEVICE_ROUTE = '/camera/insta360-luna-ultra-a30';
 
 const LunaUltraIntro = () => {
   const containerRef = useRef(null);

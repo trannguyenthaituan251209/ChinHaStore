@@ -14,10 +14,21 @@ export const blogService = {
   },
 
   async incrementViews(id) {
-    // Basic increment logic
-    const { data: post } = await supabase.from('posts').select('views').eq('id', id).single();
-    if (post) {
-      await supabase.from('posts').update({ views: (post.views || 0) + 1 }).eq('id', id);
+    try {
+      // Ưu tiên gọi RPC an toàn được bảo vệ RLS
+      const { error } = await supabase.rpc('increment_post_views', { post_id: id });
+      if (!error) return;
+    } catch {
+      // Fallback nếu hàm RPC chưa được triển khai
+    }
+
+    try {
+      const { data: post } = await supabase.from('posts').select('views').eq('id', id).single();
+      if (post) {
+        await supabase.from('posts').update({ views: (post.views || 0) + 1 }).eq('id', id);
+      }
+    } catch (err) {
+      console.warn('Increment views non-critical:', err.message);
     }
   },
 
