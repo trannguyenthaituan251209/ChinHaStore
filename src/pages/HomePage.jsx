@@ -4,7 +4,8 @@ import HeroSection from '../components/HeroSection';
 import HolidayHero from '../components/HolidayHero';
 import FeaturedProducts from '../components/FeaturedProducts';
 import NeedsRecommendation from '../components/NeedsRecommendation';
-import HowItWorks from '../components/HowItWorks';
+import X6Intro from '../components/X6Intro';
+import LunaUltraIntro from '../components/LunaUltraIntro';
 import Commitments from '../components/Commitments';
 import BlogSection from '../components/BlogSection';
 import FinalCTA from '../components/FinalCTA';
@@ -18,7 +19,8 @@ const HomePage = () => {
         <meta name="description" content="ChinHaStore cho thuê máy ảnh tại Buôn Ma Thuột, Đắk Lắk. Xem máy đang có, giá thuê theo thời lượng và đặt lịch trực tuyến; hỗ trợ giao nhận theo khu vực phục vụ." />
       </Helmet>
       <HeroSection />
-      <HowItWorks />
+      <X6Intro />
+      <LunaUltraIntro />
       <HolidayHero />
       <FeaturedProducts />
       <NeedsRecommendation />

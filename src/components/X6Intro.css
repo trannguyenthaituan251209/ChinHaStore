@@ -1,0 +1,213 @@
+.x6-intro-section {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background-color: #ffffff;
+  padding: 1.5rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.x6-intro-wrapper {
+  position: relative;
+  width: fit-content;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.x6-intro-artwork {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.x6-intro-artwork img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  /* Giữ ảnh vừa vặn tầm mắt trên desktop, không bị tràn màn hình */
+  max-height: min(80vh, 760px);
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+/* KHỐI NỘI DUNG CHỮ (Desktop / Tablet - Khung ngang):
+   Kích thước chữ hài hòa, vừa vặn cân đối theo thiết kế Canva */
+.x6-intro-content {
+  position: absolute;
+  left: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 45%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+/* TIÊU ĐỀ: "Lưu trữ 360 độ" */
+.x6-intro-title {
+  margin: 0 0 clamp(0.7rem, 1.2vw, 1.15rem) 0;
+  font-family: var(--font-bold, 'Product Sans', sans-serif);
+  font-size: clamp(2rem, 3vw, 3.1rem);
+  font-weight: 800;
+  color: #000000;
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+}
+
+/* Số "360" màu xám ánh tím nhạt (#8c8ba1) theo Canva */
+.x6-intro-title .highlight-360 {
+  color: #8c8ba1;
+  font-weight: 700;
+}
+
+/* ĐỀ MỤC / ĐOẠN MÔ TẢ: Giảm nhẹ để vừa vặn, thanh lịch */
+.x6-intro-desc {
+  margin: 0 0 clamp(1.3rem, 1.9vw, 2rem) 0;
+  font-family: var(--font-main, 'Product Sans', sans-serif);
+  font-size: clamp(0.98rem, 1.25vw, 1.22rem);
+  color: #1a1a1a;
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+.desktop-br {
+  display: inline;
+}
+
+/* NÚT BẤM "TÌM HIỂU NGAY" / "ĐẶT THUÊ NGAY"
+   - Bo góc con nhộng tròn (Pill)
+   - Thiết kế phẳng, không shadow, chỉ đổi màu khi hover */
+.x6-intro-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.72rem, 1.05vw, 0.95rem) clamp(2.4rem, 3.5vw, 3.6rem);
+  background-color: #484848;
+  color: #ffffff;
+  border-radius: 9999px;
+  font-family: var(--font-bold, 'Product Sans', sans-serif);
+  font-size: clamp(0.85rem, 1vw, 1rem);
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.85px;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+}
+
+.x6-intro-btn:hover {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.x6-intro-btn:active {
+  background-color: #000000;
+}
+
+/* Tối ưu hiệu năng animation khi scroll cho Luna Ultra */
+.luna-anim-item {
+  will-change: transform, opacity;
+}
+
+/* MODIFIER: Căn giữa theo chiều ngang, đặt phía trên (cho Luna Ultra và các section tương tự)
+   Căn chỉnh khoảng cách vừa vặn để nút không bị đè lên phần đỉnh camera (Y = 46%) */
+.x6-intro-content.x6-intro-content--top-center {
+  left: 50%;
+  top: clamp(0.85rem, 2.8%, 1.6rem);
+  transform: translateX(-50%);
+  width: min(92%, 640px);
+  max-width: 640px;
+  align-items: center;
+  text-align: center;
+}
+
+.x6-intro-content.x6-intro-content--top-center .x6-intro-title {
+  font-size: clamp(1.65rem, 2.4vw, 2.35rem);
+  margin-bottom: clamp(0.35rem, 0.7vw, 0.65rem);
+  line-height: 1.15;
+}
+
+.x6-intro-content.x6-intro-content--top-center .x6-intro-desc {
+  max-width: 560px;
+  font-size: clamp(0.85rem, 1.05vw, 1.02rem);
+  line-height: 1.45;
+  margin-bottom: clamp(0.75rem, 1.3vw, 1.15rem);
+  text-wrap: balance;
+}
+
+.x6-intro-content.x6-intro-content--top-center .x6-intro-btn {
+  padding: clamp(0.55rem, 0.8vw, 0.75rem) clamp(2rem, 2.8vw, 3rem);
+  font-size: clamp(0.8rem, 0.88vw, 0.9rem);
+  letter-spacing: 0.8px;
+}
+
+/* KHUNG DỌC (Mobile <= 767px):
+   - Căn chỉnh chữ và nút cân đối vừa mắt */
+@media (max-width: 767px) {
+  .x6-intro-section {
+    padding: 0;
+  }
+
+  .x6-intro-wrapper {
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .x6-intro-artwork img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+  }
+
+  .desktop-br {
+    display: none;
+  }
+
+  .x6-intro-content,
+  .x6-intro-content.x6-intro-content--top-center {
+    left: 50%;
+    top: clamp(0.75rem, 2.5%, 1.25rem);
+    transform: translateX(-50%);
+    width: min(92%, 360px);
+    max-width: 360px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .x6-intro-title,
+  .x6-intro-content.x6-intro-content--top-center .x6-intro-title {
+    font-size: clamp(1.35rem, 5vw, 1.7rem);
+    margin-bottom: clamp(0.25rem, 0.8vw, 0.45rem);
+    line-height: 1.15;
+  }
+
+  .x6-intro-desc,
+  .x6-intro-content.x6-intro-content--top-center .x6-intro-desc {
+    font-size: clamp(0.78rem, 2.8vw, 0.88rem);
+    margin-bottom: clamp(0.6rem, 2vw, 0.9rem);
+    line-height: 1.4;
+    text-wrap: balance;
+  }
+
+  .x6-intro-btn,
+  .x6-intro-content.x6-intro-content--top-center .x6-intro-btn {
+    padding: 0.55rem 2.1rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.6px;
+    width: auto;
+  }
+}

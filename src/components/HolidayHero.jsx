@@ -93,8 +93,15 @@ const HolidayHero = () => {
                                         </div>
                                     )}
                                     <div className="announcement-feature-content">
-                                        <span className="feed-type-label">Thông báo mới nhất</span>
-                                        {announcementDate(announcements[0]) && <time>{announcementDate(announcements[0])}</time>}
+                                        <div className="announcement-feature-meta">
+                                            <span className="feed-type-label">Thông báo mới nhất</span>
+                                            {announcementDate(announcements[0]) && (
+                                                <>
+                                                    <span className="feed-meta-dot">•</span>
+                                                    <time>{announcementDate(announcements[0])}</time>
+                                                </>
+                                            )}
+                                        </div>
                                         <h3>{announcements[0].title}</h3>
                                         {announcements[0].excerpt && <p>{announcements[0].excerpt}</p>}
                                         <span className="feed-text-link">Xem chi tiết</span>
