@@ -10,19 +10,34 @@ const X6Intro = () => {
     <section id="how-it-works" className="x6-intro-section" aria-label="Giới thiệu Insta360 X6">
       <div className="x6-intro-wrapper">
         <picture className="x6-intro-artwork">
-          {/* Khung dọc cho thiết bị di động (mobile) */}
+          {/* Khung dọc WebP cho thiết bị di động (mobile ~20KB) */}
+          <source
+            type="image/webp"
+            media="(max-width: 767px)"
+            srcSet="/assets/image/JOURNEY/x6-intro-mobile.webp"
+            width="1080"
+            height="1527"
+          />
+          {/* Khung dọc PNG dự phòng */}
           <source
             media="(max-width: 767px)"
             srcSet="/assets/image/JOURNEY/X6%20introduct%20(2).png"
-            width="5581"
-            height="7893"
+            width="1080"
+            height="1527"
           />
-          {/* Khung ngang cho tablet và desktop */}
+          {/* Khung ngang WebP cho tablet và desktop (~23KB) */}
+          <source
+            type="image/webp"
+            srcSet="/assets/image/JOURNEY/x6-intro-desktop.webp"
+            width="1920"
+            height="1079"
+          />
+          {/* Khung ngang PNG dự phòng */}
           <img
             src="/assets/image/JOURNEY/X6%20introduct.png"
             alt="Insta360 X6 - Lưu trữ 360 độ tại ChinHaStore"
-            width="4269"
-            height="2400"
+            width="1920"
+            height="1079"
             loading="lazy"
             decoding="async"
           />

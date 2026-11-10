@@ -1,0 +1,238 @@
+/* Skeleton base animations */
+@keyframes sk-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.sk-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.05) 25%,
+    rgba(0, 0, 0, 0.1) 37%,
+    rgba(0, 0, 0, 0.05) 63%
+  );
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.6s ease-in-out infinite;
+}
+
+.sk-shimmer-warm {
+  background: linear-gradient(
+    90deg,
+    rgba(122, 102, 41, 0.07) 25%,
+    rgba(122, 102, 41, 0.14) 37%,
+    rgba(122, 102, 41, 0.07) 63%
+  );
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.6s ease-in-out infinite;
+}
+
+/* Skeleton Root Container: Đảm bảo phủ trọn màn hình và đẩy footer xuống ngay từ đầu */
+.home-page-skeleton {
+  width: 100%;
+  min-height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #faf9f6;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 1. HERO SKELETON: Mô phỏng chính xác khung nền #EAE7D6 */
+.sk-hero {
+  position: relative;
+  width: 100%;
+  background-color: #EAE7D6;
+  min-height: clamp(520px, 68vw, 760px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: clamp(2.5rem, 6vw, 4.5rem);
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  box-sizing: border-box;
+}
+
+.sk-hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: min(90%, 800px);
+  text-align: center;
+}
+
+.sk-hero-title {
+  width: min(85%, 480px);
+  height: clamp(2.2rem, 4vw, 3.2rem);
+  border-radius: 12px;
+}
+
+.sk-hero-desc {
+  width: min(70%, 400px);
+  height: 1.15rem;
+  border-radius: 6px;
+}
+
+.sk-hero-btns {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.sk-hero-btn {
+  width: 140px;
+  height: 42px;
+  border-radius: 9999px;
+}
+
+.sk-hero-illustration {
+  margin-top: clamp(2rem, 4vw, 3.5rem);
+  width: min(92%, 960px);
+  height: clamp(200px, 32vw, 380px);
+  border-radius: 24px 24px 0 0;
+}
+
+/* 2. JOURNEY SKELETON (X6 & LUNA ULTRA) */
+.sk-journey-section {
+  position: relative;
+  width: 100%;
+  background-color: #ffffff;
+  min-height: clamp(420px, 50vw, 680px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.sk-journey-wrapper {
+  width: min(92%, 1400px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.sk-journey-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  width: min(100%, 460px);
+}
+
+.sk-journey-title {
+  width: 75%;
+  height: clamp(2rem, 3.2vw, 2.8rem);
+  border-radius: 8px;
+}
+
+.sk-journey-line {
+  width: 95%;
+  height: 1rem;
+  border-radius: 4px;
+}
+
+.sk-journey-line.short {
+  width: 60%;
+}
+
+.sk-journey-pill {
+  width: 160px;
+  height: 44px;
+  border-radius: 9999px;
+  margin-top: 0.5rem;
+}
+
+.sk-journey-art {
+  width: min(50%, 540px);
+  height: clamp(240px, 34vw, 420px);
+  border-radius: 16px;
+}
+
+/* Luna Ultra Center Skeleton */
+.sk-journey-center-wrapper {
+  width: min(90%, 640px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.2rem;
+  margin: 0 auto;
+}
+
+.sk-journey-center-art {
+  width: clamp(140px, 20vw, 220px);
+  height: clamp(200px, 28vw, 320px);
+  border-radius: 20px;
+  margin-top: 1rem;
+}
+
+/* 3. NEWS SKELETON (HolidayHero) */
+.sk-news-section {
+  width: 100%;
+  background-color: #fbfaf6;
+  padding: 3rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.sk-news-wrapper {
+  width: min(92%, 1280px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2rem;
+}
+
+.sk-news-card {
+  height: 280px;
+  border-radius: 16px;
+}
+
+/* Responsive adjustments cho Mobile (< 768px) */
+@media (max-width: 767px) {
+  .sk-hero {
+    min-height: clamp(480px, 120vw, 620px);
+  }
+
+  .sk-hero-illustration {
+    width: 90%;
+    height: 220px;
+  }
+
+  .sk-journey-section {
+    min-height: clamp(420px, 120vw, 560px);
+  }
+
+  .sk-journey-wrapper {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .sk-journey-text {
+    align-items: center;
+    text-align: center;
+  }
+
+  .sk-journey-art {
+    width: 80%;
+    height: 220px;
+  }
+
+  .sk-news-wrapper {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .sk-news-card {
+    height: 200px;
+  }
+}
+

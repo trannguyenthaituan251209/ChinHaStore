@@ -2,6 +2,7 @@ import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import HomePageSkeleton from './components/skeletons/HomePageSkeleton';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const BookingPage = lazy(() => import('./pages/BookingPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -222,12 +223,32 @@ function App() {
   }
 
   // MODE B: PUBLIC STOREFRONT (MAIN DOMAIN)
+  const isHomeRoute = location.pathname === '/';
+
   return (
     <div className="app storefront-mode">
       {!isAdminMode && <Navbar />}
-      <Suspense fallback={<div className="catalog-loading"><span>Đang tải nội dung...</span></div>}>
+      <Suspense
+        fallback={
+          isHomeRoute ? (
+            <HomePageSkeleton />
+          ) : (
+            <div className="catalog-loading">
+              <div className="spinner"></div>
+              <span>Đang tải nội dung...</span>
+            </div>
+          )
+        }
+      >
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route
+            path="/"
+            element={
+              <Suspense fallback={<HomePageSkeleton />}>
+                <HomePage />
+              </Suspense>
+            }
+          />
           <Route path="/dat-lich" element={<BookingPage />} />
           <Route path="/all-camera" element={<AllCameraPage />} />
           <Route path="/blog" element={<BlogPage />} />

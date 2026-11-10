@@ -71,19 +71,34 @@ const LunaUltraIntro = () => {
     >
       <div className="x6-intro-wrapper">
         <picture className="x6-intro-artwork">
-          {/* Khung dọc cho thiết bị di động (mobile) */}
+          {/* Khung dọc WebP cho thiết bị di động (mobile ~20KB) */}
+          <source
+            type="image/webp"
+            media="(max-width: 767px)"
+            srcSet="/assets/image/JOURNEY/luna-ultra-mobile.webp"
+            width="1080"
+            height="1527"
+          />
+          {/* Khung dọc PNG dự phòng */}
           <source
             media="(max-width: 767px)"
             srcSet="/assets/image/JOURNEY/Luna%20ultra%20(2).png"
-            width="5581"
-            height="7893"
+            width="1080"
+            height="1527"
           />
-          {/* Khung ngang cho tablet và desktop */}
+          {/* Khung ngang WebP cho tablet và desktop (~19KB) */}
+          <source
+            type="image/webp"
+            srcSet="/assets/image/JOURNEY/luna-ultra-desktop.webp"
+            width="1920"
+            height="1079"
+          />
+          {/* Khung ngang PNG dự phòng */}
           <img
             src="/assets/image/JOURNEY/Luna%20ultra.png"
             alt="Insta360 Luna Ultra - Vững chắc, không rung lắc tại ChinHaStore"
-            width="4269"
-            height="2400"
+            width="1920"
+            height="1079"
             loading="lazy"
             decoding="async"
           />

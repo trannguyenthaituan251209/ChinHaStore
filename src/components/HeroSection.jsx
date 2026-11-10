@@ -6,18 +6,36 @@ const HeroSection = () => {
     <section className="hero" aria-labelledby="home-hero-title">
       <div className="hero-wrapper">
         <picture className="hero-artwork">
+          {/* Mobile WebP (siêu nhẹ ~81KB) */}
+          <source
+            type="image/webp"
+            media="(max-width: 767px)"
+            srcSet="/assets/image/hero-section-vertical.webp"
+            width="1080"
+            height="1890"
+          />
+          {/* Mobile PNG dự phòng */}
           <source
             media="(max-width: 767px)"
             srcSet="/assets/image/hero-section-vertical.png"
             width="1250"
             height="2188"
           />
+          {/* Desktop WebP (siêu nhẹ ~68KB) */}
+          <source
+            type="image/webp"
+            srcSet="/assets/image/hero-section-horizontal.webp"
+            width="1920"
+            height="1156"
+          />
+          {/* Desktop PNG dự phòng */}
           <img
             src="/assets/image/hero-section-horizontal.png"
             alt="Minh họa ChinHaStore trên máy tính và điện thoại cùng mascot ong"
-            width="3375"
-            height="2032"
+            width="1920"
+            height="1156"
             fetchPriority="high"
+            decoding="async"
           />
         </picture>
 
