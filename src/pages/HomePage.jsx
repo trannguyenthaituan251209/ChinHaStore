@@ -3,7 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import HeroSection from '../components/HeroSection';
 import HolidayHero from '../components/HolidayHero';
 import FeaturedProducts from '../components/FeaturedProducts';
-import NeedsRecommendation from '../components/NeedsRecommendation';
 import X6Intro from '../components/X6Intro';
 import LunaUltraIntro from '../components/LunaUltraIntro';
 import XS10Intro from '../components/XS10Intro';
@@ -23,9 +22,8 @@ const HomePage = () => {
       <X6Intro />
       <LunaUltraIntro />
       <XS10Intro />
-      <HolidayHero />
       <FeaturedProducts />
-      <NeedsRecommendation />
+      <HolidayHero />
       <Commitments />
       <BlogSection />
       <FinalCTA />

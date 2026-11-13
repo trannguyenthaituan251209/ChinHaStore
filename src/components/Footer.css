@@ -13,12 +13,12 @@
 }
 
 .footer-logo {
-  font-family: inherit;
-  font-size: 1.8rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  margin-bottom: 1.5rem;
-  color: #FFFFFF;
+  display: block;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 1rem;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 .footer-tagline {

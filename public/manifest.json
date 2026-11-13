@@ -10,13 +10,13 @@
   "description": "Hệ thống quản lý authoritative dành riêng cho Mẫn Hi Chin.",
   "icons": [
     {
-      "src": "/assets/image/logo.png",
+      "src": "/assets/image/nhan_dien_thuong_hieu/brand-symbol-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/image/logo.png",
+      "src": "/assets/image/nhan_dien_thuong_hieu/brand-symbol-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

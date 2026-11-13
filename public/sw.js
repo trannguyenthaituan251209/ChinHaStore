@@ -28,8 +28,8 @@ self.addEventListener('push', (event) => {
 
   const notificationOptions = {
     body: data.body,
-    icon: data.icon || '/assets/image/logo.png',
-    badge: data.badge || '/assets/image/logo.png',
+    icon: data.icon || '/assets/image/nhan_dien_thuong_hieu/brand-symbol-192.png',
+    badge: data.badge || '/assets/image/nhan_dien_thuong_hieu/brand-symbol-192.png',
     tag: data.tag || 'booking-new',
     renotify: true,
     vibrate: [300, 150, 300, 150, 400],
@@ -90,8 +90,8 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
     const { title, options } = event.data;
     const notificationOptions = {
-      icon: '/assets/image/logo.png',
-      badge: '/assets/image/logo.png',
+      icon: '/assets/image/nhan_dien_thuong_hieu/brand-symbol-192.png',
+      badge: '/assets/image/nhan_dien_thuong_hieu/brand-symbol-192.png',
       vibrate: [300, 150, 300, 150, 400],
       requireInteraction: true,
       ...options

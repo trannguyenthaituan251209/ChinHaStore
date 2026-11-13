@@ -26,7 +26,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="navbar-logo">
             <Link to="/">
-              <img src="/assets/image/main_logo.png" alt="ChinHaStore" className="logo-image" />
+              <img src="/assets/image/nhan_dien_thuong_hieu/Logo%20typography.svg" alt="ChinHaStore" className="logo-image" />
             </Link>
           </div>
 

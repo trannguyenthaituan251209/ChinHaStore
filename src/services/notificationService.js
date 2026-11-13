@@ -378,8 +378,8 @@ class NotificationService {
    */
   async showNotification(title, options = {}) {
     const defaultOptions = {
-      icon: '/assets/image/logo.png',
-      badge: '/assets/image/logo.png',
+      icon: '/assets/image/nhan_dien_thuong_hieu/brand-symbol-192.png',
+      badge: '/assets/image/nhan_dien_thuong_hieu/brand-symbol-192.png',
       renotify: true,
       vibrate: [300, 150, 300, 150, 400],
       requireInteraction: true,

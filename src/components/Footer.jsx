@@ -8,7 +8,11 @@ const Footer = () => {
         
         <div className="footer-top">
           <div className="footer-brand">
-            <h2 className="footer-logo">CHINHA STORE</h2>
+            <img
+              src="/assets/image/nhan_dien_thuong_hieu/LOGO.svg"
+              alt="ChinHaStore"
+              className="footer-logo"
+            />
             <p className="footer-tagline">Lưu giữ trọn vẹn từng khoảnh khắc thanh xuân của bạn thông qua những thước phim nghệ thuật.</p>
           </div>
 

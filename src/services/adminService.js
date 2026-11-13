@@ -1465,7 +1465,7 @@ export const adminService = {
 <body style="margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f7f6; color: #333;">
     <div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e1e9e5;">
         <div style="padding: 30px 20px; text-align: center; border-bottom: 2px solid #f0f4f2;">
-            <img src="https://i.ibb.co/LXWYmSqM/logo.png" alt="Logo" style="height: 60px; margin-bottom: 15px;">
+            <img src="https://chinhastore.com/assets/image/nhan_dien_thuong_hieu/LOGO.svg" alt="ChinHaStore" style="height: 60px; width: 60px; margin-bottom: 15px;">
             <h1 style="margin: 0; color: #2d3e50; font-size: 22px;">XÁC NHẬN ĐẶT HÀNG</h1>
         </div>
         <div style="padding: 30px 25px;">

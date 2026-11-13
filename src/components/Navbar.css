@@ -30,15 +30,21 @@
 }
 
 .navbar-logo a {
-  display: flex;
-  align-items: center;
+  position: relative;
+  display: block;
+  width: 170px;
+  height: 40px;
+  overflow: hidden;
   text-decoration: none;
 }
 
 .logo-image {
-  height: 80px; /* Slightly taller to accommodate the artistic logo */
-  width: auto;
-  object-fit: contain;
+  position: absolute;
+  top: -90px;
+  left: -25px;
+  width: 220px;
+  max-width: none;
+  height: auto;
 }
 
 .navbar-links {
@@ -133,6 +139,14 @@
 
   .navbar-logo a {
     font-size: 13px;
+    width: 130px;
+    height: 32px;
+  }
+
+  .logo-image {
+    top: -68px;
+    left: -19px;
+    width: 168px;
   }
 
   .hamburger {
